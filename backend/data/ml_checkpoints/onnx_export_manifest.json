@@ -1,0 +1,49 @@
+{
+  "generated_by": "app/ml/export_onnx.py",
+  "generated_at": "2026-10-05T09:00:24.594413+00:00",
+  "note": "Records which real checkpoint each .onnx was exported from, and that checkpoint's sha256 at export time. app/ml/onnx_engine.py re-verifies this before it will report ML_REAL_ZENODO_TRAINED.",
+  "models": {
+    "classifier_real_best.onnx": {
+      "role": "classifier",
+      "source_checkpoint": "classifier_real_promoted.pth",
+      "source_sha256": "sha256:0f587cb7604047247424bf7a79a9f07ae0ab66b9e4a3070cf32c2c1957fed1ee",
+      "source_trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
+      "source_provenance_slot": "ML_REAL_ZENODO_TRAINED",
+      "architecture": "SceneClassifierV2",
+      "opset": 18,
+      "opset_requested": 13,
+      "input_name": "input",
+      "input_layout": "NCHW (N, 2=[VV,VH], H, W); H and W dynamic, each divisible by 4",
+      "output_names": [
+        "logits"
+      ],
+      "output_is_logits": true,
+      "class_labels": [
+        "Oil",
+        "No-Oil",
+        "Lookalike"
+      ],
+      "exported_at": "2026-10-05T09:00:21.772860+00:00",
+      "torch_version": "2.14.0+cu130"
+    },
+    "spill_unet_real_best.onnx": {
+      "role": "segmenter",
+      "source_checkpoint": "spill_unet_real_promoted.pt",
+      "source_sha256": "sha256:af725b2587baed621b6ee264598a44dea008dc7214ccf454ccadc2fdd50e4361",
+      "source_trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
+      "source_provenance_slot": "ML_REAL_ZENODO_TRAINED",
+      "architecture": "SpillUNet",
+      "opset": 18,
+      "opset_requested": 13,
+      "input_name": "input",
+      "input_layout": "NCHW (N, 2=[VV,VH], H, W); H and W dynamic, each divisible by 4",
+      "output_names": [
+        "logits"
+      ],
+      "output_is_logits": true,
+      "class_labels": null,
+      "exported_at": "2026-10-05T09:00:24.593377+00:00",
+      "torch_version": "2.14.0+cu130"
+    }
+  }
+}

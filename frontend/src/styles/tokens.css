@@ -1,0 +1,184 @@
+/* ============================================================
+   DESIGN TOKENS — Marine Pollution Intelligence console
+   Direction: ECDIS / radar instrument panel, not a marketing
+   dashboard. Chart-style surfaces, vector-trace accent colors,
+   monospace data readouts for coordinates/scores/MMSI.
+
+   THEME SYSTEM
+   ------------
+   Every token below is defined twice: once for [data-theme="dark"]
+   (the console's original night-mode nautical-chart look, values
+   unchanged from before theming was added) and once for
+   [data-theme="light"] (a daylight nautical-chart look — paper-white
+   surfaces, ink-navy text, deepened/saturated signal colors so they
+   stay legible as text and icon color on a light surface rather than
+   just being the dark palette's colors inverted).
+
+   `:root` also carries the dark values as a fallback so the app still
+   renders sensibly for the one paint before `index.html`'s inline
+   script (or ThemeProvider) sets `data-theme` on <html> — in practice
+   that attribute is always set before first paint, so this fallback
+   should never actually be visible.
+
+   Components must reference these variables (or the semantic
+   `--on-signal-*`/`--overlay-scrim`/`--surface-floating` tokens below)
+   rather than hard-coded colors, so every screen stays correct in
+   both themes automatically.
+   ============================================================ */
+:root,
+[data-theme='dark'] {
+  /* --- surfaces (night-mode nautical chart) --- */
+  --bg-void: #050d14;
+  --bg-deep: #081420;
+  --bg-panel: #0c1c2b;
+  --bg-panel-raised: #102538;
+  --bg-inset: #071119;
+  --border-hairline: #16324a;
+  --border-strong: #1f4460;
+
+  /* --- text --- */
+  --text-primary: #e7f1f5;
+  --text-secondary: #9fb6c4;
+  --text-muted: #62808f;
+
+  /* --- signal colors (vessel-track vernacular) --- */
+  --signal-cyan: #3fd8c4;       /* live data / observed / general readouts */
+  --signal-cyan-dim: #1f6e63;
+  --signal-amber: #ffb84d;      /* candidates / attention / hindcast */
+  --signal-amber-dim: #8a5d24;
+  --signal-coral: #ff6b5c;      /* top-priority candidate / high-severity flags */
+  --signal-coral-dim: #7a3129;
+  --signal-violet: #9c8bff;     /* forecast / prediction (distinct from observed) */
+  --signal-green: #6be675;      /* confirmed / success ticks */
+
+  /* --- fixed-contrast pairs: text/icon color placed on a solid,
+     always-colored surface (e.g. the amber CTA button). These don't
+     flip with the theme because the surface they sit on doesn't
+     either — only the *shade* of that surface below is tuned per
+     theme so the pairing keeps working. --- */
+  --on-signal-amber: #17110a;
+  --on-signal-green: #06210a;
+
+  /* --- floating / overlay surfaces (map legends, upload-notice
+     chips, drawer backdrop) that sit above the page rather than
+     being part of its normal panel stack --- */
+  --overlay-scrim: rgba(2, 6, 10, 0.6);
+  --surface-floating: rgba(8, 20, 32, 0.92);
+
+  /* --- neutral layer swatch (raw/raster imagery layers with no single
+     signal color of their own, e.g. the SAR scene legend entry) --- */
+  --layer-neutral: #8892a0;
+}
+
+[data-theme='light'] {
+  /* --- surfaces (daylight nautical chart / paper chart) --- */
+  --bg-void: #eef2f5;
+  --bg-deep: #e2e9ee;
+  --bg-panel: #ffffff;
+  --bg-panel-raised: #f6f9fb;
+  --bg-inset: #e9eef2;
+  --border-hairline: #d7e0e7;
+  --border-strong: #aebccb;
+
+  /* --- text --- */
+  --text-primary: #10222e;
+  --text-secondary: #44606e;
+  --text-muted: #6c8390;
+
+  /* --- signal colors, deepened/saturated (not just inverted) so
+     they read correctly as text/icon/border color on a light
+     panel — the dark theme's pastel values would fail contrast
+     here. Semantic role is unchanged: cyan = observed/live, amber
+     = attention/hindcast, coral = top priority, violet = forecast,
+     green = confirmed. --- */
+  --signal-cyan: #0a7d70;
+  --signal-cyan-dim: #6ba99c;
+  --signal-amber: #a8630a;
+  --signal-amber-dim: #d9a45f;
+  --signal-coral: #c73a2b;
+  --signal-coral-dim: #e2a89f;
+  --signal-violet: #6552c4;
+  --signal-green: #1d8c46;
+
+  --on-signal-amber: #17110a;
+  --on-signal-green: #f4fff6;
+
+  --overlay-scrim: rgba(15, 33, 46, 0.35);
+  --surface-floating: rgba(255, 255, 255, 0.92);
+
+  --layer-neutral: #5c6b78;
+}
+
+/* --- type --- */
+:root {
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+
+  /* --- spacing scale --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+
+  --sidebar-w: 68px;
+  --header-h: 60px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+::selection {
+  background: var(--signal-cyan-dim);
+  color: white;
+}
+
+/* subtle chart-grid texture on the deep background, evokes a nautical
+   chart's graticule without being literal */
+.chart-grid-bg {
+  background-image:
+    linear-gradient(var(--border-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-hairline) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+code, .mono { font-family: var(--font-mono); }
+
+a { color: var(--signal-cyan); }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--signal-cyan-dim); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

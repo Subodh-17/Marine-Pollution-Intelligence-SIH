@@ -1,0 +1,18 @@
+{
+  "dataset_root": "zenodo_sar",
+  "manifest_dir": "zenodo_sar/manifests",
+  "model": "classifier",
+  "architecture": "SceneClassifierV2",
+  "epochs": 40,
+  "batch_size": 16,
+  "lr": 0.0003,
+  "image_size": 256,
+  "seed": 42,
+  "device": "cuda",
+  "checkpoint_dir": "backend/data/ml_checkpoints",
+  "bce_weight": 0.5,
+  "num_workers": 0,
+  "limit_train_samples": null,
+  "started_at": "2026-10-04T05:12:32.874207",
+  "note": "This config reflects the SceneClassifierV2 lr=3e-4 training run that produced the promoted classifier_real_promoted.pth checkpoint."
+}

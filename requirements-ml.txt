@@ -1,0 +1,40 @@
+# Optional dependency for the ML detector (app/ml/detector.py) and the
+# real-data training/evaluation pipeline (app/ml/dataset.py, train.py,
+# evaluate_real.py, promote.py).
+#
+# The base application (classical dark-spot detector, drift model, AIS
+# attribution, API, frontend) works completely without this file - torch
+# is imported lazily and ONLY when /api/ml/status or a detector=ml request
+# is actually made, or when the app/ml/train.py / evaluate_real.py CLIs are
+# run directly (see app/ml/detector.py::get_ml_engine). Everything else in
+# the pipeline gracefully reports ML_UNAVAILABLE and continues to operate
+# on the classical detector if this is never installed.
+#
+# Install with:
+#   pip install -r requirements.txt -r requirements-ml.txt
+#
+# CPU-only is sufficient for both the shipped prototype checkpoints and
+# for training against the real Zenodo dataset (app/ml/train.py defaults
+# to CPU; CUDA is opt-in via --device cuda when available). See
+# https://pytorch.org/get-started/locally/ if you specifically want a
+# CUDA-specific install instead of the default PyPI wheel.
+#
+# tifffile/numpy/Pillow (used by app/ml/dataset.py for reading the real
+# dataset's TIFF images/masks) are already in the base requirements.txt -
+# nothing dataset-specific needs installing beyond torch itself.
+torch>=2.0.0
+
+# ONNX export toolchain. Needed ONLY to run `python -m app.ml.export_onnx`
+# (and the torch-vs-onnx half of `python -m app.ml.verify_onnx`) on a
+# developer machine or in CI. Production never imports these: it reads the
+# resulting .onnx files with onnxruntime, which is in the base
+# requirements.txt. torch.onnx.export uses `onnx` for graph
+# checking/serialization; onnxscript is required by torch>=2.5's exporter.
+onnx>=1.15.0
+onnxscript>=0.1.0
+
+# Optional: progress bars for long-running `python -m app.ml.train` runs
+# against the full real dataset. Pure-Python, no compiled extension -
+# works identically on Windows/Linux/macOS. Training/evaluation run
+# correctly without it (plain per-epoch print statements) if omitted.
+tqdm>=4.66.0

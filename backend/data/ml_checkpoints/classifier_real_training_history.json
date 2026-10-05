@@ -1,0 +1,242 @@
+[
+  {
+    "epoch": 1,
+    "train": {
+      "loss": 0.904634,
+      "accuracy": 0.5742
+    },
+    "val": {
+      "loss": 0.939233,
+      "accuracy": 0.5518
+    },
+    "duration_seconds": 983.3
+  },
+  {
+    "epoch": 2,
+    "train": {
+      "loss": 0.853242,
+      "accuracy": 0.5998
+    },
+    "val": {
+      "loss": 0.80013,
+      "accuracy": 0.6451
+    },
+    "duration_seconds": 989.12
+  },
+  {
+    "epoch": 3,
+    "train": {
+      "loss": 0.818554,
+      "accuracy": 0.6218
+    },
+    "val": {
+      "loss": 0.770941,
+      "accuracy": 0.6347
+    },
+    "duration_seconds": 985.71
+  },
+  {
+    "epoch": 4,
+    "train": {
+      "loss": 0.804942,
+      "accuracy": 0.6314
+    },
+    "val": {
+      "loss": 0.719631,
+      "accuracy": 0.6865
+    },
+    "duration_seconds": 987.91
+  },
+  {
+    "epoch": 5,
+    "train": {
+      "loss": 0.797575,
+      "accuracy": 0.6369
+    },
+    "val": {
+      "loss": 0.745105,
+      "accuracy": 0.6554
+    },
+    "duration_seconds": 985.34
+  },
+  {
+    "epoch": 6,
+    "train": {
+      "loss": 0.780428,
+      "accuracy": 0.6571
+    },
+    "val": {
+      "loss": 0.772429,
+      "accuracy": 0.6632
+    },
+    "duration_seconds": 989.07
+  },
+  {
+    "epoch": 7,
+    "train": {
+      "loss": 0.753933,
+      "accuracy": 0.6603
+    },
+    "val": {
+      "loss": 0.784052,
+      "accuracy": 0.6399
+    },
+    "duration_seconds": 986.79
+  },
+  {
+    "epoch": 8,
+    "train": {
+      "loss": 0.73275,
+      "accuracy": 0.6703
+    },
+    "val": {
+      "loss": 0.696013,
+      "accuracy": 0.6969
+    },
+    "duration_seconds": 1041.85
+  },
+  {
+    "epoch": 9,
+    "train": {
+      "loss": 0.736591,
+      "accuracy": 0.6795
+    },
+    "val": {
+      "loss": 0.727132,
+      "accuracy": 0.6917
+    },
+    "duration_seconds": 986.53
+  },
+  {
+    "epoch": 10,
+    "train": {
+      "loss": 0.712117,
+      "accuracy": 0.6918
+    },
+    "val": {
+      "loss": 0.739061,
+      "accuracy": 0.6606
+    },
+    "duration_seconds": 989.66
+  },
+  {
+    "epoch": 11,
+    "train": {
+      "loss": 0.72993,
+      "accuracy": 0.6864
+    },
+    "val": {
+      "loss": 0.651574,
+      "accuracy": 0.7254
+    },
+    "duration_seconds": 985.85
+  },
+  {
+    "epoch": 12,
+    "train": {
+      "loss": 0.70502,
+      "accuracy": 0.6886
+    },
+    "val": {
+      "loss": 0.761379,
+      "accuracy": 0.6528
+    },
+    "duration_seconds": 988.13
+  },
+  {
+    "epoch": 13,
+    "train": {
+      "loss": 0.710985,
+      "accuracy": 0.6896
+    },
+    "val": {
+      "loss": 0.714819,
+      "accuracy": 0.7358
+    },
+    "duration_seconds": 991.7
+  },
+  {
+    "epoch": 14,
+    "train": {
+      "loss": 0.687093,
+      "accuracy": 0.6973
+    },
+    "val": {
+      "loss": 0.749976,
+      "accuracy": 0.6943
+    },
+    "duration_seconds": 1123.36
+  },
+  {
+    "epoch": 15,
+    "train": {
+      "loss": 0.69763,
+      "accuracy": 0.7038
+    },
+    "val": {
+      "loss": 0.645431,
+      "accuracy": 0.6839
+    },
+    "duration_seconds": 993.25
+  },
+  {
+    "epoch": 16,
+    "train": {
+      "loss": 0.688453,
+      "accuracy": 0.712
+    },
+    "val": {
+      "loss": 0.73667,
+      "accuracy": 0.6347
+    },
+    "duration_seconds": 989.91
+  },
+  {
+    "epoch": 17,
+    "train": {
+      "loss": 0.69256,
+      "accuracy": 0.6914
+    },
+    "val": {
+      "loss": 0.624774,
+      "accuracy": 0.7694
+    },
+    "duration_seconds": 1181.49
+  },
+  {
+    "epoch": 18,
+    "train": {
+      "loss": 0.655989,
+      "accuracy": 0.7097
+    },
+    "val": {
+      "loss": 0.661981,
+      "accuracy": 0.7332
+    },
+    "duration_seconds": 1230.23
+  },
+  {
+    "epoch": 19,
+    "train": {
+      "loss": 0.652377,
+      "accuracy": 0.7234
+    },
+    "val": {
+      "loss": 0.626305,
+      "accuracy": 0.7513
+    },
+    "duration_seconds": 994.11
+  },
+  {
+    "epoch": 20,
+    "train": {
+      "loss": 0.668001,
+      "accuracy": 0.7143
+    },
+    "val": {
+      "loss": 0.572797,
+      "accuracy": 0.7642
+    },
+    "duration_seconds": 1004.21
+  }
+]

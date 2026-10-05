@@ -1,0 +1,42 @@
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  flex-shrink: 0;
+}
+
+.theme-toggle__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.theme-toggle__btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.theme-toggle__btn:hover {
+  color: var(--text-secondary);
+}
+
+.theme-toggle__btn.active {
+  background: var(--bg-panel-raised);
+  color: var(--signal-cyan);
+}
+
+.theme-toggle__btn:focus-visible {
+  outline: 2px solid var(--signal-cyan);
+  outline-offset: 1px;
+}

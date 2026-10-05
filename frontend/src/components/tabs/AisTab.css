@@ -1,0 +1,104 @@
+.filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+.filter-field label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.filter-field label b { color: var(--signal-cyan); font-weight: 600; }
+.filter-field input[type="range"] {
+  accent-color: var(--signal-cyan);
+  width: 100%;
+}
+
+.ais-funnel {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  margin: var(--sp-4) 0 var(--sp-5);
+}
+.ais-funnel__step {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  text-align: center;
+  min-width: 96px;
+}
+.ais-funnel__step .n {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.ais-funnel__step .l {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ais-funnel__arrow { color: var(--border-strong); font-size: 16px; }
+
+.vessel-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-hairline);
+  cursor: pointer;
+  font-size: 13px;
+}
+.vessel-mini-row:last-child { border-bottom: none; }
+.vessel-mini-row:hover { background: var(--bg-panel-raised); }
+.vessel-mini-row:focus-visible {
+  outline: 2px solid var(--signal-cyan);
+  outline-offset: -2px;
+  background: var(--bg-panel-raised);
+}
+.vessel-mini-row .rank-dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px;
+}
+.vessel-mini-row .score {
+  font-family: var(--font-mono);
+  color: var(--signal-cyan);
+}
+
+.excluded-vessel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.excluded-vessel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border-hairline);
+  font-size: 12.5px;
+}
+.excluded-vessel-row:last-child { border-bottom: none; }
+.excluded-vessel-row__name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.excluded-vessel-row__reason {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

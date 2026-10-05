@@ -1,0 +1,208 @@
+.sat-image-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+.sat-image-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.sat-image-card img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--bg-inset);
+}
+.sat-image-card__label {
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-hairline);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sat-image-card__label .step-num {
+  color: var(--signal-cyan);
+  font-weight: 600;
+}
+
+.geometry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.geometry-table tr { border-bottom: 1px solid var(--border-hairline); }
+.geometry-table tr:last-child { border-bottom: none; }
+.geometry-table td { padding: 9px 4px; }
+.geometry-table td:first-child { color: var(--text-secondary); }
+.caveat-inline {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.geometry-table td:last-child {
+  text-align: right;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--sp-4);
+  align-items: start;
+}
+@media (max-width: 780px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.confidence-bar-track {
+  height: 8px;
+  background: var(--bg-inset);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: var(--sp-2);
+}
+.confidence-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--signal-amber), var(--signal-coral));
+  border-radius: 4px;
+}
+
+.provenance-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: var(--sp-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-hairline);
+  font-size: 12.5px;
+}
+.provenance-banner--classical {
+  background: color-mix(in srgb, var(--signal-cyan) 8%, transparent);
+  border-color: color-mix(in srgb, var(--signal-cyan) 30%, var(--border-hairline));
+}
+.provenance-banner--ml {
+  background: color-mix(in srgb, var(--signal-violet) 10%, transparent);
+  border-color: color-mix(in srgb, var(--signal-violet) 30%, var(--border-hairline));
+}
+.provenance-banner--ml-real {
+  background: color-mix(in srgb, var(--signal-green) 10%, transparent);
+  border-color: color-mix(in srgb, var(--signal-green) 35%, var(--border-hairline));
+}
+.provenance-banner--fallback {
+  background: color-mix(in srgb, var(--signal-amber) 10%, transparent);
+  border-color: color-mix(in srgb, var(--signal-amber) 35%, var(--border-hairline));
+}
+.provenance-banner__badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  white-space: nowrap;
+}
+.provenance-banner__note {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Scene classification banner (Part 6, Lookalike safety) - deliberately
+   its own distinct visual block, not folded into provenance-banner above:
+   provenance answers "which detector produced this result", this answers
+   "what did the classifier conclude about this scene" - two different
+   questions that must stay visually separable, especially when the answer
+   here is Lookalike or Uncertain and the segmenter above still shows a
+   mask. */
+.scene-classification-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: var(--sp-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-hairline);
+  font-size: 12.5px;
+}
+.scene-classification-banner--oil {
+  background: color-mix(in srgb, var(--signal-coral) 10%, transparent);
+  border-color: color-mix(in srgb, var(--signal-coral) 35%, var(--border-hairline));
+}
+.scene-classification-banner--no-oil {
+  background: color-mix(in srgb, var(--signal-green) 10%, transparent);
+  border-color: color-mix(in srgb, var(--signal-green) 35%, var(--border-hairline));
+}
+.scene-classification-banner--lookalike {
+  background: color-mix(in srgb, var(--signal-amber) 12%, transparent);
+  border-color: color-mix(in srgb, var(--signal-amber) 40%, var(--border-hairline));
+}
+.scene-classification-banner--uncertain {
+  background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+  border-color: color-mix(in srgb, var(--text-muted) 30%, var(--border-hairline));
+}
+.scene-classification-banner__badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  white-space: nowrap;
+}
+.scene-classification-banner__confidence {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.scene-classification-banner__note {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1 1 260px;
+}
+.scene-classification-banner__probs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.model-provenance-panel dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.model-provenance-panel dd {
+  margin: 2px 0 0 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.model-provenance-panel ul {
+  margin: 4px 0 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

@@ -1,0 +1,116 @@
+.header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-5);
+  border-bottom: 1px solid var(--border-hairline);
+  background: var(--bg-deep);
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.header__mark {
+  width: 26px;
+  height: 26px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.header__title {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.header__title small {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.header__inv-id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border-hairline);
+  padding-left: var(--sp-4);
+  margin-left: var(--sp-2);
+  display: none;
+}
+@media (min-width: 700px) {
+  .header__inv-id { display: block; }
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.btn-run-demo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  background: var(--signal-amber);
+  color: var(--on-signal-amber);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal-amber) 0%, transparent);
+}
+.btn-run-demo:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--signal-amber) 25%, transparent);
+}
+.btn-run-demo:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.btn-run-demo:focus-visible {
+  outline: 2px solid var(--signal-cyan);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  /* This class is used on both <button> and <a> elements (e.g. the report
+     toolbar's download links sit next to download buttons) - without this,
+     only the <a> ones would pick up the browser's default link underline,
+     making otherwise-identical-looking controls inconsistent. */
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover { border-color: var(--signal-cyan-dim); color: var(--text-primary); }
+.btn-secondary:focus-visible { outline: 2px solid var(--signal-cyan); outline-offset: 2px; }
+
+.spinner {
+  width: 13px; height: 13px;
+  border: 2px solid color-mix(in srgb, var(--on-signal-amber) 35%, transparent);
+  border-top-color: var(--on-signal-amber);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

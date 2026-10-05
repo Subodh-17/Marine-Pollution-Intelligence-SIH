@@ -1,0 +1,20 @@
+# OPTIONAL: only required if DATABASE_URL is set to a postgres:// or
+# postgresql:// URL (see app/persistence/db.py, .env.example). SQLite
+# (this project's default - zero extra infrastructure, no install needed)
+# does not need this file at all.
+#
+#   pip install -r requirements-postgres.txt
+#
+# Kept as a separate file, same reasoning as requirements-ml.txt: a local
+# SQLite-only demo/dev setup should never have to pull this in, and a
+# cloud deployment that DOES set DATABASE_URL installs it explicitly.
+#
+# -binary is intentional here (not the plain `psycopg2` source
+# distribution): it ships prebuilt wheels for Linux, macOS, and Windows
+# with no local PostgreSQL client headers or a C compiler required to
+# install, which matters for this project's stated Windows-compatibility
+# requirement. The project's own persistence layer (app/persistence/db.py)
+# only uses this package's psycopg2.connect / psycopg2.extras.RealDictCursor
+# and no engine-specific SQL beyond that, so a -binary install has no
+# functional downside for what this app actually needs.
+psycopg2-binary>=2.9

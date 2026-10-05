@@ -1,0 +1,22 @@
+{
+  "architecture": "SpillUNet",
+  "input_channels": 2,
+  "num_classes": null,
+  "output": "binary_segmentation_mask",
+  "param_count": 117537,
+  "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+  "framework": "torch==2.11.0+cu128",
+  "trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
+  "dataset_dois": {
+    "part1": "10.5281/zenodo.8346860",
+    "part2": "10.5281/zenodo.8253899",
+    "part3": "10.5281/zenodo.13761290"
+  },
+  "dataset_citation": "Trujillo-Acatitla, R., Tuxpan-Vargas, J., Ovando-Vazquez, C., & Monterrubio-Martinez, E. (2024). Sentinel-1 SAR Oil spill image dataset for train, validate, and test deep learning models. Parts I-III. Zenodo. https://doi.org/10.5281/zenodo.8346860",
+  "training_date": "2026-09-09T08:18:50.649506",
+  "best_epoch": 18,
+  "best_val_metric": 0.6294,
+  "num_train_samples": 2184,
+  "num_val_samples": 386,
+  "seed": 42
+}

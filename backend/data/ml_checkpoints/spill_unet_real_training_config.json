@@ -1,0 +1,16 @@
+{
+  "dataset_root": "backend/data/zenodo_sar",
+  "manifest_dir": "backend/data/zenodo_sar/manifests",
+  "model": "segmenter",
+  "epochs": 20,
+  "batch_size": 4,
+  "lr": 0.001,
+  "image_size": 256,
+  "seed": 42,
+  "device": "cpu",
+  "checkpoint_dir": "backend/data/ml_checkpoints",
+  "bce_weight": 0.5,
+  "num_workers": 0,
+  "limit_train_samples": null,
+  "started_at": "2026-09-08T17:43:53.098210"
+}

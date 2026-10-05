@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Sets data-theme on <html> before anything paints, so the correct
+      theme's tokens (see src/styles/tokens.css) are active from the very
+      first frame instead of flashing dark-then-light or light-then-dark.
+      Mirrors the resolve() logic in src/lib/theme.jsx - kept intentionally
+      tiny and dependency-free since it must run synchronously in <head>.
+    -->
+    <script>
+      (function () {
+        var KEY = 'mpi-theme-preference';
+        var resolved = 'dark';
+        try {
+          var stored = localStorage.getItem(KEY);
+          var pref = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'system';
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          resolved = pref === 'system' ? (systemDark ? 'dark' : 'light') : pref;
+        } catch (e) {
+          resolved = 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', resolved);
+        document.documentElement.style.colorScheme = resolved;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <title>Marine Pollution Intelligence</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

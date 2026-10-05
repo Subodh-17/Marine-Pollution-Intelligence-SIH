@@ -1,0 +1,52 @@
+{
+  "architecture": "SceneClassifierV2",
+  "input_channels": 2,
+  "num_classes": 3,
+  "class_labels": {"0": "Oil", "1": "No-Oil", "2": "Lookalike"},
+  "output": "3_class_scene_label",
+  "param_count": 295107,
+  "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+  "framework": "torch==2.14.0+cu130",
+  "trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
+  "dataset_dois": {
+    "part1": "10.5281/zenodo.8346860",
+    "part2": "10.5281/zenodo.8253899",
+    "part3": "10.5281/zenodo.13761290"
+  },
+  "dataset_citation": "Trujillo-Acatitla, R., Tuxpan-Vargas, J., Ovando-Vazquez, C., & Monterrubio-Martinez, E. (2024). Sentinel-1 SAR Oil spill image dataset for train, validate, and test deep learning models. Parts I-III. Zenodo. https://doi.org/10.5281/zenodo.8346860",
+  "training_date": "2026-10-05T02:39:47.236445",
+  "best_epoch": 32,
+  "best_val_accuracy": 0.9249,
+  "best_val_metric": 0.9249,
+  "num_train_samples": 2184,
+  "num_val_samples": 386,
+  "seed": 42,
+  "training_config": {
+    "epochs": 40,
+    "batch_size": 16,
+    "lr": 0.0003,
+    "image_size": 256,
+    "device": "cuda"
+  },
+  "independent_test_metrics": {
+    "dataset": "Zenodo Sentinel-1 SAR Oil Spill Dataset Part III",
+    "test_images": 450,
+    "accuracy": 0.7844,
+    "macro_precision": 0.8034,
+    "macro_recall": 0.7844,
+    "macro_f1": 0.7779,
+    "per_class": {
+      "Oil": {"precision": 0.9559, "recall": 0.8667, "f1": 0.9091},
+      "No-Oil": {"precision": 0.6780, "recall": 0.9533, "f1": 0.7925},
+      "Lookalike": {"precision": 0.7767, "recall": 0.5333, "f1": 0.6322}
+    }
+  },
+  "checkpoint_sha256": "sha256:0f587cb7604047247424bf7a79a9f07ae0ab66b9e4a3070cf32c2c1957fed1ee",
+  "historical_baseline": {
+    "note": "The original SceneClassifier (V1) checkpoint is preserved as classifier_real_best.pth for historical reference.",
+    "v1_architecture": "SceneClassifier",
+    "v1_param_count": 23859,
+    "v1_best_val_metric": 0.7694,
+    "v1_checkpoint_sha256": "sha256:409109a444196aafb5fc12aedb095bdde4e9062b0911373510535dabb052a75e"
+  }
+}

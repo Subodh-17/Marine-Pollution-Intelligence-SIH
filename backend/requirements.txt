@@ -1,0 +1,41 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.5
+numpy>=1.26
+scipy>=1.11
+reportlab>=4.0
+matplotlib>=3.8
+python-multipart>=0.0.9
+pytest>=8.0
+httpx>=0.27
+
+# Real satellite image upload (app/satellite/real_image.py). Both are
+# pure-Python-wheel packages with no compiled extension surprises on
+# Windows (no scikit-image / GDAL involved).
+tifffile>=2023.7.10
+Pillow>=10.0
+
+# PRODUCTION ML INFERENCE RUNTIME.
+# The trained SpillUNet/SceneClassifier checkpoints are served in production
+# through ONNX Runtime's CPU execution provider (app/ml/onnx_engine.py), NOT
+# through PyTorch. This is what makes genuine ML inference fit inside a
+# 512 MB / 0.1 CPU Render Free web service: the onnxruntime CPU wheel is a
+# fraction of a torch install, and the two exported graphs together are
+# under 600 KB. PyTorch stays in requirements-ml.txt as an offline-only
+# dependency for training, evaluation and ONNX export.
+#
+# If this is not installed, the app still runs: the ML path reports itself
+# unavailable and the classical dark-spot detector remains the operational
+# default, exactly as it does without torch.
+onnxruntime>=1.17,<2
+
+# OPTIONAL: only required for local PyTorch inference/training (app/ml/detector.py).
+# The app imports torch lazily (only when /api/ml/status or a
+# detector=ml upload is actually used) so a classical-only install works
+# fine without this file. See app/ml/README_ML_STATUS.md for why this
+# detector is labelled a prototype, not a validated model.
+#
+#   pip install -r requirements-ml.txt
+#
+# (kept as a separate file, per the production-readiness brief, so a
+# classical-only deployment never has to pull in PyTorch at all)

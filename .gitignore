@@ -1,0 +1,37 @@
+backend/data/app.db
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Environment files - .env.example is the only one meant to be committed.
+# Real .env/.env.local/.env.production files hold actual secrets
+# (AUTH_SECRET_KEY, live-provider API keys, DATABASE_URL credentials) once
+# copied from the example and filled in, and must never be committed.
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.*.local
+
+# Frontend build/dependency artifacts
+frontend/node_modules/
+frontend/dist/
+
+# Real Zenodo dataset (never included in this repo/ZIP - see
+# docs/DATASET_SETUP.md; this only matters if someone points DATASET_ROOT
+# at a directory inside the repo instead of outside it).
+data/zenodo_sar/
+
+*.zip

@@ -1,0 +1,4572 @@
+{
+  "evaluation": {
+    "dataset": "Zenodo Sentinel-1 SAR Oil Spill Dataset Part III",
+    "test_images": 450,
+    "classes": [
+      "Oil",
+      "No-Oil",
+      "Lookalike"
+    ],
+    "preprocessing": "sar_percentile_1_99_minmax_v1",
+    "image_size": 256,
+    "checkpoint": "backend\\data\\ml_checkpoints\\classifier_v2_lr3e4_best.pth",
+    "checkpoint_epoch": 32,
+    "checkpoint_val_metrics": {
+      "loss": 0.210583,
+      "accuracy": 0.9249
+    },
+    "architecture": "SceneClassifierV2"
+  },
+  "accuracy": 0.7844444444444445,
+  "macro_precision": 0.8034355001836008,
+  "macro_recall": 0.7844444444444445,
+  "macro_f1": 0.7779152478658681,
+  "confusion_matrix": [
+    [
+      130,
+      4,
+      16
+    ],
+    [
+      0,
+      143,
+      7
+    ],
+    [
+      6,
+      64,
+      80
+    ]
+  ],
+  "metrics": {
+    "Oil": {
+      "support": 150,
+      "true_positive": 130,
+      "false_positive": 6,
+      "false_negative": 20,
+      "precision": 0.9558823529411765,
+      "recall": 0.8666666666666667,
+      "f1": 0.9090909090909091
+    },
+    "No-Oil": {
+      "support": 150,
+      "true_positive": 143,
+      "false_positive": 68,
+      "false_negative": 7,
+      "precision": 0.6777251184834123,
+      "recall": 0.9533333333333334,
+      "f1": 0.7922437673130195
+    },
+    "Lookalike": {
+      "support": 150,
+      "true_positive": 80,
+      "false_positive": 23,
+      "false_negative": 70,
+      "precision": 0.7766990291262136,
+      "recall": 0.5333333333333333,
+      "f1": 0.6324110671936758
+    }
+  },
+  "predictions": [
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00000.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.450545,
+        "No-Oil": 0.027192,
+        "Lookalike": 0.522262
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00001.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.975845,
+        "No-Oil": 0.000884,
+        "Lookalike": 0.023271
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00002.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.984803,
+        "No-Oil": 7e-06,
+        "Lookalike": 0.01519
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00003.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999836,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000163
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00004.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.059157,
+        "No-Oil": 0.036624,
+        "Lookalike": 0.904219
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00005.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.040554,
+        "No-Oil": 0.005718,
+        "Lookalike": 0.953728
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00006.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.900183,
+        "No-Oil": 0.00115,
+        "Lookalike": 0.098667
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00007.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.994384,
+        "No-Oil": 0.000174,
+        "Lookalike": 0.005442
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00008.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999828,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000172
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00009.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.940399,
+        "No-Oil": 0.000232,
+        "Lookalike": 0.059369
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00010.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.988415,
+        "No-Oil": 9e-06,
+        "Lookalike": 0.011576
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00011.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.985208,
+        "No-Oil": 2.3e-05,
+        "Lookalike": 0.014768
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00012.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.082316,
+        "No-Oil": 0.194045,
+        "Lookalike": 0.723639
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00013.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.735044,
+        "No-Oil": 0.052469,
+        "Lookalike": 0.212487
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00014.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.975346,
+        "No-Oil": 0.002183,
+        "Lookalike": 0.02247
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00015.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.016519,
+        "No-Oil": 0.128398,
+        "Lookalike": 0.855083
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00016.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.997427,
+        "No-Oil": 8e-05,
+        "Lookalike": 0.002493
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00017.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.996592,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.003407
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00018.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999981,
+        "No-Oil": 0.0,
+        "Lookalike": 1.9e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00019.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.995233,
+        "No-Oil": 1.3e-05,
+        "Lookalike": 0.004754
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00020.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.996598,
+        "No-Oil": 0.000106,
+        "Lookalike": 0.003296
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00021.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999976,
+        "No-Oil": 0.0,
+        "Lookalike": 2.4e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00022.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.972304,
+        "No-Oil": 0.000604,
+        "Lookalike": 0.027092
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00023.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999044,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.000955
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00024.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999967,
+        "No-Oil": 0.0,
+        "Lookalike": 3.3e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00025.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998295,
+        "No-Oil": 1.3e-05,
+        "Lookalike": 0.001692
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00026.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999948,
+        "No-Oil": 0.0,
+        "Lookalike": 5.2e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00027.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999997,
+        "No-Oil": 0.0,
+        "Lookalike": 3e-06
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00028.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.996906,
+        "No-Oil": 5.6e-05,
+        "Lookalike": 0.003038
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00029.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99921,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.000789
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00030.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999119,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000881
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00031.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.991173,
+        "No-Oil": 4e-06,
+        "Lookalike": 0.008823
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00032.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.994329,
+        "No-Oil": 4.8e-05,
+        "Lookalike": 0.005624
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00033.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.32132,
+        "No-Oil": 0.004215,
+        "Lookalike": 0.674464
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00034.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999569,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.000428
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00035.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.834512,
+        "No-Oil": 0.000659,
+        "Lookalike": 0.164829
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00036.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.118298,
+        "No-Oil": 0.143674,
+        "Lookalike": 0.738029
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00037.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.503712,
+        "No-Oil": 0.046795,
+        "Lookalike": 0.449493
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00038.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.646447,
+        "No-Oil": 0.120986,
+        "Lookalike": 0.232567
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00039.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999971,
+        "No-Oil": 0.0,
+        "Lookalike": 2.9e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00040.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.142999,
+        "No-Oil": 0.011634,
+        "Lookalike": 0.845366
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00041.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999989,
+        "No-Oil": 0.0,
+        "Lookalike": 1.1e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00042.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.429914,
+        "No-Oil": 0.007135,
+        "Lookalike": 0.562951
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00043.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.980127,
+        "No-Oil": 2.2e-05,
+        "Lookalike": 0.019851
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00044.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.961619,
+        "No-Oil": 0.021163,
+        "Lookalike": 0.017219
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00045.tif",
+      "true": "Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.26029,
+        "No-Oil": 0.555472,
+        "Lookalike": 0.184238
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00046.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.205828,
+        "No-Oil": 0.009555,
+        "Lookalike": 0.784617
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00047.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999448,
+        "No-Oil": 2.8e-05,
+        "Lookalike": 0.000525
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00048.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.929989,
+        "No-Oil": 0.000495,
+        "Lookalike": 0.069515
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00049.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99827,
+        "No-Oil": 4.3e-05,
+        "Lookalike": 0.001687
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00050.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.907314,
+        "No-Oil": 0.000639,
+        "Lookalike": 0.092047
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00051.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.82151,
+        "No-Oil": 5.3e-05,
+        "Lookalike": 0.178438
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00052.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998809,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.001189
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00053.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.358639,
+        "No-Oil": 0.025167,
+        "Lookalike": 0.616195
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00054.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.702032,
+        "No-Oil": 0.000193,
+        "Lookalike": 0.297776
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00055.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998825,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.001173
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00056.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.987111,
+        "No-Oil": 4.5e-05,
+        "Lookalike": 0.012844
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00057.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999998,
+        "No-Oil": 0.0,
+        "Lookalike": 1e-06
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00058.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.603895,
+        "No-Oil": 0.004912,
+        "Lookalike": 0.391193
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00059.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.533688,
+        "No-Oil": 0.000237,
+        "Lookalike": 0.466075
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00060.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.991872,
+        "No-Oil": 0.004418,
+        "Lookalike": 0.00371
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00061.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.507463,
+        "No-Oil": 0.004148,
+        "Lookalike": 0.488389
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00062.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99981,
+        "No-Oil": 1.1e-05,
+        "Lookalike": 0.000179
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00063.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998823,
+        "No-Oil": 0.000117,
+        "Lookalike": 0.00106
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00064.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.905551,
+        "No-Oil": 0.002043,
+        "Lookalike": 0.092406
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00065.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.9864,
+        "No-Oil": 0.000199,
+        "Lookalike": 0.013401
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00066.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999976,
+        "No-Oil": 0.0,
+        "Lookalike": 2.4e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00067.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.64272,
+        "No-Oil": 0.00132,
+        "Lookalike": 0.35596
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00068.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.043251,
+        "No-Oil": 0.009665,
+        "Lookalike": 0.947085
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00069.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.995855,
+        "No-Oil": 1.2e-05,
+        "Lookalike": 0.004133
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00070.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999665,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000335
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00071.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.870935,
+        "No-Oil": 0.001112,
+        "Lookalike": 0.127953
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00072.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.966474,
+        "No-Oil": 0.000337,
+        "Lookalike": 0.033189
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00073.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999551,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000449
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00074.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99881,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.001189
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00075.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999739,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.00026
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00076.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999927,
+        "No-Oil": 0.0,
+        "Lookalike": 7.2e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00077.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.996287,
+        "No-Oil": 5e-06,
+        "Lookalike": 0.003708
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00078.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.923188,
+        "No-Oil": 0.000605,
+        "Lookalike": 0.076207
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00079.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.925058,
+        "No-Oil": 0.000816,
+        "Lookalike": 0.074126
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00080.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.993718,
+        "No-Oil": 2.9e-05,
+        "Lookalike": 0.006253
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00081.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.441046,
+        "No-Oil": 0.057026,
+        "Lookalike": 0.501929
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00082.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999976,
+        "No-Oil": 0.0,
+        "Lookalike": 2.4e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00083.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.442854,
+        "No-Oil": 0.021847,
+        "Lookalike": 0.535299
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00084.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 1.0,
+        "No-Oil": 0.0,
+        "Lookalike": 0.0
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00085.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999953,
+        "No-Oil": 0.0,
+        "Lookalike": 4.7e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00086.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.994793,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.005205
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00087.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.983084,
+        "No-Oil": 0.000554,
+        "Lookalike": 0.016362
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00088.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.968857,
+        "No-Oil": 0.012014,
+        "Lookalike": 0.019129
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00089.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999879,
+        "No-Oil": 0.0,
+        "Lookalike": 0.00012
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00090.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999982,
+        "No-Oil": 0.0,
+        "Lookalike": 1.7e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00091.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999756,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.000243
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00092.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999956,
+        "No-Oil": 0.0,
+        "Lookalike": 4.4e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00093.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.943372,
+        "No-Oil": 0.000239,
+        "Lookalike": 0.056389
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00094.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999717,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.00028
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00095.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999727,
+        "No-Oil": 3e-06,
+        "Lookalike": 0.00027
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00096.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999368,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000631
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00097.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999155,
+        "No-Oil": 8.5e-05,
+        "Lookalike": 0.00076
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00098.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999972,
+        "No-Oil": 0.0,
+        "Lookalike": 2.8e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00099.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999313,
+        "No-Oil": 3e-06,
+        "Lookalike": 0.000684
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00100.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.988487,
+        "No-Oil": 0.000169,
+        "Lookalike": 0.011345
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00101.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999994,
+        "No-Oil": 0.0,
+        "Lookalike": 6e-06
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00102.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99984,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.000158
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00103.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.985374,
+        "No-Oil": 2e-06,
+        "Lookalike": 0.014624
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00104.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.408969,
+        "No-Oil": 0.000583,
+        "Lookalike": 0.590448
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00105.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999954,
+        "No-Oil": 0.0,
+        "Lookalike": 4.6e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00106.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999358,
+        "No-Oil": 1.8e-05,
+        "Lookalike": 0.000623
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00107.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999977,
+        "No-Oil": 0.0,
+        "Lookalike": 2.3e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00108.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.974168,
+        "No-Oil": 3e-06,
+        "Lookalike": 0.025829
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00109.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 1.0,
+        "No-Oil": 0.0,
+        "Lookalike": 0.0
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00110.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99841,
+        "No-Oil": 1.2e-05,
+        "Lookalike": 0.001578
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00111.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.9972,
+        "No-Oil": 6e-06,
+        "Lookalike": 0.002794
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00112.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999988,
+        "No-Oil": 0.0,
+        "Lookalike": 1.2e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00113.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.973552,
+        "No-Oil": 0.009535,
+        "Lookalike": 0.016913
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00114.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.982859,
+        "No-Oil": 0.001396,
+        "Lookalike": 0.015744
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00115.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999988,
+        "No-Oil": 0.0,
+        "Lookalike": 1.2e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00116.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.982851,
+        "No-Oil": 0.004449,
+        "Lookalike": 0.0127
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00117.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999948,
+        "No-Oil": 1e-06,
+        "Lookalike": 5.1e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00118.tif",
+      "true": "Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.123206,
+        "No-Oil": 0.750756,
+        "Lookalike": 0.126038
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00119.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.996421,
+        "No-Oil": 3.3e-05,
+        "Lookalike": 0.003546
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00120.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999643,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000357
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00121.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.98563,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.014369
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00122.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.994922,
+        "No-Oil": 2e-05,
+        "Lookalike": 0.005058
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00123.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999949,
+        "No-Oil": 0.0,
+        "Lookalike": 5.1e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00124.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.941282,
+        "No-Oil": 0.001037,
+        "Lookalike": 0.057681
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00125.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.986223,
+        "No-Oil": 0.0,
+        "Lookalike": 0.013777
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00126.tif",
+      "true": "Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.230249,
+        "No-Oil": 0.563957,
+        "Lookalike": 0.205793
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00127.tif",
+      "true": "Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.157593,
+        "No-Oil": 0.007569,
+        "Lookalike": 0.834838
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00128.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.993287,
+        "No-Oil": 0.000907,
+        "Lookalike": 0.005806
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00129.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999977,
+        "No-Oil": 0.0,
+        "Lookalike": 2.3e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00130.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999594,
+        "No-Oil": 0.0,
+        "Lookalike": 0.000406
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00131.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.934788,
+        "No-Oil": 0.01209,
+        "Lookalike": 0.053122
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00132.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99964,
+        "No-Oil": 0.0,
+        "Lookalike": 0.00036
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00133.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.916394,
+        "No-Oil": 0.000865,
+        "Lookalike": 0.082741
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00134.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.997163,
+        "No-Oil": 5e-06,
+        "Lookalike": 0.002832
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00135.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999981,
+        "No-Oil": 0.0,
+        "Lookalike": 1.9e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00136.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998273,
+        "No-Oil": 9e-06,
+        "Lookalike": 0.001718
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00137.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.995582,
+        "No-Oil": 0.00102,
+        "Lookalike": 0.003398
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00138.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.990089,
+        "No-Oil": 0.003437,
+        "Lookalike": 0.006474
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00139.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999414,
+        "No-Oil": 1e-06,
+        "Lookalike": 0.000585
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00140.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999987,
+        "No-Oil": 0.0,
+        "Lookalike": 1.3e-05
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00141.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.998342,
+        "No-Oil": 3.7e-05,
+        "Lookalike": 0.001621
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00142.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.988422,
+        "No-Oil": 3.3e-05,
+        "Lookalike": 0.011546
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00143.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.99882,
+        "No-Oil": 2.7e-05,
+        "Lookalike": 0.001153
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00144.tif",
+      "true": "Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.030092,
+        "No-Oil": 0.62462,
+        "Lookalike": 0.345287
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00145.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999056,
+        "No-Oil": 2.1e-05,
+        "Lookalike": 0.000923
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00146.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.979954,
+        "No-Oil": 0.000654,
+        "Lookalike": 0.019392
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00147.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.992481,
+        "No-Oil": 0.000422,
+        "Lookalike": 0.007097
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00148.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999025,
+        "No-Oil": 8e-05,
+        "Lookalike": 0.000895
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Oil\\00149.tif",
+      "true": "Oil",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.999493,
+        "No-Oil": 7e-06,
+        "Lookalike": 0.000499
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00000.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.03782,
+        "No-Oil": 0.24265,
+        "Lookalike": 0.719529
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00001.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00421,
+        "No-Oil": 0.97606,
+        "Lookalike": 0.019729
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00002.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.018619,
+        "No-Oil": 0.92101,
+        "Lookalike": 0.060371
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00003.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.025134,
+        "No-Oil": 0.800221,
+        "Lookalike": 0.174645
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00004.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000577,
+        "No-Oil": 0.976587,
+        "Lookalike": 0.022835
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00005.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.058383,
+        "No-Oil": 0.856399,
+        "Lookalike": 0.085218
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00006.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.008925,
+        "No-Oil": 0.964129,
+        "Lookalike": 0.026947
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00007.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000799,
+        "No-Oil": 0.992291,
+        "Lookalike": 0.006909
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00008.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002444,
+        "No-Oil": 0.981992,
+        "Lookalike": 0.015563
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00009.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006496,
+        "No-Oil": 0.946476,
+        "Lookalike": 0.047028
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00010.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000746,
+        "No-Oil": 0.959919,
+        "Lookalike": 0.039335
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00011.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000874,
+        "No-Oil": 0.985176,
+        "Lookalike": 0.01395
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00012.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000204,
+        "No-Oil": 0.995209,
+        "Lookalike": 0.004587
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00013.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.02731,
+        "No-Oil": 0.308519,
+        "Lookalike": 0.664172
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00014.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00651,
+        "No-Oil": 0.976926,
+        "Lookalike": 0.016564
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00015.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006883,
+        "No-Oil": 0.968644,
+        "Lookalike": 0.024473
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00016.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006456,
+        "No-Oil": 0.978247,
+        "Lookalike": 0.015297
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00017.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000759,
+        "No-Oil": 0.993046,
+        "Lookalike": 0.006195
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00018.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000343,
+        "No-Oil": 0.99564,
+        "Lookalike": 0.004017
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00019.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.028626,
+        "No-Oil": 0.78194,
+        "Lookalike": 0.189434
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00020.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.024496,
+        "No-Oil": 0.751416,
+        "Lookalike": 0.224089
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00021.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002572,
+        "No-Oil": 0.972649,
+        "Lookalike": 0.024779
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00022.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002143,
+        "No-Oil": 0.983439,
+        "Lookalike": 0.014418
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00023.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00204,
+        "No-Oil": 0.984017,
+        "Lookalike": 0.013943
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00024.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001774,
+        "No-Oil": 0.985197,
+        "Lookalike": 0.013029
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00025.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004461,
+        "No-Oil": 0.978757,
+        "Lookalike": 0.016782
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00026.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00316,
+        "No-Oil": 0.981951,
+        "Lookalike": 0.014889
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00027.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002673,
+        "No-Oil": 0.984471,
+        "Lookalike": 0.012857
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00028.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.026951,
+        "No-Oil": 0.758959,
+        "Lookalike": 0.21409
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00029.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002744,
+        "No-Oil": 0.965954,
+        "Lookalike": 0.031302
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00030.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.0032,
+        "No-Oil": 0.972815,
+        "Lookalike": 0.023985
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00031.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.025601,
+        "No-Oil": 0.759975,
+        "Lookalike": 0.214424
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00032.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005133,
+        "No-Oil": 0.788008,
+        "Lookalike": 0.206859
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00033.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004718,
+        "No-Oil": 0.958778,
+        "Lookalike": 0.036505
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00034.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004645,
+        "No-Oil": 0.965412,
+        "Lookalike": 0.029943
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00035.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.01537,
+        "No-Oil": 0.940937,
+        "Lookalike": 0.043693
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00036.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00388,
+        "No-Oil": 0.976745,
+        "Lookalike": 0.019375
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00037.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003024,
+        "No-Oil": 0.970386,
+        "Lookalike": 0.026591
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00038.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003728,
+        "No-Oil": 0.96614,
+        "Lookalike": 0.030132
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00039.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.024758,
+        "No-Oil": 0.265699,
+        "Lookalike": 0.709543
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00040.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002042,
+        "No-Oil": 0.96806,
+        "Lookalike": 0.029898
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00041.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004287,
+        "No-Oil": 0.954768,
+        "Lookalike": 0.040945
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00042.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006478,
+        "No-Oil": 0.914872,
+        "Lookalike": 0.07865
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00043.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006999,
+        "No-Oil": 0.952144,
+        "Lookalike": 0.040858
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00044.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00523,
+        "No-Oil": 0.937239,
+        "Lookalike": 0.057531
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00045.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002613,
+        "No-Oil": 0.975046,
+        "Lookalike": 0.02234
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00046.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.026283,
+        "No-Oil": 0.840104,
+        "Lookalike": 0.133613
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00047.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002264,
+        "No-Oil": 0.986579,
+        "Lookalike": 0.011157
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00048.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.019481,
+        "No-Oil": 0.79557,
+        "Lookalike": 0.184949
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00049.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.018693,
+        "No-Oil": 0.920355,
+        "Lookalike": 0.060951
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00050.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001213,
+        "No-Oil": 0.991949,
+        "Lookalike": 0.006838
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00051.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.026226,
+        "No-Oil": 0.766279,
+        "Lookalike": 0.207494
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00052.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.030249,
+        "No-Oil": 0.621735,
+        "Lookalike": 0.348016
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00053.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002658,
+        "No-Oil": 0.976287,
+        "Lookalike": 0.021055
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00054.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003904,
+        "No-Oil": 0.974274,
+        "Lookalike": 0.021822
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00055.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004182,
+        "No-Oil": 0.981374,
+        "Lookalike": 0.014444
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00056.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.022568,
+        "No-Oil": 0.881996,
+        "Lookalike": 0.095435
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00057.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001157,
+        "No-Oil": 0.982332,
+        "Lookalike": 0.016512
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00058.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003619,
+        "No-Oil": 0.972843,
+        "Lookalike": 0.023538
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00059.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000202,
+        "No-Oil": 0.993975,
+        "Lookalike": 0.005823
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00060.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000224,
+        "No-Oil": 0.99538,
+        "Lookalike": 0.004396
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00061.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.042348,
+        "No-Oil": 0.522424,
+        "Lookalike": 0.435229
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00062.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000227,
+        "No-Oil": 0.995024,
+        "Lookalike": 0.004749
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00063.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.015635,
+        "No-Oil": 0.909119,
+        "Lookalike": 0.075246
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00064.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.019417,
+        "No-Oil": 0.886528,
+        "Lookalike": 0.094055
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00065.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00468,
+        "No-Oil": 0.969599,
+        "Lookalike": 0.02572
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00066.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.008933,
+        "No-Oil": 0.957919,
+        "Lookalike": 0.033148
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00067.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002893,
+        "No-Oil": 0.93869,
+        "Lookalike": 0.058417
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00068.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.011427,
+        "No-Oil": 0.47351,
+        "Lookalike": 0.515063
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00069.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004289,
+        "No-Oil": 0.957233,
+        "Lookalike": 0.038478
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00070.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004133,
+        "No-Oil": 0.978031,
+        "Lookalike": 0.017837
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00071.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001516,
+        "No-Oil": 0.990676,
+        "Lookalike": 0.007808
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00072.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003887,
+        "No-Oil": 0.97739,
+        "Lookalike": 0.018723
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00073.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002353,
+        "No-Oil": 0.986227,
+        "Lookalike": 0.01142
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00074.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005082,
+        "No-Oil": 0.968116,
+        "Lookalike": 0.026802
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00075.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002659,
+        "No-Oil": 0.980868,
+        "Lookalike": 0.016473
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00076.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.04281,
+        "No-Oil": 0.591165,
+        "Lookalike": 0.366025
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00077.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005434,
+        "No-Oil": 0.971131,
+        "Lookalike": 0.023435
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00078.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002122,
+        "No-Oil": 0.980603,
+        "Lookalike": 0.017275
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00079.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002488,
+        "No-Oil": 0.981964,
+        "Lookalike": 0.015548
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00080.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002292,
+        "No-Oil": 0.983803,
+        "Lookalike": 0.013905
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00081.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003702,
+        "No-Oil": 0.935111,
+        "Lookalike": 0.061187
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00082.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.026804,
+        "No-Oil": 0.78171,
+        "Lookalike": 0.191485
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00083.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003754,
+        "No-Oil": 0.783713,
+        "Lookalike": 0.212533
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00084.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000672,
+        "No-Oil": 0.98674,
+        "Lookalike": 0.012588
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00085.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002322,
+        "No-Oil": 0.979451,
+        "Lookalike": 0.018227
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00086.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.034923,
+        "No-Oil": 0.11051,
+        "Lookalike": 0.854566
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00087.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.058383,
+        "No-Oil": 0.856399,
+        "Lookalike": 0.085218
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00088.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003569,
+        "No-Oil": 0.948003,
+        "Lookalike": 0.048428
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00089.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002942,
+        "No-Oil": 0.967285,
+        "Lookalike": 0.029774
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00090.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003496,
+        "No-Oil": 0.965598,
+        "Lookalike": 0.030906
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00091.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000179,
+        "No-Oil": 0.994657,
+        "Lookalike": 0.005164
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00092.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.010615,
+        "No-Oil": 0.501729,
+        "Lookalike": 0.487655
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00093.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006875,
+        "No-Oil": 0.964622,
+        "Lookalike": 0.028503
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00094.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000171,
+        "No-Oil": 0.994417,
+        "Lookalike": 0.005412
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00095.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000889,
+        "No-Oil": 0.971138,
+        "Lookalike": 0.027973
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00096.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000759,
+        "No-Oil": 0.986948,
+        "Lookalike": 0.012293
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00097.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.013122,
+        "No-Oil": 0.94002,
+        "Lookalike": 0.046858
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00098.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000298,
+        "No-Oil": 0.986767,
+        "Lookalike": 0.012934
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00099.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.058383,
+        "No-Oil": 0.856399,
+        "Lookalike": 0.085218
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00100.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000584,
+        "No-Oil": 0.993001,
+        "Lookalike": 0.006414
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00101.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000234,
+        "No-Oil": 0.99203,
+        "Lookalike": 0.007736
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00102.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00071,
+        "No-Oil": 0.982853,
+        "Lookalike": 0.016437
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00103.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002242,
+        "No-Oil": 0.866023,
+        "Lookalike": 0.131734
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00104.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001008,
+        "No-Oil": 0.975847,
+        "Lookalike": 0.023145
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00105.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002706,
+        "No-Oil": 0.938264,
+        "Lookalike": 0.05903
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00106.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000267,
+        "No-Oil": 0.992178,
+        "Lookalike": 0.007554
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00107.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000278,
+        "No-Oil": 0.990532,
+        "Lookalike": 0.00919
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00108.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005034,
+        "No-Oil": 0.967129,
+        "Lookalike": 0.027837
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00109.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000718,
+        "No-Oil": 0.98565,
+        "Lookalike": 0.013632
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00110.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003235,
+        "No-Oil": 0.984098,
+        "Lookalike": 0.012667
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00111.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003471,
+        "No-Oil": 0.978117,
+        "Lookalike": 0.018412
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00112.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.008388,
+        "No-Oil": 0.968136,
+        "Lookalike": 0.023475
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00113.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006892,
+        "No-Oil": 0.978211,
+        "Lookalike": 0.014897
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00114.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.0039,
+        "No-Oil": 0.983287,
+        "Lookalike": 0.012813
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00115.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005129,
+        "No-Oil": 0.97939,
+        "Lookalike": 0.015481
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00116.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.012422,
+        "No-Oil": 0.971751,
+        "Lookalike": 0.015827
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00117.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001664,
+        "No-Oil": 0.983608,
+        "Lookalike": 0.014728
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00118.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.011407,
+        "No-Oil": 0.972666,
+        "Lookalike": 0.015928
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00119.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005627,
+        "No-Oil": 0.975469,
+        "Lookalike": 0.018904
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00120.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009545,
+        "No-Oil": 0.800185,
+        "Lookalike": 0.19027
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00121.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.04247,
+        "No-Oil": 0.491,
+        "Lookalike": 0.466531
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00122.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.00598,
+        "No-Oil": 0.945932,
+        "Lookalike": 0.048088
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00123.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009022,
+        "No-Oil": 0.964737,
+        "Lookalike": 0.026241
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00124.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005269,
+        "No-Oil": 0.975652,
+        "Lookalike": 0.019079
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00125.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002988,
+        "No-Oil": 0.985182,
+        "Lookalike": 0.01183
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00126.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006112,
+        "No-Oil": 0.970171,
+        "Lookalike": 0.023717
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00127.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.005306,
+        "No-Oil": 0.441743,
+        "Lookalike": 0.552951
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00128.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000573,
+        "No-Oil": 0.982961,
+        "Lookalike": 0.016466
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00129.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001298,
+        "No-Oil": 0.964258,
+        "Lookalike": 0.034444
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00130.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001441,
+        "No-Oil": 0.962745,
+        "Lookalike": 0.035814
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00131.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.007686,
+        "No-Oil": 0.969795,
+        "Lookalike": 0.02252
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00132.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002707,
+        "No-Oil": 0.981395,
+        "Lookalike": 0.015898
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00133.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006285,
+        "No-Oil": 0.977128,
+        "Lookalike": 0.016588
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00134.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005809,
+        "No-Oil": 0.970215,
+        "Lookalike": 0.023976
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00135.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003785,
+        "No-Oil": 0.961575,
+        "Lookalike": 0.03464
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00136.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.058076,
+        "No-Oil": 0.59294,
+        "Lookalike": 0.348984
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00137.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.006568,
+        "No-Oil": 0.951257,
+        "Lookalike": 0.042175
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00138.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.021134,
+        "No-Oil": 0.842395,
+        "Lookalike": 0.136471
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00139.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.019753,
+        "No-Oil": 0.771221,
+        "Lookalike": 0.209026
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00140.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002043,
+        "No-Oil": 0.867935,
+        "Lookalike": 0.130023
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00141.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000901,
+        "No-Oil": 0.965519,
+        "Lookalike": 0.033579
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00142.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000457,
+        "No-Oil": 0.982848,
+        "Lookalike": 0.016695
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00143.tif",
+      "true": "No-Oil",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.380233,
+        "No-Oil": 0.120009,
+        "Lookalike": 0.499758
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00144.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003194,
+        "No-Oil": 0.983067,
+        "Lookalike": 0.013738
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00145.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000389,
+        "No-Oil": 0.992369,
+        "Lookalike": 0.007242
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00146.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000246,
+        "No-Oil": 0.947294,
+        "Lookalike": 0.05246
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00147.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000335,
+        "No-Oil": 0.990641,
+        "Lookalike": 0.009023
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00148.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000758,
+        "No-Oil": 0.991587,
+        "Lookalike": 0.007654
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\No oil\\00149.tif",
+      "true": "No-Oil",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003184,
+        "No-Oil": 0.979702,
+        "Lookalike": 0.017114
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00000.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.212492,
+        "No-Oil": 0.550267,
+        "Lookalike": 0.237241
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00001.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.17679,
+        "No-Oil": 0.294811,
+        "Lookalike": 0.528399
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00002.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001428,
+        "No-Oil": 0.627964,
+        "Lookalike": 0.370609
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00003.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003653,
+        "No-Oil": 0.967361,
+        "Lookalike": 0.028986
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00004.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.013385,
+        "No-Oil": 0.337173,
+        "Lookalike": 0.649442
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00005.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.008669,
+        "No-Oil": 0.011027,
+        "Lookalike": 0.980304
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00006.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.003976,
+        "No-Oil": 0.000845,
+        "Lookalike": 0.995179
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00007.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.006177,
+        "No-Oil": 0.488324,
+        "Lookalike": 0.505499
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00008.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.003862,
+        "No-Oil": 0.21659,
+        "Lookalike": 0.779548
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00009.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.032754,
+        "No-Oil": 0.350671,
+        "Lookalike": 0.616575
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00010.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.148799,
+        "No-Oil": 0.008169,
+        "Lookalike": 0.843032
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00011.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.818321,
+        "No-Oil": 0.000972,
+        "Lookalike": 0.180707
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00012.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.714887,
+        "No-Oil": 0.008135,
+        "Lookalike": 0.276977
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00013.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004634,
+        "No-Oil": 0.570004,
+        "Lookalike": 0.425361
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00014.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001496,
+        "No-Oil": 0.50765,
+        "Lookalike": 0.490855
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00015.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.005972,
+        "No-Oil": 0.269462,
+        "Lookalike": 0.724566
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00016.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.0008,
+        "No-Oil": 0.3622,
+        "Lookalike": 0.637
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00017.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.002535,
+        "No-Oil": 0.014617,
+        "Lookalike": 0.982848
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00018.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.057044,
+        "No-Oil": 0.096395,
+        "Lookalike": 0.846561
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00019.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.040124,
+        "No-Oil": 0.304222,
+        "Lookalike": 0.655654
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00020.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.519653,
+        "No-Oil": 0.017849,
+        "Lookalike": 0.462498
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00021.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.165084,
+        "No-Oil": 0.587587,
+        "Lookalike": 0.247329
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00022.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.030458,
+        "No-Oil": 0.569791,
+        "Lookalike": 0.399751
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00023.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.01325,
+        "No-Oil": 0.029837,
+        "Lookalike": 0.956913
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00024.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.113384,
+        "No-Oil": 0.127089,
+        "Lookalike": 0.759526
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00025.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.021907,
+        "No-Oil": 0.608961,
+        "Lookalike": 0.369133
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00026.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.004079,
+        "No-Oil": 0.147065,
+        "Lookalike": 0.848856
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00027.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.350106,
+        "No-Oil": 0.017432,
+        "Lookalike": 0.632462
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00028.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.017536,
+        "No-Oil": 0.436625,
+        "Lookalike": 0.545839
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00029.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.12775,
+        "No-Oil": 0.157846,
+        "Lookalike": 0.714404
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00030.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.012524,
+        "No-Oil": 0.08549,
+        "Lookalike": 0.901987
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00031.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.03639,
+        "No-Oil": 0.066354,
+        "Lookalike": 0.897257
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00032.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.079088,
+        "No-Oil": 0.471618,
+        "Lookalike": 0.449294
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00033.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.041133,
+        "No-Oil": 0.633161,
+        "Lookalike": 0.325705
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00034.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.969563,
+        "No-Oil": 7.6e-05,
+        "Lookalike": 0.030361
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00035.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.135833,
+        "No-Oil": 0.016674,
+        "Lookalike": 0.847493
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00036.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.017008,
+        "No-Oil": 0.278613,
+        "Lookalike": 0.704379
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00037.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001601,
+        "No-Oil": 0.521034,
+        "Lookalike": 0.477365
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00038.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.337662,
+        "No-Oil": 0.004715,
+        "Lookalike": 0.657623
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00039.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000893,
+        "No-Oil": 0.985822,
+        "Lookalike": 0.013285
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00040.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.026601,
+        "No-Oil": 0.017876,
+        "Lookalike": 0.955523
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00041.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.003969,
+        "No-Oil": 0.163321,
+        "Lookalike": 0.83271
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00042.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004469,
+        "No-Oil": 0.905746,
+        "Lookalike": 0.089785
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00043.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.003422,
+        "No-Oil": 0.024708,
+        "Lookalike": 0.97187
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00044.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002654,
+        "No-Oil": 0.92868,
+        "Lookalike": 0.068666
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00045.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.024626,
+        "No-Oil": 0.001364,
+        "Lookalike": 0.97401
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00046.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.307409,
+        "No-Oil": 0.001201,
+        "Lookalike": 0.69139
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00047.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.045185,
+        "No-Oil": 0.183839,
+        "Lookalike": 0.770976
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00048.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002184,
+        "No-Oil": 0.98252,
+        "Lookalike": 0.015296
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00049.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.476952,
+        "No-Oil": 0.017073,
+        "Lookalike": 0.505974
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00050.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000685,
+        "No-Oil": 0.993469,
+        "Lookalike": 0.005845
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00051.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002452,
+        "No-Oil": 0.948303,
+        "Lookalike": 0.049246
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00052.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.003985,
+        "No-Oil": 0.127554,
+        "Lookalike": 0.86846
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00053.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.014205,
+        "No-Oil": 0.063433,
+        "Lookalike": 0.922362
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00054.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.628407,
+        "No-Oil": 0.011089,
+        "Lookalike": 0.360504
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00055.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.106874,
+        "No-Oil": 0.007066,
+        "Lookalike": 0.88606
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00056.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.194351,
+        "No-Oil": 4.9e-05,
+        "Lookalike": 0.8056
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00057.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.174306,
+        "No-Oil": 7.2e-05,
+        "Lookalike": 0.825621
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00058.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.091692,
+        "No-Oil": 0.461408,
+        "Lookalike": 0.4469
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00059.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.025418,
+        "No-Oil": 0.842944,
+        "Lookalike": 0.131638
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00060.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.402062,
+        "No-Oil": 0.026128,
+        "Lookalike": 0.57181
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00061.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.007873,
+        "No-Oil": 0.932858,
+        "Lookalike": 0.059269
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00062.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000727,
+        "No-Oil": 0.992543,
+        "Lookalike": 0.00673
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00063.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005738,
+        "No-Oil": 0.96274,
+        "Lookalike": 0.031522
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00064.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.002143,
+        "No-Oil": 0.465306,
+        "Lookalike": 0.532552
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00065.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.425617,
+        "No-Oil": 0.000501,
+        "Lookalike": 0.573882
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00066.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.324211,
+        "No-Oil": 0.002103,
+        "Lookalike": 0.673686
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00067.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.18288,
+        "No-Oil": 0.074433,
+        "Lookalike": 0.742688
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00068.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.037445,
+        "No-Oil": 0.028403,
+        "Lookalike": 0.934151
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00069.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.104382,
+        "No-Oil": 0.470536,
+        "Lookalike": 0.425082
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00070.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003429,
+        "No-Oil": 0.972859,
+        "Lookalike": 0.023713
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00071.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009696,
+        "No-Oil": 0.84855,
+        "Lookalike": 0.141754
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00072.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.022738,
+        "No-Oil": 0.777847,
+        "Lookalike": 0.199415
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00073.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009469,
+        "No-Oil": 0.796243,
+        "Lookalike": 0.194288
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00074.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005288,
+        "No-Oil": 0.886833,
+        "Lookalike": 0.107878
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00075.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003696,
+        "No-Oil": 0.87159,
+        "Lookalike": 0.124714
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00076.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.005302,
+        "No-Oil": 0.079653,
+        "Lookalike": 0.915045
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00077.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.009966,
+        "No-Oil": 0.016469,
+        "Lookalike": 0.973565
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00078.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.345901,
+        "No-Oil": 0.033137,
+        "Lookalike": 0.620962
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00079.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.02105,
+        "No-Oil": 0.92907,
+        "Lookalike": 0.04988
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00080.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.033972,
+        "No-Oil": 0.878452,
+        "Lookalike": 0.087575
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00081.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.041108,
+        "No-Oil": 0.824033,
+        "Lookalike": 0.134859
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00082.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.044098,
+        "No-Oil": 0.810236,
+        "Lookalike": 0.145666
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00083.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.045945,
+        "No-Oil": 0.764137,
+        "Lookalike": 0.189918
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00084.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002831,
+        "No-Oil": 0.923697,
+        "Lookalike": 0.073472
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00085.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002277,
+        "No-Oil": 0.895018,
+        "Lookalike": 0.102705
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00086.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.008762,
+        "No-Oil": 0.236363,
+        "Lookalike": 0.754875
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00087.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.019562,
+        "No-Oil": 0.759588,
+        "Lookalike": 0.22085
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00088.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000731,
+        "No-Oil": 0.803088,
+        "Lookalike": 0.196181
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00089.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000276,
+        "No-Oil": 0.927011,
+        "Lookalike": 0.072713
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00090.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.01565,
+        "No-Oil": 0.41009,
+        "Lookalike": 0.57426
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00091.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.031968,
+        "No-Oil": 0.00231,
+        "Lookalike": 0.965721
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00092.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009035,
+        "No-Oil": 0.735158,
+        "Lookalike": 0.255807
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00093.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.077331,
+        "No-Oil": 0.158563,
+        "Lookalike": 0.764106
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00094.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.004546,
+        "No-Oil": 0.127647,
+        "Lookalike": 0.867807
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00095.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.103463,
+        "No-Oil": 0.136081,
+        "Lookalike": 0.760457
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00096.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.029529,
+        "No-Oil": 0.271975,
+        "Lookalike": 0.698496
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00097.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.03236,
+        "No-Oil": 0.50804,
+        "Lookalike": 0.459599
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00098.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.00522,
+        "No-Oil": 0.008831,
+        "Lookalike": 0.985949
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00099.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.01383,
+        "No-Oil": 0.060638,
+        "Lookalike": 0.925531
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00100.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.015505,
+        "No-Oil": 0.062073,
+        "Lookalike": 0.922422
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00101.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003749,
+        "No-Oil": 0.966291,
+        "Lookalike": 0.02996
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00102.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.00255,
+        "No-Oil": 0.159147,
+        "Lookalike": 0.838303
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00103.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.001497,
+        "No-Oil": 0.428397,
+        "Lookalike": 0.570106
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00104.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.044141,
+        "No-Oil": 0.038384,
+        "Lookalike": 0.917475
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00105.tif",
+      "true": "Lookalike",
+      "predicted": "Oil",
+      "probabilities": {
+        "Oil": 0.546186,
+        "No-Oil": 0.007394,
+        "Lookalike": 0.44642
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00106.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.008122,
+        "No-Oil": 0.227745,
+        "Lookalike": 0.764132
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00107.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.056731,
+        "No-Oil": 0.040577,
+        "Lookalike": 0.902693
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00108.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.033678,
+        "No-Oil": 0.543364,
+        "Lookalike": 0.422958
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00109.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.014368,
+        "No-Oil": 0.654235,
+        "Lookalike": 0.331397
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00110.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.079012,
+        "No-Oil": 0.003873,
+        "Lookalike": 0.917115
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00111.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.009866,
+        "No-Oil": 0.087674,
+        "Lookalike": 0.902461
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00112.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.058444,
+        "No-Oil": 0.26279,
+        "Lookalike": 0.678767
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00113.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.006053,
+        "No-Oil": 0.029452,
+        "Lookalike": 0.964494
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00114.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004822,
+        "No-Oil": 0.514604,
+        "Lookalike": 0.480574
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00115.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.026335,
+        "No-Oil": 0.769172,
+        "Lookalike": 0.204493
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00116.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005953,
+        "No-Oil": 0.969386,
+        "Lookalike": 0.024661
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00117.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.016977,
+        "No-Oil": 0.594707,
+        "Lookalike": 0.388317
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00118.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.018456,
+        "No-Oil": 0.162761,
+        "Lookalike": 0.818783
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00119.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.286253,
+        "No-Oil": 0.00386,
+        "Lookalike": 0.709886
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00120.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.003662,
+        "No-Oil": 0.977023,
+        "Lookalike": 0.019315
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00121.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004437,
+        "No-Oil": 0.968642,
+        "Lookalike": 0.026921
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00122.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.004483,
+        "No-Oil": 0.969592,
+        "Lookalike": 0.025925
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00123.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.009943,
+        "No-Oil": 0.948667,
+        "Lookalike": 0.04139
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00124.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.005755,
+        "No-Oil": 0.974237,
+        "Lookalike": 0.020008
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00125.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.111003,
+        "No-Oil": 0.037957,
+        "Lookalike": 0.85104
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00126.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.009231,
+        "No-Oil": 0.050477,
+        "Lookalike": 0.940292
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00127.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.260446,
+        "No-Oil": 0.00375,
+        "Lookalike": 0.735804
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00128.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.286386,
+        "No-Oil": 0.002862,
+        "Lookalike": 0.710753
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00129.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.006669,
+        "No-Oil": 0.002963,
+        "Lookalike": 0.990368
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00130.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.025349,
+        "No-Oil": 0.660009,
+        "Lookalike": 0.314642
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00131.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.113636,
+        "No-Oil": 0.650943,
+        "Lookalike": 0.235421
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00132.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.011247,
+        "No-Oil": 0.93601,
+        "Lookalike": 0.052742
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00133.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.025308,
+        "No-Oil": 0.133743,
+        "Lookalike": 0.840949
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00134.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.051912,
+        "No-Oil": 0.162457,
+        "Lookalike": 0.78563
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00135.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.00855,
+        "No-Oil": 0.259203,
+        "Lookalike": 0.732246
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00136.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.046681,
+        "No-Oil": 0.054997,
+        "Lookalike": 0.898322
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00137.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.186696,
+        "No-Oil": 0.059046,
+        "Lookalike": 0.754258
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00138.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000671,
+        "No-Oil": 0.977707,
+        "Lookalike": 0.021622
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00139.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000824,
+        "No-Oil": 0.978037,
+        "Lookalike": 0.021139
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00140.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.01751,
+        "No-Oil": 0.625299,
+        "Lookalike": 0.357191
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00141.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.032671,
+        "No-Oil": 0.890282,
+        "Lookalike": 0.077046
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00142.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.007125,
+        "No-Oil": 0.060158,
+        "Lookalike": 0.932718
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00143.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.000793,
+        "No-Oil": 0.503067,
+        "Lookalike": 0.496141
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00144.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.039668,
+        "No-Oil": 0.103139,
+        "Lookalike": 0.857193
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00145.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.079882,
+        "No-Oil": 0.211728,
+        "Lookalike": 0.70839
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00146.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.041117,
+        "No-Oil": 0.635587,
+        "Lookalike": 0.323295
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00147.tif",
+      "true": "Lookalike",
+      "predicted": "Lookalike",
+      "probabilities": {
+        "Oil": 0.004629,
+        "No-Oil": 0.122813,
+        "Lookalike": 0.872558
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00148.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.002408,
+        "No-Oil": 0.940755,
+        "Lookalike": 0.056837
+      }
+    },
+    {
+      "image": "D:\\zenodo_sar\\02_Test_images_and_ground_truth\\Images\\Lookalike\\00149.tif",
+      "true": "Lookalike",
+      "predicted": "No-Oil",
+      "probabilities": {
+        "Oil": 0.001935,
+        "No-Oil": 0.975458,
+        "Lookalike": 0.022607
+      }
+    }
+  ]
+}
