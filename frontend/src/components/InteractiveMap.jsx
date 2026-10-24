@@ -142,7 +142,7 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
   // No slick was detected in this scene, so there is no origin/observed
   // point to center a map on — show a clear placeholder instead of
   // crashing on `origin.lat` / `observed.lat`.
-  if (!origin || !observed) {
+  if (!observed) {
     return (
       <div className="map-wrap" style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', maxWidth: 340, padding: 'var(--sp-4)' }}>
@@ -153,14 +153,15 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
     )
   }
 
-  const backwardLine = [...drift.backward_track, observed].map(p => [p.lat, p.lon])
-  const forwardLine = [observed, ...drift.forward_track].map(p => [p.lat, p.lon])
+  const mapCenter = origin ? [origin.lat, origin.lon] : [observed.lat, observed.lon]
+  const backwardLine = origin ? [...drift.backward_track, observed].map(p => [p.lat, p.lon]) : []
+  const forwardLine = drift.forward_track.length ? [observed, ...drift.forward_track].map(p => [p.lat, p.lon]) : []
 
   const fitBounds = sceneBounds || (geo ? [[geo.centroid_lat - 0.3, geo.centroid_lon - 0.3], [geo.centroid_lat + 0.3, geo.centroid_lon + 0.3]] : null)
 
   return (
     <div className="map-wrap" style={{ height }}>
-      <MapContainer center={[origin.lat, origin.lon]} zoom={10} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
+      <MapContainer center={mapCenter} zoom={10} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
         <TileLayer
           key={provider.id}
           url={provider.url}
@@ -195,7 +196,7 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
           </CircleMarker>
         )}
 
-        {layers.hindcast && (
+        {layers.hindcast && origin && (
           <>
             <Polyline positions={backwardLine} pathOptions={{ color: 'var(--signal-amber)', weight: 2, dashArray: '5 5' }} />
             {drift.backward_track.map((p, i) => (
@@ -212,7 +213,7 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
           </>
         )}
 
-        {layers.forecast && (
+        {layers.forecast && forwardLine.length > 1 && (
           <>
             <Polyline positions={forwardLine} pathOptions={{ color: 'var(--signal-violet)', weight: 2, dashArray: '2 6' }} />
             {drift.forward_track.map((p, i) => (
@@ -227,7 +228,7 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
         </CircleMarker>
 
         {layers.radius && (
-          <Circle center={[origin.lat, origin.lon]} radius={searchRadiusKm * 1000}
+          <Circle center={origin ? [origin.lat, origin.lon] : [observed.lat, observed.lon]} radius={searchRadiusKm * 1000}
             pathOptions={{ color: 'var(--text-muted)', weight: 1, dashArray: '4 4', fillOpacity: 0.02 }} />
         )}
 

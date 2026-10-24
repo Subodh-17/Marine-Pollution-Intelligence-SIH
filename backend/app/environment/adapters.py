@@ -29,9 +29,9 @@ a higher-priority source, when it didn't).
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-import math
 
 from app.config import get_settings
 from app.logging_config import get_logger
@@ -50,9 +50,16 @@ class EnvironmentConditions:
     current_speed_ms: float
     current_dir_deg: float       # oceanographic convention: direction current flows TOWARD
     wave_height_m: float
-    source: str                  # "REAL" | "CACHED" | "LOCAL_SAMPLE" | "SYNTHETIC_DEMO"
+    source: str                  # "REAL_OPEN_METEO" | "REAL" | "PARTIAL_REAL" | "CACHED" | "LOCAL_SAMPLE" | "SYNTHETIC_DEMO"
     retrieved_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     fallback_reason: str | None = None   # why a higher-priority source wasn't used, if any
+    wind_provider: str | None = None
+    current_provider: str | None = None
+    data_valid_time: str | None = None
+    data_age_hours: float | None = None
+    is_fallback: bool = False
+    coverage_status: str = "FULL_METOCEAN"  # "FULL_METOCEAN" | "PARTIAL_WIND_ONLY" | "SYNTHETIC"
+    notes: list[str] = field(default_factory=list)
 
 
 class RealWeatherOceanAdapter:
@@ -119,6 +126,13 @@ class RealWeatherOceanAdapter:
                 current_dir_deg=float(data["current_dir_deg"]) % 360,
                 wave_height_m=float(data.get("wave_height_m", 0.0)),
                 source="REAL",
+                wind_provider="CUSTOM_LIVE_HTTP",
+                current_provider="CUSTOM_LIVE_HTTP",
+                data_valid_time=datetime.now(timezone.utc).isoformat(),
+                data_age_hours=0.0,
+                is_fallback=False,
+                coverage_status="FULL_METOCEAN",
+                notes=["Retrieved from custom configured live provider endpoint."],
             )
         except (TypeError, ValueError) as e:
             raise EnvironmentDataUnavailable(f"Live provider response had non-numeric field(s): {e}")
@@ -160,20 +174,67 @@ class SyntheticEnvironmentAdapter:
             wave_height_m=round(max(0.1, wave_height), 2),
             source="SYNTHETIC_DEMO",
             fallback_reason=fallback_reason,
+            wind_provider="SYNTHETIC_TRIGONOMETRIC_DEMO",
+            current_provider="SYNTHETIC_TRIGONOMETRIC_DEMO",
+            data_valid_time=timestamp.isoformat(),
+            data_age_hours=0.0,
+            is_fallback=bool(fallback_reason),
+            coverage_status="SYNTHETIC",
+            notes=["Synthetic deterministic demonstration field. NOT a real forecast or observation."],
         )
 
 
-def resolve_environment_conditions(lat: float, lon: float, timestamp) -> EnvironmentConditions:
-    """Walk the fallback chain and return the first available source. The
-    reason the chain fell through (if it did) is carried onto the final
-    result's `fallback_reason` so the frontend/report can display exactly
-    why synthetic data was used instead of just showing "synthetic" with no
-    explanation."""
+def resolve_environment_conditions(
+    lat: float,
+    lon: float,
+    timestamp,
+    allow_synthetic: bool = True,
+    mode: str | None = None,
+) -> EnvironmentConditions:
+    """Walk the fallback chain and return the first available source.
+
+    If mode == 'real_satellite' or allow_synthetic is False, synthetic substitution
+    is strictly refused to uphold scientific honesty and prevent unverified
+    trajectories from masquerading as real operational forecasts.
+    """
+    settings = get_settings()
     reasons = []
-    for adapter in (RealWeatherOceanAdapter(), CachedEnvironmentAdapter()):
+
+    # Assemble adapter chain based on configuration
+    adapters = []
+    provider = (settings.env_provider or "").lower()
+
+    if provider in ("open_meteo", "auto"):
+        try:
+            from app.environment.open_meteo import OpenMeteoOceanAdapter
+            adapters.append(OpenMeteoOceanAdapter())
+        except ImportError as e:
+            reasons.append(f"OpenMeteoOceanAdapter import failed: {e}")
+        adapters.append(CachedEnvironmentAdapter())
+    elif provider == "custom_live" or settings.env_live_provider_url:
+        adapters.append(RealWeatherOceanAdapter())
+        adapters.append(CachedEnvironmentAdapter())
+    else:
+        # Default / unconfigured live provider: exercise RealWeatherOceanAdapter
+        # so its configuration status is recorded in fallback reasons
+        adapters.append(RealWeatherOceanAdapter())
+        adapters.append(CachedEnvironmentAdapter())
+
+    for adapter in adapters:
         try:
             return adapter.fetch(lat, lon, timestamp)
         except EnvironmentDataUnavailable as e:
             reasons.append(f"{adapter.__class__.__name__}: {e}")
             continue
+        except Exception as e:
+            reasons.append(f"{adapter.__class__.__name__} unexpected error: {e}")
+            continue
+
+    # Refuse synthetic fallback when in operational mode or explicitly forbidden
+    is_operational = (mode == "real_satellite") or (not allow_synthetic)
+    if is_operational:
+        raise EnvironmentDataUnavailable(
+            f"Operational mode refused synthetic environmental fallback: {'; '.join(reasons)}"
+        )
+
     return SyntheticEnvironmentAdapter().fetch(lat, lon, timestamp, fallback_reason="; ".join(reasons))

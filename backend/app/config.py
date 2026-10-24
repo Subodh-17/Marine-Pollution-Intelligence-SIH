@@ -214,6 +214,12 @@ class Settings:
     env_live_timeout_seconds: float
     env_live_max_retries: int
     live_data_max_age_minutes: float
+    env_provider: str
+    env_cache_ttl_seconds: float
+    env_max_data_age_hours: float
+    open_meteo_marine_url: str
+    open_meteo_weather_url: str
+    open_meteo_archive_url: str
 
     # ---- Upload hardening (Section 9) ------------------------------------------
     max_image_dimension_px: int
@@ -333,6 +339,12 @@ def get_settings() -> Settings:
         env_live_timeout_seconds=_env_float("ENV_LIVE_TIMEOUT_SECONDS", 10.0),
         env_live_max_retries=_env_int("ENV_LIVE_MAX_RETRIES", 2),
         live_data_max_age_minutes=_env_float("LIVE_DATA_MAX_AGE_MINUTES", 180.0),
+        env_provider=_env_str("ENV_PROVIDER", "synthetic").lower(),
+        env_cache_ttl_seconds=_env_float("ENV_CACHE_TTL_SECONDS", 3600.0),
+        env_max_data_age_hours=_env_float("ENV_MAX_DATA_AGE_HOURS", 24.0),
+        open_meteo_marine_url=_env_str("OPEN_METEO_MARINE_URL", "https://marine-api.open-meteo.com/v1/marine"),
+        open_meteo_weather_url=_env_str("OPEN_METEO_WEATHER_URL", "https://api.open-meteo.com/v1/forecast"),
+        open_meteo_archive_url=_env_str("OPEN_METEO_ARCHIVE_URL", "https://archive-api.open-meteo.com/v1/archive"),
         max_image_dimension_px=_env_int("MAX_IMAGE_DIMENSION_PX", 8000),
         enable_zenodo_data=_env_bool("ENABLE_ZENODO_DATA", False),
         dataset_root=_resolve_default_dataset_root(),

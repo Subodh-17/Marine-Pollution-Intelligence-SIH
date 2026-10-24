@@ -47,7 +47,7 @@ export default function KpiCards({ investigation }) {
       <Card
         label="Probable origin"
         value={origin ? `${origin.lat.toFixed(3)}°` : 'N/A'}
-        sub={origin ? `${origin.lon.toFixed(3)}° · ${investigation.drift.origin_confidence} confidence` : 'No slick detected'}
+        sub={origin ? `${origin.lon.toFixed(3)}° · ${investigation.drift.origin_confidence} confidence` : (geo ? 'Drift unavailable' : 'No slick detected')}
         accent="var(--signal-violet)"
       />
       <Card

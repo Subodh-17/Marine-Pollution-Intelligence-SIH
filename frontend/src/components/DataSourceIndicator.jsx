@@ -1,6 +1,8 @@
 const DOT_CLASS = (val) => {
   if (!val) return 'synthetic'
   const v = val.toUpperCase()
+  if (v.includes('UNAVAILABLE') || v.includes('NOT_RUN') || v.includes('NOT RUN')) return 'synthetic'
+  if (v.includes('PARTIAL')) return 'cached'
   if (v.includes('FROM FILE')) return 'real'
   if (v.includes('ASSUMED')) return 'synthetic'
   if (v.includes('SYNTHETIC') || v.includes('DEMO')) return 'synthetic'
@@ -26,8 +28,12 @@ const TAG_LABELS = {
   LIVE_AIS: 'Live Feed',
   LIVE_AIS_UNAVAILABLE_FALLBACK_SYNTHETIC: 'Live Feed Unavailable — Demo Fleet Used',
   REAL: 'Live Feed',
+  REAL_OPEN_METEO: 'Open-Meteo (Real CMEMS/GFS)',
+  PARTIAL_REAL: 'Partial Real (Wind Only)',
+  PARTIAL_WIND_ONLY: 'Partial Real (Wind Only)',
   CACHED: 'Cached Feed',
   LOCAL_SAMPLE: 'Local Sample Data',
+  UNAVAILABLE: 'Data Unavailable',
   NOT_RUN: 'Not Run',
 }
 

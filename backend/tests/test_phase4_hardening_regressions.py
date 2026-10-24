@@ -314,10 +314,22 @@ def test_redact_credentials_masks_passwords_in_connection_urls():
 
 def test_connect_postgres_masks_credentials_and_raises_persistence_error(monkeypatch):
     """When connecting to PostgreSQL fails, the error message must never leak the raw password."""
+    import sys
+    from unittest.mock import MagicMock
+
     fake_url = "postgresql://deployer:ultra_secret_pass@127.0.0.1:1/nonexistent_db"
     monkeypatch.setenv("DATABASE_URL", fake_url)
     monkeypatch.setenv("DATABASE_ENABLED", "true")
     get_settings.cache_clear()
+
+    # Mock psycopg2 connection failure deterministically so the credential-masking
+    # error path is exercised without requiring external binaries or real network sockets.
+    mock_psycopg2 = MagicMock()
+    mock_psycopg2.connect.side_effect = Exception(
+        "connection to postgresql://deployer:ultra_secret_pass@127.0.0.1:1 failed: connection refused"
+    )
+    monkeypatch.setitem(sys.modules, "psycopg2", mock_psycopg2)
+    monkeypatch.setitem(sys.modules, "psycopg2.extras", mock_psycopg2)
 
     with pytest.raises(_db.PersistenceError) as exc_info:
         with _db._connect_postgres():
