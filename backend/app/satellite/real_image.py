@@ -190,7 +190,7 @@ def load_real_scene(
     elif arr.ndim == 2:
         single_band = _normalize_band(arr)
     else:
-        raise UnsupportedImageFormat(f"Unsupported image dimensions: {arr.shape}")
+        raise UnsupportedImageFormat(f"Unsupported image array shape {arr.shape}; expected 2D or 3D array.")
 
     height, width = single_band.shape[:2]
 
