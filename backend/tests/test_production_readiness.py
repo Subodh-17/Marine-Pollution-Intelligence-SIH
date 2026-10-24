@@ -123,6 +123,57 @@ def test_root_health_endpoint():
     assert "version" in body
 
 
+def test_root_health_endpoint_dynamic_env(monkeypatch):
+    """Workstream A: /health dynamically reflects APP_ENV without requiring
+    server restart or hardcoded strings."""
+    monkeypatch.setenv("APP_ENV", "staging")
+    get_settings.cache_clear()
+    try:
+        r = client.get("/health")
+        assert r.status_code == 200
+        assert r.json()["env"] == "staging"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_cors_restrictive_allowlist_enforcement():
+    """Workstream A: Deployed Vercel origin and permitted local development
+    origins are allowed; unauthorized origins are strictly denied."""
+    # Deployed Vercel origin allowed
+    r_vercel = client.get("/api/health", headers={"Origin": "https://marine-pollution-intelligence-sih.vercel.app"})
+    assert r_vercel.headers.get("access-control-allow-origin") == "https://marine-pollution-intelligence-sih.vercel.app"
+
+    # Local dev origin allowed
+    r_local = client.get("/api/health", headers={"Origin": "http://localhost:5173"})
+    assert r_local.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+    # Disallowed origin must NOT receive access-control-allow-origin
+    r_evil = client.get("/api/health", headers={"Origin": "https://unauthorized-attacker.test"})
+    assert "access-control-allow-origin" not in r_evil.headers
+
+
+def test_cors_preflight_options_request():
+    """Workstream A: Preflight requests from permitted origins succeed with
+    correct headers; unauthorized origins are denied."""
+    headers = {
+        "Origin": "https://marine-pollution-intelligence-sih.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "Content-Type",
+    }
+    r = client.options("/api/spill/detect", headers=headers)
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") == "https://marine-pollution-intelligence-sih.vercel.app"
+    assert "POST" in r.headers.get("access-control-allow-methods", "")
+
+    # Preflight from unauthorized origin refused
+    bad_headers = {
+        "Origin": "https://malicious-site.example",
+        "Access-Control-Request-Method": "POST",
+    }
+    r_bad = client.options("/api/spill/detect", headers=bad_headers)
+    assert "access-control-allow-origin" not in r_bad.headers
+
+
 def test_api_health_endpoint_unchanged_for_frontend_compatibility():
     """frontend/src/api.js calls GET /api/health - must keep working exactly
     as before."""

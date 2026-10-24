@@ -89,6 +89,33 @@ def _env_optional_str(name: str) -> str | None:
 # lifespan handler's insecure-secret warning.
 INSECURE_DEFAULT_AUTH_SECRET_KEY = "dev-only-insecure-default-secret-change-me-for-any-real-deployment"
 
+# Restrictive production allowlist: deployed Vercel frontend origin and
+# explicitly permitted local development origins (Workstream A).
+DEFAULT_CORS_ALLOWED_ORIGINS: tuple[str, ...] = (
+    "https://marine-pollution-intelligence-sih.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+)
+
+
+def _resolve_default_app_env() -> str:
+    """Resolves environment identity without hardcoding a misleading status.
+    Explicit APP_ENV always wins; falls back to production when running on
+    Render (RENDER=true or RENDER_SERVICE_ID present) or when standard cloud
+    environment indicators are present; defaults to 'development' locally."""
+    val = os.environ.get("APP_ENV")
+    if val not in (None, ""):
+        return val.strip().lower()
+    if os.environ.get("RENDER") == "true" or os.environ.get("RENDER_SERVICE_ID"):
+        return "production"
+    for candidate in ("ENVIRONMENT", "NODE_ENV"):
+        c_val = os.environ.get(candidate, "").strip().lower()
+        if c_val in ("production", "prod"):
+            return "production"
+    return "development"
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -257,10 +284,10 @@ def get_settings() -> Settings:
     `get_settings.cache_clear()` (e.g. in tests) to force re-reading the
     environment."""
     return Settings(
-        app_env=_env_str("APP_ENV", "development"),
+        app_env=_resolve_default_app_env(),
         app_version=_env_str("APP_VERSION", "0.1.0"),
         log_level=_env_str("LOG_LEVEL", "INFO").upper(),
-        cors_allowed_origins=_env_str_list("CORS_ALLOWED_ORIGINS", ("*",)),
+        cors_allowed_origins=_env_str_list("CORS_ALLOWED_ORIGINS", DEFAULT_CORS_ALLOWED_ORIGINS),
         max_upload_size_mb=_env_float("MAX_UPLOAD_SIZE_MB", 50.0),
         allowed_ais_extensions=_env_str_list("ALLOWED_AIS_EXTENSIONS", (".csv",)),
         allowed_satellite_extensions=_env_str_list(

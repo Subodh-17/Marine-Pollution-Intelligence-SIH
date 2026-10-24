@@ -16,6 +16,7 @@ import RankingTab from './components/tabs/RankingTab'
 import TimelineTab from './components/tabs/TimelineTab'
 import ReportTab from './components/tabs/ReportTab'
 import MlTrainingTab from './components/tabs/MlTrainingTab'
+import { getInitialTabFromLocation } from './lib/routing'
 import api from './api'
 
 // Surfaces the backend's structured `{"detail": "..."}` error message when
@@ -60,7 +61,7 @@ function storeInvestigationId(id) {
 
 export default function App() {
   const [investigation, setInvestigation] = useState(null)
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState(getInitialTabFromLocation)
   const [running, setRunning] = useState(false)
   const [revealedCount, setRevealedCount] = useState(0)
   const [progressSteps, setProgressSteps] = useState([])
@@ -70,6 +71,22 @@ export default function App() {
   const [error, setError] = useState(null)
   const [restoring, setRestoring] = useState(() => !!readStoredInvestigationId())
   const timerRef = useRef(null)
+
+  // Workstream B: Synchronizes browser address bar with client activeTab
+  // so deep-links, browser navigation, and refresh preserve the current view.
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return
+      const currentRaw = window.location.pathname.replace(/^\/+/, '').split('/')[0].toLowerCase()
+      const normalizedCurrent = currentRaw === 'ml-training' ? 'mltraining' : (currentRaw || 'dashboard')
+      if (normalizedCurrent !== activeTab) {
+        const targetUrl = activeTab === 'dashboard' ? '/' : `/${activeTab}`
+        window.history.replaceState(null, '', targetUrl)
+      }
+    } catch {
+      /* best-effort only */
+    }
+  }, [activeTab])
   // Defense-in-depth re-entrancy guard for the real-satellite-upload
   // pipeline, independent of UploadSatelliteModal's own guard (see that
   // component's submittingRef comment). This one lives here, at the

@@ -229,7 +229,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": settings.app_version, "env": settings.app_env}
+    s = get_settings()
+    return {"status": "ok", "version": s.app_version, "env": s.app_env}
 
 
 @app.get("/api/health")

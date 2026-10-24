@@ -235,7 +235,7 @@ def test_no_detection_scenario_returns_200_not_500():
 
 def test_cors_headers_present():
     r = client.get("/api/health", headers={"Origin": "http://localhost:5173"})
-    assert r.headers.get("access-control-allow-origin") == "*"
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:5173"
 
 
 def test_custom_ais_mode_without_prior_upload_returns_400_not_silent_demo_fallback():
