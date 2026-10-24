@@ -197,7 +197,12 @@ def _connect_postgres() -> Iterator[_DictRowCursor]:
             "(see requirements-postgres.txt / docs/DEPLOYMENT.md)."
         ) from e
     url = get_settings().database_url
-    conn = psycopg2.connect(url)
+    try:
+        conn = psycopg2.connect(url, connect_timeout=10)
+    except Exception as e:
+        safe_err = _redact_credentials(str(e))
+        safe_url = _redact_credentials(url or "")
+        raise PersistenceError(f"PostgreSQL connection to {safe_url!r} failed: {safe_err}") from e
     try:
         # RealDictCursor is what makes `row["col"]` (and the plain
         # `dict(row)` calls below) work identically to sqlite3.Row's
@@ -212,10 +217,16 @@ def _connect_postgres() -> Iterator[_DictRowCursor]:
         yield cur
         conn.commit()
     except Exception:
-        conn.rollback()
+        try:
+            conn.rollback()
+        except Exception:
+            pass
         raise
     finally:
-        conn.close()
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 @contextmanager
@@ -313,7 +324,7 @@ def save_investigation(inv) -> bool:
             )
         return True
     except Exception as e:  # pragma: no cover - defensive, see docstring
-        _log.warning(
+        _log.error(
             "investigation_persist_failed",
             extra={"investigation_id": getattr(inv, "id", None), "error": str(e)},
         )
@@ -337,7 +348,7 @@ def load_investigation(investigation_id: str) -> dict | None:
             data["_owner"] = row["owner"]
             return data
     except Exception as e:  # pragma: no cover - defensive
-        _log.warning("investigation_load_failed", extra={"investigation_id": investigation_id, "error": str(e)})
+        _log.error("investigation_load_failed", extra={"investigation_id": investigation_id, "error": str(e)})
         return None
 
 

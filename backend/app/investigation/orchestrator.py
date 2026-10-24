@@ -139,6 +139,7 @@ class Investigation:
     # investigation content) but used by main.py's _require() to enforce
     # per-owner access when auth is enabled.
     owner: str = "anonymous"
+    persisted: bool = False
 
     def to_dict(self):
         raw = {
@@ -154,6 +155,7 @@ class Investigation:
             "progress_log": self.progress_log,
             "config_used": self.config_used,
             "processing_time_ms": self.processing_time_ms,
+            "persisted": self.persisted,
         }
         return _sanitize_for_json(raw)
 
@@ -766,8 +768,15 @@ def run_investigation(
         processing_time_ms=total_ms,
         owner=owner,
     )
-    _STORE[inv_id] = inv
-    _db.save_investigation(inv)  # Section 6: survives a backend restart; never raises (see db.py)
+    saved = _db.save_investigation(inv)  # Section 6: survives a backend restart; never raises (see db.py)
+    inv.persisted = bool(saved)
+    if get_settings().database_enabled and not saved:
+        _log.error("investigation_persistence_failed", extra={"investigation_id": inv_id})
+        _STORE.pop(inv_id, None)
+        if get_settings().database_mandatory:
+            raise _db.PersistenceError(f"Mandatory database persistence failed for investigation {inv_id}")
+    else:
+        _STORE[inv_id] = inv
     _log.info(
         "investigation_completed",
         extra={
@@ -825,6 +834,7 @@ class RehydratedInvestigation:
     config_used: dict
     processing_time_ms: float | None
     owner: str = "anonymous"
+    persisted: bool = True
 
     def to_dict(self) -> dict:
         raw = {
@@ -835,6 +845,7 @@ class RehydratedInvestigation:
             "candidates": [c.to_dict() for c in self.candidates],
             "progress_log": self.progress_log, "config_used": self.config_used,
             "processing_time_ms": self.processing_time_ms,
+            "persisted": True,
         }
         return _sanitize_for_json(raw)
 

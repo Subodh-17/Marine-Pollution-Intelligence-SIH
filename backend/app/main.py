@@ -67,6 +67,8 @@ async def _lifespan(app: FastAPI):
                 "database_unavailable_at_startup",
                 extra={"error": str(e), "backend": "postgresql" if live_settings.database_url else "sqlite"},
             )
+            if live_settings.database_mandatory:
+                raise RuntimeError(f"DATABASE_MANDATORY is true but database initialization failed: {e}") from e
 
     # Same "warn loudly, never crash the demo" philosophy as the database
     # check above - a hackathon judge clicking through a local demo with
@@ -523,6 +525,8 @@ def spill_detect(
             search_radius_km=search_radius_km, time_window_hours=time_window_hours,
             owner=current_user,
         )
+    except _persistence_db.PersistenceError as e:
+        raise HTTPException(500, f"Database persistence failure: {e}")
     except ValueError as e:
         # e.g. the uploaded AIS CSV is empty or missing required columns
         # (mmsi/timestamp/lat/lon) - a malformed-input problem, not a server
@@ -668,6 +672,8 @@ async def upload_satellite_image(
             owner=current_user,
             input_file_sha256=upload_sha256,
         )
+    except _persistence_db.PersistenceError as e:
+        raise HTTPException(500, f"Database persistence failure: {e}")
     except HTTPException:
         raise
     except Exception as e:
@@ -1167,7 +1173,11 @@ def analyze_ais(
     inv.ais_summary["window_end"] = window_end.isoformat()
     inv.ais_summary["excluded_vessels"] = excluded_vessels
 
-    _persistence_db.save_investigation(inv)
+    saved = _persistence_db.save_investigation(inv)
+    if get_settings().database_enabled and not saved:
+        _log.error("ais_reanalysis_persistence_failed", extra={"investigation_id": inv.id})
+        if get_settings().database_mandatory:
+            raise HTTPException(500, "Mandatory persistence failed: AIS re-analysis could not be saved to database.")
 
     return {
         "search_radius_km": search_radius_km,
@@ -1270,7 +1280,11 @@ def attribution_analyze(investigation_id: str, weights: dict | None = None, curr
     is_gated = not policy_eval.eligible or (sat_dict.get("attribution_gating") or {}).get("gated", False)
     if is_gated:
         inv.candidates = []
-        _persistence_db.save_investigation(inv)
+        saved = _persistence_db.save_investigation(inv)
+        if get_settings().database_enabled and not saved:
+            _log.error("attribution_gated_persistence_failed", extra={"investigation_id": inv.id})
+            if get_settings().database_mandatory:
+                raise HTTPException(500, "Mandatory persistence failed: gated attribution could not be saved to database.")
         return {
             "weights_used": normalized,
             "candidates": [],
@@ -1287,7 +1301,11 @@ def attribution_analyze(investigation_id: str, weights: dict | None = None, curr
         detection_time=detection_time,
     )
     inv.candidates = candidates
-    _persistence_db.save_investigation(inv)
+    saved = _persistence_db.save_investigation(inv)
+    if get_settings().database_enabled and not saved:
+        _log.error("attribution_reanalysis_persistence_failed", extra={"investigation_id": inv.id})
+        if get_settings().database_mandatory:
+            raise HTTPException(500, "Mandatory persistence failed: attribution candidates could not be saved to database.")
     return {"weights_used": normalized, "candidates": [c.to_dict() for c in candidates]}
 
 

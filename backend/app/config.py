@@ -182,6 +182,7 @@ class Settings:
     # persistence happens at all, for both backends. See app/persistence/db.py
     # for the abstraction and docs/DEPLOYMENT.md for setup.
     database_enabled: bool
+    database_mandatory: bool
     database_path: str
     database_url: str | None
 
@@ -308,6 +309,7 @@ def get_settings() -> Settings:
         drift_forward_hours=_env_float_tuple("DRIFT_FORWARD_HOURS", (6.0, 12.0, 24.0, 48.0)),
         map_tile_provider=_env_str("MAP_TILE_PROVIDER", "osm"),
         database_enabled=_env_bool("DATABASE_ENABLED", True),
+        database_mandatory=_env_bool("DATABASE_MANDATORY", False),
         database_path=_env_str(
             "DATABASE_PATH",
             os.path.join(os.path.dirname(__file__), "..", "data", "app.db"),
