@@ -181,3 +181,136 @@
   border-radius: 0 4px 4px 0;
   line-height: 1.5;
 }
+
+/* ---- Bento Grid System (Phase 3 Design) ---- */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+.bento-col-12 { grid-column: span 12; }
+.bento-col-8 { grid-column: span 8; }
+.bento-col-7 { grid-column: span 7; }
+.bento-col-6 { grid-column: span 6; }
+.bento-col-5 { grid-column: span 5; }
+.bento-col-4 { grid-column: span 4; }
+.bento-col-3 { grid-column: span 3; }
+
+@media (max-width: 1080px) {
+  .bento-col-8, .bento-col-7, .bento-col-6, .bento-col-5, .bento-col-4, .bento-col-3 {
+    grid-column: span 12;
+  }
+}
+
+.bento-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-bento);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card--glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+}
+
+.bento-card--glass:hover {
+  border-color: var(--glass-border-strong);
+}
+
+.bento-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+  gap: var(--sp-2);
+}
+
+.bento-card__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bento-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.bento-badge--green { background: rgba(107, 230, 117, 0.15); color: var(--signal-green); border: 1px solid rgba(107, 230, 117, 0.3); }
+.bento-badge--cyan { background: rgba(63, 216, 196, 0.15); color: var(--signal-cyan); border: 1px solid rgba(63, 216, 196, 0.3); }
+.bento-badge--amber { background: rgba(255, 184, 77, 0.15); color: var(--signal-amber); border: 1px solid rgba(255, 184, 77, 0.3); }
+.bento-badge--coral { background: rgba(255, 107, 92, 0.15); color: var(--signal-coral); border: 1px solid rgba(255, 107, 92, 0.3); }
+.bento-badge--violet { background: rgba(156, 139, 255, 0.15); color: var(--signal-violet); border: 1px solid rgba(156, 139, 255, 0.3); }
+
+/* Action buttons */
+.action-btn-row {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.bento-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  transition: all 0.15s ease;
+}
+.bento-action-btn:hover {
+  background: var(--border-strong);
+  color: var(--signal-cyan);
+  border-color: var(--signal-cyan);
+}
+.bento-action-btn--primary {
+  background: var(--signal-amber);
+  color: var(--on-signal-amber);
+  border-color: var(--signal-amber);
+}
+.bento-action-btn--primary:hover {
+  filter: brightness(1.1);
+  color: var(--on-signal-amber);
+}
+
+/* Fail-closed safety alerts */
+.safety-alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--sp-4);
+  border-left: 4px solid var(--signal-amber);
+  background: var(--bg-panel-raised);
+}
+.safety-alert-banner--coral {
+  border-left-color: var(--signal-coral);
+  background: rgba(255, 107, 92, 0.08);
+}
+.safety-alert-banner--amber {
+  border-left-color: var(--signal-amber);
+  background: rgba(255, 184, 77, 0.08);
+}

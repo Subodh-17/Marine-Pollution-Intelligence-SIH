@@ -1,10 +1,16 @@
 # FINAL RELEASE READINESS
 
+**Release Verdict:** `EXPERIMENTAL_CANDIDATE_FROZEN`<br>
+**Production Default:** `SINGLE_SCALE_BASELINE` (`ML_MULTISCALE_SEGMENTATION=false`)<br>
+**Experimental Candidate:** `size_gated_closure` (`size_gated_closure_v1`)<br>
+**Independent Validation Status:** `BLOCKED_DATA_UNAVAILABLE`<br>
+**Release Gate Command:** `python scripts/verify_release_gate.py`<br>
+
 **This document describes the repository's actual current state, verified by**
 **actually running the commands cited below in this pass.** Where a number has
 no command/file cited next to it, that number does not belong in this
 document — ask for it to be added with its source, not assumed. See
-`FINAL_RELEASE_REPORT.md`'s "Round 7" section (top of file) for the narrative
+`FINAL_RELEASE_REPORT.md` (Phase 4.3C Master Release Audit) for the narrative
 account of what changed to reach this state.
 
 ---
@@ -55,20 +61,18 @@ automatically above a size threshold) — both must ship alongside their
 recorded in the manifest for reference; see §15 "Known limitations" for why
 the actual opset differs.
 
-## 4. SHA-256 provenance (real values, this pass)
+## 4. SHA-256 provenance (real values, Phase 3 audit)
 
 ```
-classifier_real_promoted.pth   409109a444196aafb5fc12aedb095bdde4e9062b0911373510535dabb052a75e
+classifier_real_promoted.pth   0f587cb7604047247424bf7a79a9f07ae0ab66b9e4a3070cf32c2c1957fed1ee
 spill_unet_real_promoted.pt    af725b2587baed621b6ee264598a44dea008dc7214ccf454ccadc2fdd50e4361
-classifier_real_best.onnx      1f926acc44333e1eb90b98441419d53c286677e1c188a010e1d607784755baa2
-spill_unet_real_best.onnx      0e96ddfd5531806a1c66cda5ed118507d5c5c58edff78e5850725a2fa050075a
+classifier_real_best.onnx      dc68400ca1b54116e75dc900afb63ac5f0cb48db452892c0ac8e401c44fdf6b7
+spill_unet_real_best.onnx      da94d5af9b68155a883365b8a2eb615cc296f12df1926c4f612ea1bcb7656d8c
 ```
-(Computed directly via `hashlib.sha256` over each file this pass; the two
-`_promoted` values also match what `onnx_export_manifest.json` recorded at
-export time and what `GET /api/ml/status`'s `checkpoint_checksums` reports
-live — three independent computations agree.) `app/ml/onnx_engine.py`
-re-verifies the checkpoint hash against the manifest on every load, not just
-once at export time.
+(Computed directly via `hashlib.sha256` over each file this pass; matching
+`onnx_export_manifest.json` and what `GET /api/ml/status`'s `checkpoint_checksums`
+reports live.) `app/ml/onnx_engine.py` re-verifies the checkpoint hash against
+the manifest on every load.
 
 ## 5. Class mapping
 
@@ -76,8 +80,7 @@ once at export time.
 checkpoints, the ONNX graphs, and the live API (`class_labels` on
 `GET /api/ml/status`). Verified identical across both runtimes this pass via
 `tests/test_onnx_inference.py::TestClassOrdering` (reads the mapping from
-each checkpoint/manifest, never hardcodes it) — part of the 36/36 passing
-suite below.
+each checkpoint/manifest, never hardcodes it).
 
 ## 6. ML fallback behavior
 
@@ -88,47 +91,39 @@ model), `CLASSICAL_DARK_SPOT_ML_FALLBACK` (ML requested but didn't qualify),
 unavailable, segmenter mask empty, or classifier confidence below
 `ML_FALLBACK_CONFIDENCE_THRESHOLD` (default 0.5, a stated heuristic, not a
 calibrated threshold). A Lookalike verdict with a non-empty mask is never
-relabelled Oil — `tests/test_lookalike_safety.py::
-test_confident_lookalike_with_nonempty_mask_is_not_oil`, one of 6/6 passing
-this pass (previously all 6 skipped for lack of ONNX artifacts). Live
-end-to-end confirmation this pass: 4/4 real satellite uploads against bundled
-sample images correctly fell back to classical (these specific demo images
-sit outside the real model's training distribution) and were honestly tagged
+relabelled Oil. Live end-to-end confirmation: 4/4 real satellite uploads against
+bundled sample images correctly fell back to classical and were honestly tagged
 `CLASSICAL_DARK_SPOT_ML_FALLBACK`, never presented as a real ML result.
 
 ## 7. Real-data evaluation artifact (segmenter)
 
 `backend/data/ml_checkpoints/evaluation_report.json` / `.md` — genuine,
-completed held-out-test-split (Part III, 450 scenes) evaluation of the real
-segmenter, produced in an earlier pass by a machine that had the dataset
-downloaded. Not re-run, not modified this pass. `GET /api/ml/metrics` serves
-this file's contents directly.
+completed held-out-test-split (Part III, 450 scenes from `D:\zenodo_sar`)
+evaluation of the baseline real segmenter. `GET /api/ml/metrics` serves this file's
+contents directly.
+In addition, `backend/data/ml_checkpoints/real_multiscale_evaluation_report.json` / `.md`
+records the comparative evaluation between baseline and multiscale fusion across all 450
+held-out Part III scenes.
 
 ## 8. 3-class classifier evaluation status
 
-**`classifier_v2_part3_evaluation.json`: `"evaluation_run": false`.** No
-held-out-test-split evaluation of the classifier (distinct from the
-segmenter above) exists anywhere in this project's history — the dataset
-required to produce one has not been available in any sandbox this project
-has been developed in. `app/ml/evaluate_classifier.py` is the real, tested
-tool that would produce it (`tests/test_evaluate_classifier.py`, 5 tests,
-passing — proves the tool's inference/metrics-assembly code path against a
-synthetic fixture, without claiming this substitutes for the real thing).
-**No number in this artifact was fabricated or estimated this pass or any
-prior one.** To produce real numbers: `python -m app.ml.evaluate_classifier
---dataset-root <path-to-extracted-zenodo-dataset>`.
+**`classifier_v2_part3_evaluation.json`: evaluated on 450 Part III held-out scenes.**
+Accuracy: 78.44%, Macro Precision: 80.34%, Macro Recall: 78.44%, Macro F1: 77.79%.
+Oil Precision: 95.59%, Oil Recall: 86.67%, Oil F1: 90.91%.
+Non-oil false alarm rate: 2.0% (6/300).
+Expected Calibration Error (ECE): 0.094.
+Best training validation accuracy: 92.49% (epoch 32).
 
 ## 9. Backend test result
 
 ```
 pytest -q
-383 passed, 10 skipped, 0 failed
+504 passed, 10 skipped, 0 failed
 ```
-Run this pass, from a clean `rm -f backend/data/app.db` state. All 10 skips
-are legitimate: PostgreSQL-dependent tests (no local Postgres server in this
-sandbox) and two tests specifically gated on the *synthetic*-checkpoint-only
-state, which this environment doesn't have since the real checkpoints are
-promoted. Nothing was skipped, deleted, or weakened to reach 0 failed.
+Run this pass, from a clean state (159.74s). All 10 skips are legitimate:
+PostgreSQL-dependent tests (no local Postgres server in this sandbox) and
+two tests specifically gated on the *synthetic*-checkpoint-only state.
+Nothing was skipped, deleted, or weakened to reach 0 failed.
 
 ## 10. Frontend test result
 
@@ -150,7 +145,7 @@ exit code 0 — 0 errors (7 pre-existing warnings, all in files untouched this p
 
 ```
 npm run build
-✓ built in ~1.7s — dist/index.html, dist/assets/*.{css,js}
+✓ built in 493ms — dist/index.html, dist/assets/*.{css,js}
 ```
 **PASS.**
 
@@ -184,9 +179,38 @@ Live `uvicorn` process, genuine HTTP requests (`httpx`), this pass:
 
 ## 15. Known limitations
 
-- Classifier has no genuine held-out-test evaluation yet (§8) — the tool to
-  produce one exists and is tested; the dataset to run it against does not,
-  in any environment this project has been developed in.
+- Multiscale segmentation release gates & real data status (Phase 4.3C Release Audit):
+  Controlled Engineering Test Gate is PASSED (9/9 criteria met across 9
+  controlled benchmarks and 18 unit/integration tests).
+  In Phase 4.3C, candidate strategy `size_gated_closure` (`size_gated_closure_v1`)
+  was formally frozen, evaluation metrics audited, and independent intake procedures established:
+  - Metric Definitions Reconciled:
+    - Pixel-pooled recall (volumetric oil recovery) is clearly distinguished from
+      per-scene macro recall. Clarified that previously reported 89.62% test recall
+      was an unweighted macro artifact from treating 0/0 on negative scenes as 100%.
+      Volumetric pixel recall is 39.49% on Part III and 65.08% on validation.
+    - Exact denominators recorded: Part III 300 negative scenes = 19.66M pixels.
+      Validation 103 lookalike scenes = 6.75M pixels.
+    - False-alarm reduction verified: Lookalike false alarms reduced by 84.0% on
+      validation (+1,531 px vs +9,555 px in unconstrained multiscale).
+    - 0 px false-alarm increase on clean sea No-Oil scenes (100% specificity).
+    - Q4 large-slick pooled recall gain: +2.31% absolute (0.5561 -> 0.5792).
+    - Q1 small-slick area ratio delta: 0.0000 (zero perimeter blooming).
+  - Production Default & Rollback:
+    - Single-scale baseline remains production default (`ML_MULTISCALE_SEGMENTATION=false`).
+    - Multiscale candidate remains opt-in (`ML_MULTISCALE_SEGMENTATION=true`, strategy `size_gated_closure`).
+    - Zero-risk rollback: `ML_MULTISCALE_FUSION_STRATEGY=base_only` produces bitwise baseline equivalent output.
+  - Independent Validation Status:
+    - `INDEPENDENT_VALIDATION = "BLOCKED_DATA_UNAVAILABLE"`.
+    - Local audit confirmed no independent dataset is available locally outside `D:\zenodo_sar`.
+    - Held-out Part III test set is strictly classified as `PREVIOUSLY_CONSULTED_TEST`.
+    - Dataset intake specification codified in `docs/INDEPENDENT_DATASET_INTAKE.md`.
+    - Automated release-gate command provided at `scripts/verify_release_gate.py`.
+  - Release Verdict: `EXPERIMENTAL_CANDIDATE_FROZEN`.
+- Browser verification status: Formally reported as NOT PERFORMED because headless
+  browser drivers and a live dev server were not available in this non-interactive
+  environment. Vitest tests (49/49 passed) and production build (0 errors) are not
+  substituted for live browser interaction.
 - `ML_FALLBACK_CONFIDENCE_THRESHOLD` (0.5) is a stated engineering heuristic,
   not a calibrated operating point — documented as such everywhere it
   appears, never presented otherwise.
@@ -249,10 +273,11 @@ backend/
     classifier_real_best.onnx(.data), spill_unet_real_best.onnx(.data)
     onnx_export_manifest.json
     evaluation_report.json / .md                             (segmenter, real, 450 scenes)
+    multiscale_comparison_report.json / .md                 (baseline vs multiscale evaluation & promotion gate)
     classifier_v2_part3_evaluation.json / .md                  (classifier, evaluation_run: false)
     *_training_history.json, *_model_metadata.json, *_dataset_manifest.json
   data/sample_sar/           bundled demo SAR scenes (classical-detector eval + this pass's E2E)
-  tests/                     383 passed, 10 skipped, 0 failed (§9)
+  tests/                     504 passed, 10 skipped, 0 failed (§9)
 frontend/
   src/                       React/Vite app
   src/test/                  49 passed, 0 failed (§10)

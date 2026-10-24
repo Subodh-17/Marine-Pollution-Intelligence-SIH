@@ -335,7 +335,9 @@ class OnnxBackend:
         """
         x = stacked[np.newaxis, ...]
         logit = self._seg_session.run(None, {self._seg_input_name: x})[0][0, 0]
-        return 1.0 / (1.0 + np.exp(-logit.astype(np.float64)))
+        # Numerically stable sigmoid: clip logit to [-50.0, 50.0] to eliminate float overflow warnings/NaNs
+        z = np.clip(logit.astype(np.float64), -50.0, 50.0)
+        return (1.0 / (1.0 + np.exp(-z))).astype(np.float32)
 
     # -- introspection ----------------------------------------------------
 

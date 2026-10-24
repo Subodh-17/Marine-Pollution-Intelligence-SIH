@@ -247,3 +247,63 @@ class TestArchitectureIsRecordedAndReadBack:
         x = np.random.randn(1, 2, 32, 32).astype(np.float32)
         out = sess.run(None, {input_name: x})
         assert out[0].shape == (1, 3)
+
+class TestCheckpointResume:
+    def test_resume_preserves_best_metrics(self, tmp_path):
+        root = str(tmp_path / "zenodo_sar")
+        _make_fixture_dataset(root)
+        manifest_dir = os.path.join(root, "manifests")
+        ds.build_manifests(root, output_dir=manifest_dir, val_fraction=0.5, seed=1)
+        ckpt_dir = str(tmp_path / "checkpoints")
+
+        # Train epoch 1
+        summary1 = trainmod.train_model(
+            dataset_root=root, model_kind="classifier", architecture="scene_classifier_v2",
+            manifest_dir=manifest_dir, epochs=1, batch_size=2, image_size=32, seed=1,
+            checkpoint_dir=ckpt_dir,
+        )
+
+        # Resume and train epoch 2
+        last_path = os.path.join(ckpt_dir, "classifier_real_last.pth")
+
+        # Manually alter the best_metric in checkpoint to verify it is preserved
+        ckpt = torch.load(last_path, map_location="cpu")
+        ckpt["best_metric"] = 0.999
+        ckpt["best_epoch"] = 1
+        torch.save(ckpt, last_path)
+
+        summary2 = trainmod.train_model(
+            dataset_root=root, model_kind="classifier", architecture="scene_classifier_v2",
+            manifest_dir=manifest_dir, epochs=2, batch_size=2, image_size=32, seed=1,
+            checkpoint_dir=ckpt_dir, resume=last_path
+        )
+
+        assert summary2["best_val_metric"] == max(0.999, summary2["history"][0]["val"]["accuracy"])
+        assert summary2["config"]["resumed_from"] == last_path
+
+    def test_resume_missing_optimizer_state(self, tmp_path):
+        root = str(tmp_path / "zenodo_sar")
+        _make_fixture_dataset(root)
+        manifest_dir = os.path.join(root, "manifests")
+        ds.build_manifests(root, output_dir=manifest_dir, val_fraction=0.5, seed=1)
+        ckpt_dir = str(tmp_path / "checkpoints")
+
+        trainmod.train_model(
+            dataset_root=root, model_kind="classifier", architecture="scene_classifier_v2",
+            manifest_dir=manifest_dir, epochs=1, batch_size=2, image_size=32, seed=1,
+            checkpoint_dir=ckpt_dir,
+        )
+
+        last_path = os.path.join(ckpt_dir, "classifier_real_last.pth")
+
+        # Strip optimizer state to simulate the epoch-7 checkpoint
+        ckpt = torch.load(last_path, map_location="cpu")
+        del ckpt["optimizer_state_dict"]
+        torch.save(ckpt, last_path)
+
+        # This shouldn't crash
+        trainmod.train_model(
+            dataset_root=root, model_kind="classifier", architecture="scene_classifier_v2",
+            manifest_dir=manifest_dir, epochs=2, batch_size=2, image_size=32, seed=1,
+            checkpoint_dir=ckpt_dir, resume=last_path
+        )

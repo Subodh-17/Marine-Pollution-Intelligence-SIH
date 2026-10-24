@@ -267,21 +267,13 @@ both JSON and Markdown (`app/ml/evaluate_real.py`).
 **⚠️ The original `SceneClassifier` architecture previously exhibited a 37.56% accuracy generalization failure during independent Part III evaluation.** This has been explicitly root-caused (average pooling dilution of localized targets) and resolved by deploying `SceneClassifierV2` as the production standard. Full architectural context is in `backend/app/ml/README_ML_STATUS.md`.
 
 **Current shipped state:**
-- The **classifier** (`SceneClassifierV2`) *has* a genuine, completed real-data evaluation shipped in this repo (`classifier_v2_part3_evaluation.json`), evaluated against 450 held-out test scenes. It achieved **78.44% accuracy** (Macro F1 77.79%), with strong Oil detection (precision 95.59%, recall 86.67%, F1 90.91%).
-- The **segmenter** (`SpillUNet`) *has* a genuine, completed real-data evaluation shipped in this repo: `backend/data/ml_checkpoints/evaluation_report.json`, 450 held-out test scenes, real numbers (precision/recall/F1/IoU/Dice/pixel-accuracy, per-category breakdown) from a training + evaluation run. `/api/ml/metrics` serves this file's contents directly.
-  `tests/test_evaluate_classifier.py`) and is the tool that produces it, but running it requires
-  the same locally-extracted dataset, which is genuinely absent from every sandbox this project has
-  been developed in so far. `backend/data/ml_checkpoints/classifier_v2_part3_evaluation.json` /
-  `.md` reflect this honestly: `"evaluation_run": false`, every metric field `null`, the checkpoint's
-  real SHA-256 and the dataset's recorded split *counts* (from `classifier_real_dataset_manifest.
-  json`, itself real) included, nothing invented. **Do not treat the classifier's training-time
-  validation accuracy (`classifier_real_model_metadata.json`'s `best_val_metric`, ≈0.77 at epoch
-  18) as a substitute for this** — it is a validation-split number from training, not a held-out
-  test-split evaluation, and the two are not interchangeable.
-- Whoever next has the dataset available can close this gap with:
-  `python -m app.ml.evaluate_classifier --dataset-root ./data/zenodo_sar` — no retraining, no
-  architecture change, just pointing the existing, tested tool at the existing, shipped
-  `classifier_real_promoted.pth` checkpoint.
+- The **classifier** (`SceneClassifierV2`) *has* a genuine, completed real-data evaluation shipped in this repo (`classifier_v2_part3_evaluation.json`), evaluated against 450 held-out test scenes. It achieved **78.44% three-class accuracy** (Macro F1 77.79%), with strong Oil detection (precision 95.59%, recall 86.67%, F1 90.91%), oil-vs-rest AUROC 0.986, false alarm rate on non-oil of 2.0% (6/300), and expected calibration error (ECE) 0.094.
+- The **segmenter** (`SpillUNet`) *has* a genuine, completed real-data evaluation shipped in this repo: `backend/data/ml_checkpoints/evaluation_report.json`, evaluated on 450 held-out test scenes. Per the SIH-26143 technical audit:
+  - **Pixel-pooled metrics** (evaluated across all 29.5M test pixels): Precision 0.7915, Recall 0.3949, F1/Dice 0.5269, IoU 0.3577.
+  - **Oil-scene macro metrics** (mean over the 150 positive oil scenes): Precision 0.9322, Recall 0.6886, F1/Dice 0.7382, IoU 0.6324.
+  - **Historical headline mean** (0.8962 recall): Note that this historical figure was an unweighted mean across all 450 scenes where 300 empty-mask scenes had recall=1.0 hardcoded by convention. True detection recall is represented by the pixel-pooled (0.3949) or positive-scene macro (0.6886) figures.
+  - **Large-slick performance**: On the largest quartile of oil scenes (>11% of frame coverage, holding 73% of oil pixels), segmenter recall drops to 0.324-0.335 and area ratio to 0.26 due to receptive field constraints.
+- `/api/ml/metrics` serves these structured evaluation artifacts directly, including pixel-pooled metrics, quartile degradation analysis, and classifier metrics.
 
 **Any number this pipeline reports comes from an actual run of the commands above against an**
 **actual downloaded copy of the dataset** — the JSON/Markdown output files in
@@ -326,12 +318,11 @@ stated reason. **As shipped now** (updated this pass — an earlier version of t
 described a synthetic-only state that is no longer accurate), it reports the model as
 **real-Zenodo-trained** (`is_real_data_trained: true`, `inference_runtime:
 "onnxruntime_cpu"`, best epoch 18, 2,184 train / 386 val samples, dataset DOIs populated), with
-**genuine segmenter evaluation metrics available** (450-scene held-out test split — see §6b) and
-the **classifier's own held-out evaluation still not yet available** (`evaluation_run: false` —
-see §6b, same gap, not fixed by anything in this pass). The **Dataset Status section still
+**genuine segmenter evaluation metrics available** (450-scene held-out test split, reporting pixel-pooled,
+oil-scene macro, and quartile metrics — see §6b) and the **classifier's completed held-out evaluation**
+(78.4% accuracy, 86.7% oil recall, 2.0% false-alarm rate, ECE 0.094). The **Dataset Status section still
 reports `missing`** (no dataset extracted under `DATASET_ROOT` in any environment this project has
-been developed in) — that part of the original claim remains accurate; only the model-trained-
-status half was stale. The Dataset Status section
+been developed in) — that part of the original claim remains accurate; both models are evaluated and shipped. The Dataset Status section
 is deliberately independent of model-trained status: it answers "is the real dataset present and
 structurally valid on disk" (via `app.ml.dataset.get_dataset_status()`, reusing the same
 `discover_pairs()`/`validate_pairs()` logic as the `inspect`/`build-manifests` CLI), never
@@ -392,8 +383,8 @@ not need PyTorch installed — verified directly, not just asserted, in
 `tests/test_ml_training_page.py::TestOnnxServesWithoutTorch`).
 
 **Not retrained, not re-architected.** This section only ever reads the already-promoted
-checkpoints §6b produced; it has no effect on §6b's own still-open gap (the classifier's held-out
-evaluation — see above). Deleting the `.onnx` files and manifest and re-running the engine
+checkpoints §6b produced; it preserves the validated weights and evaluations for both models.
+Deleting the `.onnx` files and manifest and re-running the engine
 transparently falls back to the PyTorch checkpoints with identical weights and provenance; neither
 path is ever silently preferred in a way that changes what model actually produced a result.
 

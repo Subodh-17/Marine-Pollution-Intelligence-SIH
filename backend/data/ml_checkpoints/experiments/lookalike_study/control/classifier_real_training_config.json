@@ -1,0 +1,21 @@
+{
+  "dataset_root": "D:\\zenodo_sar",
+  "manifest_dir": "D:\\zenodo_sar\\manifests",
+  "model": "classifier",
+  "architecture": "SceneClassifierV2",
+  "epochs": 20,
+  "batch_size": 4,
+  "lr": 0.001,
+  "image_size": 256,
+  "seed": 42,
+  "device": "cuda",
+  "checkpoint_dir": "backend/data/ml_checkpoints/experiments/lookalike_study/control",
+  "bce_weight": 0.5,
+  "num_workers": 0,
+  "limit_train_samples": null,
+  "started_at": "2026-10-11T03:59:12.075861",
+  "resumed_from": "backend/data/ml_checkpoints/experiments/lookalike_study/control/classifier_real_last.pth",
+  "focal_loss": false,
+  "focal_gamma": 1.5,
+  "lookalike_weight_multiplier": 1.0
+}

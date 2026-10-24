@@ -113,12 +113,18 @@ what "promotion" does and doesn't touch.
 | **Training dataset** | Not required for production inference; never bundled |
 | **Evaluation** | `backend/data/ml_checkpoints/evaluation_report.json` / `.md` |
 
-Held-out test split, 450 scenes, threshold 0.5, preprocessing
-`sar_percentile_1_99_minmax_v1`:
+Held-out test split (450 Zenodo Sentinel-1 Part III scenes, threshold 0.5,
+preprocessing `sar_percentile_1_99_minmax_v1`):
 
-| Precision | Recall | F1 | IoU | Dice | Pixel acc. |
+| Evaluation Scope | Precision | Recall | F1 / Dice | IoU | Description |
 |---|---|---|---|---|---|
-| 0.7485 | 0.8962 | 0.6838 | 0.6486 | 0.6838 | 0.9765 |
+| **Pixel-Pooled (All 450 scenes)** | **0.7915** | **0.3949** | **0.5269** | **0.3577** | Direct confusion matrix pooled over all 29.5M pixels (Audit §1 standard). |
+| **Oil-Scene Macro (150 Oil scenes)** | **0.9322** | **0.6886** | **0.7382** | **0.6324** | Mean over positive oil scenes only; excludes empty-mask recall inflation. |
+| Overall Scene Mean (Historical) | 0.7485 | 0.8962 | 0.6838 | 0.6486 | Historical unweighted mean (inflated by 300 empty masks with recall=1.0). |
+
+- **SceneClassifierV2:** 78.4% 3-class accuracy, 86.7% oil scene recall, 2.0% false alarm rate on non-oil (6/300), AUROC 0.986, ECE 0.094.
+- **Slick-Size Quartile Failure (Audit §2):** Large slicks (>11% frame coverage, containing 73% of all oil pixels) achieve only 0.324-0.335 mean recall with predicted area capturing ~26% of true spill size due to receptive field limits. Precision remains ~99% (under-segmentation, not hallucination).
+- **Fail-Closed Attribution Policy (Audit §3):** Attribution is strictly gated on `LIKELY_OIL` classification and minimum mask area (>= 250 px). Non-oil and Lookalike scenes abstain from vessel attribution, preventing false vessel accusations.
 
 **Limitations.** These are research-model results and should not be presented
 as operational certainty. Softmax scores are model confidence outputs, not

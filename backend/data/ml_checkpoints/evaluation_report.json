@@ -1,10 +1,10 @@
 {
-  "evaluated_at": "2026-09-09T14:05:59.059420",
+  "evaluated_at": "2026-10-20T09:27:15.004469",
   "checkpoint_path": "backend/data/ml_checkpoints/spill_unet_real_best.pt",
   "checkpoint_epoch": 18,
   "checkpoint_trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
-  "dataset_root": "backend/data/zenodo_sar",
-  "test_manifest": "backend/data/zenodo_sar/manifests/test_manifest.json",
+  "dataset_root": "D:\\zenodo_sar",
+  "test_manifest": "D:\\zenodo_sar\\manifests\\test_manifest.json",
   "num_test_scenes": 450,
   "preprocessing_version": "sar_percentile_1_99_minmax_v1",
   "threshold": 0.5,
@@ -15,11 +15,74 @@
     "iou": 0.6486,
     "dice": 0.6838,
     "pixel_accuracy": 0.9765,
-    "tp": 385466,
-    "fp": 101526,
-    "fn": 590671,
-    "tn": 28413537,
+    "tp": 385457,
+    "fp": 101511,
+    "fn": 590680,
+    "tn": 28413552,
     "n_scenes": 450
+  },
+  "pixel_pooled": {
+    "precision": 0.7915,
+    "recall": 0.3949,
+    "f1": 0.5269,
+    "iou": 0.3577,
+    "dice": 0.5269,
+    "pixel_accuracy": 0.9765,
+    "tp": 385457,
+    "fp": 101511,
+    "fn": 590680,
+    "tn": 28413552
+  },
+  "oil_scene_macro": {
+    "precision": 0.9322,
+    "recall": 0.6886,
+    "f1": 0.7382,
+    "iou": 0.6324,
+    "dice": 0.7382,
+    "pixel_accuracy": 0.9383,
+    "tp": 385457,
+    "fp": 16174,
+    "fn": 590680,
+    "tn": 8838089,
+    "n_scenes": 150
+  },
+  "slick_size_quartiles": {
+    "Q1_smallest": {
+      "n_scenes": 37,
+      "frame_coverage": "< 1.9%",
+      "share_of_oil_pixels": 0.0258,
+      "mean_pixel_recall": 0.865,
+      "mean_iou": 0.7321,
+      "pooled_precision": 0.8517,
+      "predicted_to_true_area_ratio": 1.039
+    },
+    "Q2_small_medium": {
+      "n_scenes": 37,
+      "frame_coverage": "1.9% - 4.3%",
+      "share_of_oil_pixels": 0.0727,
+      "mean_pixel_recall": 0.8573,
+      "mean_iou": 0.7765,
+      "pooled_precision": 0.8747,
+      "predicted_to_true_area_ratio": 0.9753
+    },
+    "Q3_medium_large": {
+      "n_scenes": 37,
+      "frame_coverage": "4.3% - 11.0%",
+      "share_of_oil_pixels": 0.1684,
+      "mean_pixel_recall": 0.7158,
+      "mean_iou": 0.7028,
+      "pooled_precision": 0.9776,
+      "predicted_to_true_area_ratio": 0.7217
+    },
+    "Q4_largest": {
+      "n_scenes": 39,
+      "frame_coverage": "> 11.0%",
+      "share_of_oil_pixels": 0.733,
+      "mean_pixel_recall": 0.3354,
+      "mean_iou": 0.3344,
+      "pooled_precision": 0.9949,
+      "predicted_to_true_area_ratio": 0.2621
+    }
   },
   "per_category": {
     "Lookalike": {
@@ -30,9 +93,9 @@
       "dice": 0.3467,
       "pixel_accuracy": 0.9913,
       "tp": 0,
-      "fp": 85200,
+      "fp": 85187,
       "fn": 0,
-      "tn": 9745200,
+      "tn": 9745213,
       "n_scenes": 150
     },
     "No-Oil": {
@@ -55,10 +118,10 @@
       "iou": 0.6324,
       "dice": 0.7382,
       "pixel_accuracy": 0.9383,
-      "tp": 385466,
-      "fp": 16176,
-      "fn": 590671,
-      "tn": 8838087,
+      "tp": 385457,
+      "fp": 16174,
+      "fn": 590680,
+      "tn": 8838089,
       "n_scenes": 150
     }
   },
@@ -68,21 +131,21 @@
       "predicted_negative"
     ],
     "actual_positive": {
-      "predicted_positive": 385466,
-      "predicted_negative": 590671
+      "predicted_positive": 385457,
+      "predicted_negative": 590680
     },
     "actual_negative": {
-      "predicted_positive": 101526,
-      "predicted_negative": 28413537
+      "predicted_positive": 101511,
+      "predicted_negative": 28413552
     },
     "matrix": [
       [
-        385466,
-        590671
+        385457,
+        590680
       ],
       [
-        101526,
-        28413537
+        101511,
+        28413552
       ]
     ]
   },
@@ -391,9 +454,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9984,
       "tp": 0,
-      "fp": 104,
+      "fp": 103,
       "fn": 0,
-      "tn": 65432
+      "tn": 65433
     },
     {
       "id": "part3_Lookalike_00022",
@@ -461,9 +524,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9922,
       "tp": 0,
-      "fp": 510,
+      "fp": 511,
       "fn": 0,
-      "tn": 65026
+      "tn": 65025
     },
     {
       "id": "part3_Lookalike_00027",
@@ -531,9 +594,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9995,
       "tp": 0,
-      "fp": 35,
+      "fp": 34,
       "fn": 0,
-      "tn": 65501
+      "tn": 65502
     },
     {
       "id": "part3_Lookalike_00032",
@@ -741,9 +804,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9552,
       "tp": 0,
-      "fp": 2939,
+      "fp": 2938,
       "fn": 0,
-      "tn": 62597
+      "tn": 62598
     },
     {
       "id": "part3_Lookalike_00047",
@@ -853,9 +916,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9306,
       "tp": 0,
-      "fp": 4550,
+      "fp": 4548,
       "fn": 0,
-      "tn": 60986
+      "tn": 60988
     },
     {
       "id": "part3_Lookalike_00055",
@@ -1005,11 +1068,11 @@
       "f1": 0.0,
       "iou": 0.0,
       "dice": 0.0,
-      "pixel_accuracy": 0.898,
+      "pixel_accuracy": 0.8981,
       "tp": 0,
-      "fp": 6682,
+      "fp": 6679,
       "fn": 0,
-      "tn": 58854
+      "tn": 58857
     },
     {
       "id": "part3_Lookalike_00066",
@@ -1413,9 +1476,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9904,
       "tp": 0,
-      "fp": 631,
+      "fp": 630,
       "fn": 0,
-      "tn": 64905
+      "tn": 64906
     },
     {
       "id": "part3_Lookalike_00095",
@@ -1455,9 +1518,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9988,
       "tp": 0,
-      "fp": 78,
+      "fp": 79,
       "fn": 0,
-      "tn": 65458
+      "tn": 65457
     },
     {
       "id": "part3_Lookalike_00098",
@@ -1469,9 +1532,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9961,
       "tp": 0,
-      "fp": 254,
+      "fp": 253,
       "fn": 0,
-      "tn": 65282
+      "tn": 65283
     },
     {
       "id": "part3_Lookalike_00099",
@@ -1887,11 +1950,11 @@
       "f1": 0.0,
       "iou": 0.0,
       "dice": 0.0,
-      "pixel_accuracy": 0.9003,
+      "pixel_accuracy": 0.9004,
       "tp": 0,
-      "fp": 6531,
+      "fp": 6528,
       "fn": 0,
-      "tn": 59005
+      "tn": 59008
     },
     {
       "id": "part3_Lookalike_00129",
@@ -1903,9 +1966,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.986,
       "tp": 0,
-      "fp": 916,
+      "fp": 915,
       "fn": 0,
-      "tn": 64620
+      "tn": 64621
     },
     {
       "id": "part3_Lookalike_00130",
@@ -1931,9 +1994,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9872,
       "tp": 0,
-      "fp": 838,
+      "fp": 839,
       "fn": 0,
-      "tn": 64698
+      "tn": 64697
     },
     {
       "id": "part3_Lookalike_00132",
@@ -2127,9 +2190,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9984,
       "tp": 0,
-      "fp": 106,
+      "fp": 105,
       "fn": 0,
-      "tn": 65430
+      "tn": 65431
     },
     {
       "id": "part3_Lookalike_00146",
@@ -2155,9 +2218,9 @@
       "dice": 0.0,
       "pixel_accuracy": 0.9888,
       "tp": 0,
-      "fp": 737,
+      "fp": 736,
       "fn": 0,
-      "tn": 64799
+      "tn": 64800
     },
     {
       "id": "part3_Lookalike_00148",
@@ -4292,13 +4355,13 @@
       "category": "Oil",
       "precision": 0.9937,
       "recall": 0.1805,
-      "f1": 0.3056,
+      "f1": 0.3055,
       "iou": 0.1803,
-      "dice": 0.3056,
+      "dice": 0.3055,
       "pixel_accuracy": 0.6072,
-      "tp": 5664,
+      "tp": 5663,
       "fp": 36,
-      "fn": 25707,
+      "fn": 25708,
       "tn": 34129
     },
     {
@@ -4348,13 +4411,13 @@
       "category": "Oil",
       "precision": 0.9993,
       "recall": 0.1041,
-      "f1": 0.1886,
+      "f1": 0.1885,
       "iou": 0.1041,
-      "dice": 0.1886,
+      "dice": 0.1885,
       "pixel_accuracy": 0.6211,
-      "tp": 2885,
+      "tp": 2884,
       "fp": 2,
-      "fn": 24828,
+      "fn": 24829,
       "tn": 37821
     },
     {
@@ -4380,9 +4443,9 @@
       "iou": 0.4121,
       "dice": 0.5837,
       "pixel_accuracy": 0.7326,
-      "tp": 12286,
+      "tp": 12285,
       "fp": 43,
-      "fn": 17482,
+      "fn": 17483,
       "tn": 35725
     },
     {
@@ -4487,14 +4550,14 @@
       "id": "part3_Oil_00014",
       "category": "Oil",
       "precision": 0.9894,
-      "recall": 0.2709,
-      "f1": 0.4253,
-      "iou": 0.2701,
-      "dice": 0.4253,
-      "pixel_accuracy": 0.7816,
-      "tp": 5296,
+      "recall": 0.271,
+      "f1": 0.4254,
+      "iou": 0.2702,
+      "dice": 0.4254,
+      "pixel_accuracy": 0.7817,
+      "tp": 5297,
       "fp": 57,
-      "fn": 14253,
+      "fn": 14252,
       "tn": 45930
     },
     {
@@ -4514,15 +4577,15 @@
     {
       "id": "part3_Oil_00016",
       "category": "Oil",
-      "precision": 0.696,
-      "recall": 0.9705,
-      "f1": 0.8106,
-      "iou": 0.6816,
-      "dice": 0.8106,
+      "precision": 0.6958,
+      "recall": 0.97,
+      "f1": 0.8104,
+      "iou": 0.6812,
+      "dice": 0.8104,
       "pixel_accuracy": 0.9866,
-      "tp": 1877,
+      "tp": 1876,
       "fp": 820,
-      "fn": 57,
+      "fn": 58,
       "tn": 62782
     },
     {
@@ -4641,14 +4704,14 @@
       "id": "part3_Oil_00025",
       "category": "Oil",
       "precision": 0.9997,
-      "recall": 0.6286,
-      "f1": 0.7718,
-      "iou": 0.6284,
-      "dice": 0.7718,
-      "pixel_accuracy": 0.9438,
-      "tp": 6224,
+      "recall": 0.6287,
+      "f1": 0.7719,
+      "iou": 0.6285,
+      "dice": 0.7719,
+      "pixel_accuracy": 0.9439,
+      "tp": 6225,
       "fp": 2,
-      "fn": 3678,
+      "fn": 3677,
       "tn": 55632
     },
     {
@@ -4795,14 +4858,14 @@
       "id": "part3_Oil_00036",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.0083,
-      "f1": 0.0165,
-      "iou": 0.0083,
-      "dice": 0.0165,
+      "recall": 0.0082,
+      "f1": 0.0163,
+      "iou": 0.0082,
+      "dice": 0.0163,
       "pixel_accuracy": 0.8179,
-      "tp": 100,
+      "tp": 99,
       "fp": 0,
-      "fn": 11934,
+      "fn": 11935,
       "tn": 53502
     },
     {
@@ -4851,14 +4914,14 @@
       "id": "part3_Oil_00040",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.1475,
-      "f1": 0.2571,
-      "iou": 0.1475,
-      "dice": 0.2571,
+      "recall": 0.1474,
+      "f1": 0.257,
+      "iou": 0.1474,
+      "dice": 0.257,
       "pixel_accuracy": 0.7687,
-      "tp": 2622,
+      "tp": 2621,
       "fp": 0,
-      "fn": 15156,
+      "fn": 15157,
       "tn": 47758
     },
     {
@@ -4879,14 +4942,14 @@
       "id": "part3_Oil_00042",
       "category": "Oil",
       "precision": 0.9271,
-      "recall": 0.2479,
-      "f1": 0.3912,
-      "iou": 0.2431,
-      "dice": 0.3912,
+      "recall": 0.2478,
+      "f1": 0.391,
+      "iou": 0.243,
+      "dice": 0.391,
       "pixel_accuracy": 0.8622,
-      "tp": 2900,
+      "tp": 2899,
       "fp": 228,
-      "fn": 8800,
+      "fn": 8801,
       "tn": 53608
     },
     {
@@ -5033,14 +5096,14 @@
       "id": "part3_Oil_00053",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.0614,
-      "f1": 0.1157,
-      "iou": 0.0614,
-      "dice": 0.1157,
+      "recall": 0.0615,
+      "f1": 0.1158,
+      "iou": 0.0615,
+      "dice": 0.1158,
       "pixel_accuracy": 0.7887,
-      "tp": 906,
+      "tp": 907,
       "fp": 0,
-      "fn": 13849,
+      "fn": 13848,
       "tn": 50781
     },
     {
@@ -5122,9 +5185,9 @@
       "iou": 0.4447,
       "dice": 0.6156,
       "pixel_accuracy": 0.7851,
-      "tp": 11277,
+      "tp": 11276,
       "fp": 41,
-      "fn": 14040,
+      "fn": 14041,
       "tn": 40178
     },
     {
@@ -5233,24 +5296,24 @@
       "f1": 0.1815,
       "iou": 0.0998,
       "dice": 0.1815,
-      "pixel_accuracy": 0.297,
-      "tp": 5108,
+      "pixel_accuracy": 0.2969,
+      "tp": 5107,
       "fp": 7,
-      "fn": 46068,
+      "fn": 46069,
       "tn": 14353
     },
     {
       "id": "part3_Oil_00068",
       "category": "Oil",
-      "precision": 0.9951,
-      "recall": 0.1301,
-      "f1": 0.2301,
-      "iou": 0.13,
-      "dice": 0.2301,
+      "precision": 0.9952,
+      "recall": 0.1302,
+      "f1": 0.2302,
+      "iou": 0.1301,
+      "dice": 0.2302,
       "pixel_accuracy": 0.7068,
-      "tp": 2871,
+      "tp": 2873,
       "fp": 14,
-      "fn": 19202,
+      "fn": 19200,
       "tn": 43449
     },
     {
@@ -5271,14 +5334,14 @@
       "id": "part3_Oil_00070",
       "category": "Oil",
       "precision": 0.9879,
-      "recall": 0.672,
-      "f1": 0.7999,
-      "iou": 0.6665,
-      "dice": 0.7999,
+      "recall": 0.6716,
+      "f1": 0.7996,
+      "iou": 0.6661,
+      "dice": 0.7996,
       "pixel_accuracy": 0.9875,
-      "tp": 1639,
+      "tp": 1638,
       "fp": 20,
-      "fn": 800,
+      "fn": 801,
       "tn": 63077
     },
     {
@@ -5299,28 +5362,28 @@
       "id": "part3_Oil_00072",
       "category": "Oil",
       "precision": 0.9895,
-      "recall": 0.8524,
-      "f1": 0.9159,
-      "iou": 0.8448,
-      "dice": 0.9159,
+      "recall": 0.8522,
+      "f1": 0.9158,
+      "iou": 0.8446,
+      "dice": 0.9158,
       "pixel_accuracy": 0.9822,
-      "tp": 6340,
+      "tp": 6339,
       "fp": 67,
-      "fn": 1098,
+      "fn": 1099,
       "tn": 58031
     },
     {
       "id": "part3_Oil_00073",
       "category": "Oil",
       "precision": 0.9947,
-      "recall": 0.6208,
-      "f1": 0.7645,
-      "iou": 0.6187,
-      "dice": 0.7645,
+      "recall": 0.6206,
+      "f1": 0.7643,
+      "iou": 0.6186,
+      "dice": 0.7643,
       "pixel_accuracy": 0.9628,
-      "tp": 3958,
+      "tp": 3957,
       "fp": 21,
-      "fn": 2418,
+      "fn": 2419,
       "tn": 59139
     },
     {
@@ -5341,14 +5404,14 @@
       "id": "part3_Oil_00075",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.7812,
-      "f1": 0.8772,
-      "iou": 0.7812,
-      "dice": 0.8772,
+      "recall": 0.7814,
+      "f1": 0.8773,
+      "iou": 0.7814,
+      "dice": 0.8773,
       "pixel_accuracy": 0.9834,
-      "tp": 3881,
+      "tp": 3882,
       "fp": 0,
-      "fn": 1087,
+      "fn": 1086,
       "tn": 60568
     },
     {
@@ -5495,14 +5558,14 @@
       "id": "part3_Oil_00086",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.5012,
-      "f1": 0.6678,
-      "iou": 0.5012,
-      "dice": 0.6678,
+      "recall": 0.5007,
+      "f1": 0.6673,
+      "iou": 0.5007,
+      "dice": 0.6673,
       "pixel_accuracy": 0.969,
-      "tp": 2040,
+      "tp": 2038,
       "fp": 0,
-      "fn": 2030,
+      "fn": 2032,
       "tn": 61466
     },
     {
@@ -5634,16 +5697,16 @@
     {
       "id": "part3_Oil_00096",
       "category": "Oil",
-      "precision": 0.8665,
+      "precision": 0.8669,
       "recall": 0.9932,
-      "f1": 0.9256,
-      "iou": 0.8615,
-      "dice": 0.9256,
+      "f1": 0.9258,
+      "iou": 0.8619,
+      "dice": 0.9258,
       "pixel_accuracy": 0.9953,
       "tp": 1909,
-      "fp": 294,
+      "fp": 293,
       "fn": 13,
-      "tn": 63320
+      "tn": 63321
     },
     {
       "id": "part3_Oil_00097",
@@ -5748,13 +5811,13 @@
       "category": "Oil",
       "precision": 1.0,
       "recall": 0.1066,
-      "f1": 0.1926,
+      "f1": 0.1927,
       "iou": 0.1066,
-      "dice": 0.1926,
+      "dice": 0.1927,
       "pixel_accuracy": 0.4135,
-      "tp": 4586,
+      "tp": 4587,
       "fp": 0,
-      "fn": 38440,
+      "fn": 38439,
       "tn": 22510
     },
     {
@@ -5803,14 +5866,14 @@
       "id": "part3_Oil_00108",
       "category": "Oil",
       "precision": 0.9847,
-      "recall": 0.266,
-      "f1": 0.4189,
-      "iou": 0.2649,
-      "dice": 0.4189,
+      "recall": 0.2661,
+      "f1": 0.419,
+      "iou": 0.265,
+      "dice": 0.419,
       "pixel_accuracy": 0.7985,
-      "tp": 4759,
+      "tp": 4760,
       "fp": 74,
-      "fn": 13130,
+      "fn": 13129,
       "tn": 47573
     },
     {
@@ -6027,14 +6090,14 @@
       "id": "part3_Oil_00124",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.1268,
-      "f1": 0.225,
-      "iou": 0.1268,
-      "dice": 0.225,
+      "recall": 0.1266,
+      "f1": 0.2248,
+      "iou": 0.1266,
+      "dice": 0.2248,
       "pixel_accuracy": 0.8844,
-      "tp": 1100,
+      "tp": 1099,
       "fp": 0,
-      "fn": 7578,
+      "fn": 7579,
       "tn": 56858
     },
     {
@@ -6069,14 +6132,14 @@
       "id": "part3_Oil_00127",
       "category": "Oil",
       "precision": 1.0,
-      "recall": 0.1461,
-      "f1": 0.2549,
-      "iou": 0.1461,
-      "dice": 0.2549,
+      "recall": 0.146,
+      "f1": 0.2548,
+      "iou": 0.146,
+      "dice": 0.2548,
       "pixel_accuracy": 0.778,
-      "tp": 2489,
+      "tp": 2488,
       "fp": 0,
-      "fn": 14551,
+      "fn": 14552,
       "tn": 48496
     },
     {
@@ -6181,14 +6244,14 @@
       "id": "part3_Oil_00135",
       "category": "Oil",
       "precision": 0.9329,
-      "recall": 0.909,
-      "f1": 0.9208,
-      "iou": 0.8532,
-      "dice": 0.9208,
+      "recall": 0.9094,
+      "f1": 0.921,
+      "iou": 0.8536,
+      "dice": 0.921,
       "pixel_accuracy": 0.9945,
-      "tp": 2098,
+      "tp": 2099,
       "fp": 151,
-      "fn": 210,
+      "fn": 209,
       "tn": 63077
     },
     {
@@ -6250,16 +6313,16 @@
     {
       "id": "part3_Oil_00140",
       "category": "Oil",
-      "precision": 0.9056,
+      "precision": 0.9068,
       "recall": 0.9379,
-      "f1": 0.9215,
-      "iou": 0.8544,
-      "dice": 0.9215,
+      "f1": 0.9221,
+      "iou": 0.8554,
+      "dice": 0.9221,
       "pixel_accuracy": 0.9982,
       "tp": 710,
-      "fp": 74,
+      "fp": 73,
       "fn": 47,
-      "tn": 64705
+      "tn": 64706
     },
     {
       "id": "part3_Oil_00141",
@@ -6279,14 +6342,14 @@
       "id": "part3_Oil_00142",
       "category": "Oil",
       "precision": 0.9977,
-      "recall": 0.8586,
-      "f1": 0.923,
-      "iou": 0.857,
-      "dice": 0.923,
+      "recall": 0.8585,
+      "f1": 0.9229,
+      "iou": 0.8568,
+      "dice": 0.9229,
       "pixel_accuracy": 0.9866,
-      "tp": 5260,
+      "tp": 5259,
       "fp": 12,
-      "fn": 866,
+      "fn": 867,
       "tn": 59398
     },
     {
@@ -6308,13 +6371,13 @@
       "category": "Oil",
       "precision": 1.0,
       "recall": 0.0097,
-      "f1": 0.0193,
+      "f1": 0.0192,
       "iou": 0.0097,
-      "dice": 0.0193,
-      "pixel_accuracy": 0.5813,
-      "tp": 270,
+      "dice": 0.0192,
+      "pixel_accuracy": 0.5812,
+      "tp": 269,
       "fp": 0,
-      "fn": 27443,
+      "fn": 27444,
       "tn": 37823
     },
     {
@@ -6394,8 +6457,9 @@
     "part3": "10.5281/zenodo.13761290"
   },
   "caveats": [
+    "SCIENTIFIC HONESTY GUARD (Audit \u00a71): The headline 'overall' recall of 0.8962 is an unweighted arithmetic mean across all 450 scenes. The 300 No-Oil/Lookalike scenes have empty masks where binary_mask_metrics assigned recall=1.0 by convention. True oil detection capability is measured by pixel_pooled recall (0.3949) or oil_scene_macro recall (0.6886).",
+    "LARGE-SLICK FAILURE (Audit \u00a72): Large slicks (Q4, >11% frame coverage, containing ~73% of oil pixels) suffer from severe receptive-field under-segmentation: mean recall is 0.324-0.335 and predicted area is only ~26% of true spill size. High precision (~99%) confirms the model under-segments rather than hallucinates.",
     "This is the dataset's own published test split (Part III), never mixed into train/val (see app/ml/dataset.py build_manifests 'LEAKAGE PREVENTION').",
-    "Metrics are only as good as the mask threshold used (0.5 default, see --threshold) and reflect this exact checkpoint at this exact epoch - re-evaluate after further training.",
-    "Per-category numbers for No-Oil/Lookalike scenes measure false-positive behavior (their ground truth is an all-zero mask), not detection recall - a low IoU/Dice there without an accompanying pixel_accuracy check should be read as noisy on an all-negative scene, not as a missed detection."
+    "Metrics reflect this exact checkpoint at this exact epoch (best epoch 18) and threshold (0.5)."
   ]
 }

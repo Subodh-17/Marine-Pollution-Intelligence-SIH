@@ -211,6 +211,26 @@ if TORCH_AVAILABLE:
         dl = dice_loss(logits, target)
         return bce_weight * bce + (1 - bce_weight) * dl
 
+    def focal_loss_fn(logits: "torch.Tensor", target: "torch.Tensor", gamma: float = 1.5, weight: Optional["torch.Tensor"] = None) -> "torch.Tensor":
+        log_pt = F.log_softmax(logits, dim=1)
+        # Gather log probabilities for the correct class
+        log_pt = log_pt.gather(1, target.unsqueeze(1)).squeeze(1)
+        pt = torch.exp(log_pt)
+
+        ce_loss = -log_pt
+        focal_term = ((1 - pt) ** gamma) * ce_loss
+
+        if weight is not None:
+            target_weights = weight[target]
+            focal_loss = focal_term * target_weights
+            weight_sum = target_weights.sum()
+            if weight_sum > 0:
+                return focal_loss.sum() / weight_sum
+            else:
+                return torch.tensor(0.0, device=logits.device, requires_grad=True)
+        else:
+            return focal_term.mean()
+
 
 # =============================================================================
 # Training config / history
@@ -233,6 +253,10 @@ class TrainingConfig:
     num_workers: int
     limit_train_samples: Optional[int]
     started_at: str
+    resumed_from: Optional[str] = None
+    focal_loss: bool = False
+    focal_gamma: float = 1.5
+    lookalike_weight_multiplier: float = 1.0
 
 
 def _dataset_metadata_snapshot(manifest_dir: str) -> dict:
@@ -304,7 +328,7 @@ def _compute_class_weights(records, device) -> "torch.Tensor":
     return torch.tensor(weights, dtype=torch.float32, device=device)
 
 
-def _epoch_classifier(model, loader, optimizer, device, train: bool, class_weights=None) -> dict:
+def _epoch_classifier(model, loader, optimizer, device, train: bool, class_weights=None, use_focal: bool = False, focal_gamma: float = 1.5) -> dict:
     model.train(mode=train)
     total_loss = 0.0
     n_batches = 0
@@ -321,7 +345,10 @@ def _epoch_classifier(model, loader, optimizer, device, train: bool, class_weigh
             # loss/accuracy should reflect genuine, unweighted performance,
             # not be flattered or penalized by a weighting choice that only
             # makes sense as a training-time optimization nudge.
-            loss = F.cross_entropy(logits, labels, weight=class_weights if train else None)
+            if use_focal and train:
+                loss = focal_loss_fn(logits, labels, gamma=focal_gamma, weight=class_weights)
+            else:
+                loss = F.cross_entropy(logits, labels, weight=class_weights if train else None)
             if train:
                 optimizer.zero_grad()
                 loss.backward()
@@ -348,9 +375,13 @@ def train_model(
     seed: int = 42,
     device: str = "cpu",
     checkpoint_dir: Optional[str] = None,
+    resume: Optional[str] = None,
     bce_weight: float = 0.5,
     num_workers: int = 0,
     limit_train_samples: Optional[int] = None,
+    focal_loss: bool = False,
+    focal_gamma: float = 1.5,
+    lookalike_weight_multiplier: float = 1.0,
 ) -> dict:
     """Trains either the segmenter ("segmenter" -> SpillUNet) or the
     classifier ("classifier" -> SceneClassifier) against the real dataset
@@ -365,6 +396,10 @@ def train_model(
         raise RuntimeError("PyTorch is not installed. Install it via `pip install -r requirements-ml.txt`.")
     if model_kind not in ("segmenter", "classifier"):
         raise ValueError(f"Unknown model_kind {model_kind!r} - expected 'segmenter' or 'classifier'.")
+    if lookalike_weight_multiplier <= 0.0 or not np.isfinite(lookalike_weight_multiplier):
+        raise ValueError(f"lookalike_weight_multiplier must be positive and finite, got {lookalike_weight_multiplier}")
+    if focal_loss and (focal_gamma < 0.0 or not np.isfinite(focal_gamma)):
+        raise ValueError(f"focal_gamma must be non-negative and finite, got {focal_gamma}")
     # `architecture` only applies to model_kind="classifier" - the segmenter
     # has one architecture (SpillUNet). Default stays the ORIGINAL
     # SceneClassifier for full backward compatibility (an existing script/
@@ -427,6 +462,10 @@ def train_model(
         seed=seed, device=str(torch_device), checkpoint_dir=portable_path(checkpoint_dir),
         bce_weight=bce_weight, num_workers=num_workers, limit_train_samples=limit_train_samples,
         started_at=datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+        resumed_from=portable_path(resume) if resume else None,
+        focal_loss=focal_loss,
+        focal_gamma=focal_gamma,
+        lookalike_weight_multiplier=lookalike_weight_multiplier,
     )
 
     # Computed once, from the train split's own real record counts - see
@@ -435,15 +474,46 @@ def train_model(
     # separate `bce_weight` knob).
     classifier_class_weights = _compute_class_weights(train_ds.records, torch_device) if model_kind == "classifier" else None
     if classifier_class_weights is not None:
-        print(f"[classifier] class weights (train-split inverse-frequency, "
-              f"{CLASS_LABELS} order): {[round(w, 3) for w in classifier_class_weights.tolist()]}")
+        if lookalike_weight_multiplier != 1.0:
+            # Documented interaction: We multiply the existing inverse-frequency weight for class 2 (Lookalike)
+            # by this additional scalar factor to penalize Lookalike errors more heavily.
+            classifier_class_weights[2] *= lookalike_weight_multiplier
+        print(f"[classifier] class weights (train-split inverse-frequency" +
+              (f" * Lookalike_x{lookalike_weight_multiplier}" if lookalike_weight_multiplier != 1.0 else "") +
+              f", {CLASS_LABELS} order): {[round(w, 3) for w in classifier_class_weights.tolist()]}")
 
     history = []
+    start_epoch = 1
     best_metric = -1.0
     best_epoch = -1
+
+    if resume:
+        print(f"Resuming from checkpoint: {resume}")
+        checkpoint = torch.load(resume, map_location=torch_device, weights_only=False)
+        model.load_state_dict(checkpoint["model_state_dict"])
+
+        start_epoch = checkpoint.get("epoch", 0) + 1
+
+        if "best_metric" in checkpoint:
+            best_metric = checkpoint["best_metric"]
+            best_epoch = checkpoint["best_epoch"]
+        else:
+            best_epoch = checkpoint.get("epoch", -1)
+            val_metrics = checkpoint.get("val_metrics", {})
+            if model_kind == "segmenter":
+                best_metric = val_metrics.get("iou", -1.0)
+            else:
+                best_metric = val_metrics.get("accuracy", -1.0)
+
+        if "optimizer_state_dict" in checkpoint:
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            print("Restored optimizer state from checkpoint.")
+        else:
+            print("optimizer_state_dict not found in checkpoint. Initializing a fresh Adam optimizer.")
+
     t0 = time.perf_counter()
 
-    for epoch in range(1, epochs + 1):
+    for epoch in range(start_epoch, epochs + 1):
         epoch_t0 = time.perf_counter()
         if model_kind == "segmenter":
             train_stats = _epoch_segmenter(model, train_loader, optimizer, torch_device, bce_weight, train=True)
@@ -451,9 +521,9 @@ def train_model(
             val_score = val_stats["iou"]
         else:
             train_stats = _epoch_classifier(model, train_loader, optimizer, torch_device, train=True,
-                                             class_weights=classifier_class_weights)
+                                             class_weights=classifier_class_weights, use_focal=focal_loss, focal_gamma=focal_gamma)
             val_stats = _epoch_classifier(model, val_loader, optimizer, torch_device, train=False,
-                                           class_weights=classifier_class_weights)
+                                           class_weights=classifier_class_weights, use_focal=focal_loss, focal_gamma=focal_gamma)
             val_score = val_stats["accuracy"]
 
         epoch_record = {
@@ -469,6 +539,7 @@ def train_model(
 
         checkpoint_payload = {
             "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
             "epoch": epoch,
             "val_metrics": val_stats,
             "seed": seed,
@@ -478,6 +549,8 @@ def train_model(
             "class_mapping": {i: label for i, label in enumerate(CLASS_LABELS)} if model_kind == "classifier" else None,
             "trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
             "dataset_dois": ds_mod.DATASET_DOIS,
+            "best_metric": best_metric,
+            "best_epoch": best_epoch,
         }
         last_path = os.path.join(checkpoint_dir, f"{_ckpt_stub(model_kind)}_real_last.{_ckpt_ext(model_kind)}")
         torch.save(checkpoint_payload, last_path)
@@ -528,6 +601,7 @@ def train_model(
             "num_train_samples": len(train_ds),
             "num_val_samples": len(val_ds),
             "seed": seed,
+            "resumed_from": resume,
         }, f, indent=2)
 
     return training_summary
@@ -564,6 +638,7 @@ def main(argv=None) -> int:
     parser.add_argument("--seed", type=int, default=settings.ml_train_seed)
     parser.add_argument("--device", default="cpu", choices=["cpu", "cuda"])
     parser.add_argument("--checkpoint-dir", default=settings.ml_checkpoint_dir)
+    parser.add_argument("--resume", default=None, help="Path to an existing checkpoint to resume training from.")
     parser.add_argument("--bce-weight", type=float, default=0.5)
     parser.add_argument("--num-workers", type=int, default=0,
                          help="DataLoader workers. Keep at 0 on Windows unless you guard the entry "
@@ -577,6 +652,12 @@ def main(argv=None) -> int:
                               "compatible). 'scene_classifier_v2' is the redesigned, deeper "
                               "architecture - see architectures.py::SceneClassifierV2 docstring "
                               "and README_ML_STATUS.md for why it exists.")
+    parser.add_argument("--focal-loss", action="store_true",
+                         help="Enable Focal Loss for the classifier (helps with hard Lookalike vs No-Oil examples).")
+    parser.add_argument("--focal-gamma", type=float, default=1.5,
+                         help="Gamma parameter for Focal Loss.")
+    parser.add_argument("--lookalike-weight-multiplier", type=float, default=1.0,
+                         help="Multiplier applied strictly to the Lookalike class weight (class index 2).")
     args = parser.parse_args(argv)
 
     if args.device == "cuda" and not (TORCH_AVAILABLE and torch.cuda.is_available()):
@@ -596,8 +677,10 @@ def main(argv=None) -> int:
                 architecture=args.architecture if model_kind == "classifier" else None,
                 manifest_dir=args.manifest_dir, epochs=args.epochs, batch_size=args.batch_size,
                 lr=args.lr, image_size=args.image_size, seed=args.seed, device=args.device,
-                checkpoint_dir=args.checkpoint_dir, bce_weight=args.bce_weight,
+                checkpoint_dir=args.checkpoint_dir, resume=args.resume, bce_weight=args.bce_weight,
                 num_workers=args.num_workers, limit_train_samples=args.limit_train_samples,
+                focal_loss=args.focal_loss, focal_gamma=args.focal_gamma,
+                lookalike_weight_multiplier=args.lookalike_weight_multiplier,
             )
         except DatasetNotFoundError as e:
             print(f"ERROR: {e}", file=sys.stderr)

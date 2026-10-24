@@ -20,10 +20,12 @@ remains accurate **about them**.
 | Local/GPU inference | PyTorch CPU/CUDA where available |
 | Internal provenance | `ML_REAL_ZENODO_TRAINED` |
 
-Held-out test-set results (from `evaluation_report.json`, not restated from
-memory): precision **0.7485**, recall **0.8962**, F1 **0.6838**, IoU
-**0.6486**, Dice **0.6838**, pixel accuracy **0.9765**, over **450** test
-scenes at threshold 0.5.
+Held-out test-set results (from `evaluation_report.json`, reflecting the SIH-26143 audit corrections):
+- **Pixel-Pooled (All 450 scenes):** Precision **0.7915**, Recall **0.3949**, F1/Dice **0.5269**, IoU **0.3577**, Pixel accuracy **0.9765**.
+- **Oil-Scene Macro (150 Oil scenes):** Precision **0.9322**, Recall **0.6886**, F1/Dice **0.7382**, IoU **0.6324**.
+- **Overall Scene Mean (Historical):** Precision **0.7485**, Recall **0.8962**, F1 **0.6838**, IoU **0.6486** (inflated by empty-mask recall convention).
+- **Slick-Size Quartile Failure:** On the largest slick quartile (Q4, >11% frame coverage, 73% of oil pixels), segmenter recall is 0.324-0.335 and area ratio 0.26 due to receptive field limits.
+- **Fail-Closed Attribution:** Vessel attribution is gated on `LIKELY_OIL` classification and minimum area, cutting false accusations from 34% down to under 2%.
 
 **Limitations (unchanged and still important):** these are research-model
 results, not operational certainty. Softmax scores are model confidence

@@ -29,6 +29,7 @@ class MaskMetrics:
     # explicitly by name, per this project's requirement to report it.
     dice: float
     pixel_accuracy: float
+    empty_gt: bool = False
 
 
 def binary_mask_metrics(pred: np.ndarray, gt: np.ndarray) -> MaskMetrics:
@@ -45,6 +46,13 @@ def binary_mask_metrics(pred: np.ndarray, gt: np.ndarray) -> MaskMetrics:
         0.0 (every flagged pixel is a false positive) and recall is reported
         as 1.0 by convention (there was nothing to miss), matching the
         common scikit-learn convention for an empty positive class.
+
+    SCIENTIFIC HONESTY GUARD (SIH-26143 ML Audit finding §1):
+    Setting recall = 1.0 on empty-mask scenes is an isolated convention for
+    single-image evaluation. It MUST NOT be averaged across all-negative
+    scenes (e.g. Lookalike and No-Oil) to report inflated macro recall.
+    True oil detection capability must be evaluated over positive scenes
+    (`oil_scene_macro`) or pooled across all pixels (`pixel_pooled`).
     """
     if pred.shape != gt.shape:
         raise ValueError(f"Shape mismatch: pred {pred.shape} vs gt {gt.shape}")
@@ -59,6 +67,7 @@ def binary_mask_metrics(pred: np.ndarray, gt: np.ndarray) -> MaskMetrics:
     gt_positive = tp + fn
     pred_positive = tp + fp
     union = tp + fp + fn
+    is_empty_gt = bool(gt_positive == 0)
 
     if gt_positive == 0:
         recall = 1.0
@@ -76,7 +85,8 @@ def binary_mask_metrics(pred: np.ndarray, gt: np.ndarray) -> MaskMetrics:
 
     return MaskMetrics(tp=tp, fp=fp, fn=fn, tn=tn, precision=round(precision, 4),
                         recall=round(recall, 4), f1=round(f1, 4), iou=round(iou, 4),
-                        dice=round(dice, 4), pixel_accuracy=round(pixel_accuracy, 4))
+                        dice=round(dice, 4), pixel_accuracy=round(pixel_accuracy, 4),
+                        empty_gt=is_empty_gt)
 
 
 @dataclass

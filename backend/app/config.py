@@ -122,10 +122,13 @@ class Settings:
     # rationale - this is a heuristic engineering cutoff, not a validated
     # operating point.
     ml_confidence_threshold: float
+    ml_multiscale_segmentation: bool
+    ml_multiscale_fusion_strategy: str
 
     # ---- AIS / attribution ---------------------------------------------------
     ais_search_radius_km_default: float
     ais_time_window_hours_default: float
+    min_attribution_mask_px: int
 
     # ---- Drift hindcast/forecast duration -----------------------------------
     drift_backward_hours: tuple[float, ...]
@@ -234,6 +237,20 @@ class Settings:
         return int(self.max_upload_size_mb * 1024 * 1024)
 
 
+def _resolve_default_dataset_root() -> str:
+    val = os.environ.get("DATASET_ROOT")
+    if val not in (None, ""):
+        return val
+    for candidate in (
+        os.path.join("data", "zenodo_sar"),
+        os.path.join("backend", "data", "zenodo_sar"),
+        r"D:\zenodo_sar",
+    ):
+        if os.path.isdir(candidate):
+            return candidate
+    return os.path.join("data", "zenodo_sar")
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Returns the process-wide, cached Settings snapshot. Call
@@ -255,8 +272,11 @@ def get_settings() -> Settings:
             # directly inside app/ml/detector.py.
             "ML_FALLBACK_CONFIDENCE_THRESHOLD", 0.5
         ),
+        ml_multiscale_segmentation=_env_bool("ML_MULTISCALE_SEGMENTATION", False),
+        ml_multiscale_fusion_strategy=_env_str("ML_MULTISCALE_FUSION_STRATEGY", "size_gated_closure").lower(),
         ais_search_radius_km_default=_env_float("AIS_SEARCH_RADIUS_KM_DEFAULT", 50.0),
         ais_time_window_hours_default=_env_float("AIS_TIME_WINDOW_HOURS_DEFAULT", 12.0),
+        min_attribution_mask_px=_env_int("MIN_ATTRIBUTION_MASK_PX", 250),
         drift_backward_hours=_env_float_tuple("DRIFT_BACKWARD_HOURS", (6.0, 12.0, 18.0, 24.0)),
         drift_forward_hours=_env_float_tuple("DRIFT_FORWARD_HOURS", (6.0, 12.0, 24.0, 48.0)),
         map_tile_provider=_env_str("MAP_TILE_PROVIDER", "osm"),
@@ -286,7 +306,7 @@ def get_settings() -> Settings:
         live_data_max_age_minutes=_env_float("LIVE_DATA_MAX_AGE_MINUTES", 180.0),
         max_image_dimension_px=_env_int("MAX_IMAGE_DIMENSION_PX", 8000),
         enable_zenodo_data=_env_bool("ENABLE_ZENODO_DATA", False),
-        dataset_root=_env_str("DATASET_ROOT", os.path.join("data", "zenodo_sar")),
+        dataset_root=_resolve_default_dataset_root(),
         dataset_status_cache_ttl_seconds=_env_float("DATASET_STATUS_CACHE_TTL_SECONDS", 300.0),
         ml_train_batch_size=_env_int("ML_TRAIN_BATCH_SIZE", 4),
         ml_train_epochs=_env_int("ML_TRAIN_EPOCHS", 20),

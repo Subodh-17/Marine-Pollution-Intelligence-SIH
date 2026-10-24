@@ -95,11 +95,21 @@ def _normalize_band(band: np.ndarray) -> np.ndarray:
     data used. See MODEL_CARD.md §6 / app/ml/README_ML_STATUS.md for the
     full history of this consistency check.
     """
-    band = band.astype(np.float64)
+    band = np.asarray(band)
+    if band.size == 0:
+        return np.zeros_like(band, dtype=np.float32)
     lo, hi = np.percentile(band, [1, 99])
     if hi <= lo:
         return np.zeros_like(band, dtype=np.float32)
-    return np.clip((band - lo) / (hi - lo), 0, 1).astype(np.float32)
+    denom = np.float32(hi - lo)
+    if denom <= 0.0:
+        return np.zeros_like(band, dtype=np.float32)
+    out = np.empty(band.shape, dtype=np.float32)
+    lo_f = np.float32(lo)
+    np.subtract(band, lo_f, out=out, casting="unsafe")
+    np.divide(out, denom, out=out)
+    np.clip(out, 0.0, 1.0, out=out)
+    return out
 
 
 # Public alias - app/ml/dataset.py and app/ml/train.py import this name

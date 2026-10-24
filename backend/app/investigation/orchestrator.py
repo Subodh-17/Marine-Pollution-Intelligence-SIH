@@ -488,16 +488,42 @@ def run_investigation(
             cleaned, {t.mmsi for t in trajectories},
             origin_lat, origin_lon, search_radius_km, window_start, window_end,
         )
-
-        # ---- 11. Attribution scoring + ranking -----------------------------------
-        candidates = rank_candidates(
-            trajectories, origin_lat, origin_lon, origin_time,
-            search_radius_km=search_radius_km, time_window_hours=time_window_hours,
-            weights=weights or DEFAULT_WEIGHTS,
-            detection_time=observed_time,
+        # ---- Attribution Gating (Centralized Policy: app/investigation/policy.py) ----
+        from app.investigation.policy import evaluate_attribution_eligibility
+        policy_eval = evaluate_attribution_eligibility(
+            scene_classification=det.scene_classification,
+            mask=det.mask,
+            observed_time=observed_time,
+            min_mask_area_px=settings.min_attribution_mask_px,
+            ais_records=raw_records,
         )
-        log("Candidate scoring completed")
-        log("Vessel ranking generated")
+        attribution_gated = not policy_eval.eligible
+        attribution_status = policy_eval.status
+        attribution_decision_reason = policy_eval.reason
+
+        if attribution_gated:
+            candidates = []
+            log(f"Attribution safety gate applied: {attribution_status}")
+            _log.info(
+                "attribution_safety_gate_applied",
+                extra={
+                    "investigation_id": inv_id,
+                    "attribution_status": attribution_status,
+                    "oil_status": policy_eval.oil_status,
+                    "mask_area_px": policy_eval.mask_pixels,
+                },
+            )
+        else:
+            # ---- 11. Attribution scoring + ranking -----------------------------------
+            candidates = rank_candidates(
+                trajectories, origin_lat, origin_lon, origin_time,
+                search_radius_km=search_radius_km, time_window_hours=time_window_hours,
+                weights=weights or DEFAULT_WEIGHTS,
+                detection_time=observed_time,
+            )
+            log("Candidate scoring completed")
+            log("Vessel ranking generated")
+
         log("Investigation ready")
         _log.info(
             "ais_attribution_completed",
@@ -505,6 +531,7 @@ def run_investigation(
                 "investigation_id": inv_id,
                 "ais_records": total_raw,
                 "candidate_vessels": len(candidates),
+                "attribution_status": attribution_status,
             },
         )
 
@@ -521,6 +548,10 @@ def run_investigation(
             "ais_source": ais_source_tag,
             "reference_dataset": ais_reference_dataset,
             "excluded_vessels": excluded_vessels,
+            "attribution_status": attribution_status,
+            "attribution_gated": attribution_gated,
+            "attribution_decision_reason": attribution_decision_reason,
+            "evidence_provenance": policy_eval.evidence_provenance,
         }
 
     h, w = image.shape
@@ -530,20 +561,6 @@ def run_investigation(
         "north": top_left[0], "west": top_left[1],
         "south": bottom_right[0], "east": bottom_right[1],
     }
-
-    # Fixed, human-readable version tags for each detector implementation
-    # (see Part 2 "reproducibility" requirement: every investigation records
-    # which detector version actually produced its result). These describe
-    # the *code* version, not a trained-model version number - see
-    # MODEL_CARD.md for why the ML prototype has no meaningful trained-model
-    # version (its checkpoints are synthetic-trained, not iteratively
-    # versioned against a real validation set). Deliberately read straight
-    # from `det.detector_version` (set by whichever detector actually
-    # produced `det` - app/satellite/detection.py or app/ml/detector.py)
-    # rather than a hand-maintained provenance->version map, so a new
-    # provenance value (e.g. "ML_REAL_ZENODO_TRAINED", which carries its own
-    # per-checkpoint version string like "ml_real_spillunet_epoch7") is
-    # correctly reflected here with zero risk of the map going stale.
 
     satellite_payload = {
         "geometry": geometry.to_dict() if geometry else None,
@@ -562,21 +579,17 @@ def run_investigation(
         "geolocation_source": geolocation_source,
         "geotiff_metadata": geotiff_metadata_info,
         "dataset_reference": dataset_reference,
-        # Structured model-provenance metadata (Part E/F/G/H) - model name/
-        # version, real-vs-synthetic training data, dataset DOIs, input
-        # channels, preprocessing version, limitations, ... None whenever no
-        # ML model was actually invoked (classical detector, synthetic demo,
-        # or non-dual-pol input that never reached the ML engine).
         "model_provenance_info": ml_model_info,
-        # Oil/No-Oil/Lookalike/Uncertain verdict (see
-        # app/satellite/detection.py's DetectionResult.scene_classification
-        # docstring). None whenever the ML classifier did not load/run
-        # (classical detector, synthetic demo, non-dual-pol input, or ML
-        # engine unavailable) - always check for None before reading.
-        # detection_notes above already carries an explicit warning
-        # whenever oil_status != "LIKELY_OIL", so this structured field and
-        # the human-readable notes can never disagree about the verdict.
         "scene_classification": det.scene_classification,
+        "attribution_status": ais_summary.get("attribution_status", "NOT_RUN"),
+        "attribution_gating": {
+            "gated": ais_summary.get("attribution_gated", False),
+            "status": ais_summary.get("attribution_status", "NOT_RUN"),
+            "reason": ais_summary.get("attribution_decision_reason", ""),
+            "oil_status": det.scene_classification.get("oil_status") if det.scene_classification else None,
+            "mask_area_px": geometry.area_px if geometry else 0,
+            "evidence_provenance": ais_summary.get("evidence_provenance"),
+        },
     }
 
     environment_payload = {

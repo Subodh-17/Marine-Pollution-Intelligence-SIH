@@ -1,0 +1,43 @@
+{
+  "dataset_root": "D:\\zenodo_sar",
+  "generated_at": "2026-10-03T11:09:08.553763",
+  "seed": 42,
+  "split_strategy": "dataset_native",
+  "val_fraction": 0.15,
+  "dataset_dois": {
+    "part1": "10.5281/zenodo.8346860",
+    "part2": "10.5281/zenodo.8253899",
+    "part3": "10.5281/zenodo.13761290"
+  },
+  "dataset_citation": "Trujillo-Acatitla, R., Tuxpan-Vargas, J., Ovando-Vazquez, C., & Monterrubio-Martinez, E. (2024). Sentinel-1 SAR Oil spill image dataset for train, validate, and test deep learning models. Parts I-III. Zenodo. https://doi.org/10.5281/zenodo.8346860",
+  "counts": {
+    "train": 2184,
+    "val": 386,
+    "test": 450,
+    "train_by_category": {
+      "Oil": 1020,
+      "No-Oil": 582,
+      "Lookalike": 582
+    },
+    "val_by_category": {
+      "Oil": 180,
+      "No-Oil": 103,
+      "Lookalike": 103
+    },
+    "test_by_category": {
+      "Oil": 150,
+      "No-Oil": 150,
+      "Lookalike": 150
+    }
+  },
+  "issues": [],
+  "leakage_check": {
+    "performed": true,
+    "conflicts_found": 0
+  },
+  "manifest_files": {
+    "train": "train_manifest.json",
+    "val": "val_manifest.json",
+    "test": "test_manifest.json"
+  }
+}

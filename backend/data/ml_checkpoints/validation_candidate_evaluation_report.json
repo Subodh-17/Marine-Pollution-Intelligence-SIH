@@ -1,0 +1,86 @@
+{
+  "timestamp": "2026-10-20T15:17:14Z",
+  "dataset_split": "validation",
+  "num_scenes": 386,
+  "strategy_evaluated": "size_gated_closure_100_25",
+  "parameters": {
+    "min_area": 100,
+    "struct_size": 25,
+    "coarse_weight": 0.95,
+    "threshold": 0.5
+  },
+  "latency_ms": {
+    "mean_baseline": 72.28,
+    "mean_candidate": 94.33
+  },
+  "pixel_pooled": {
+    "baseline": {
+      "recall": 0.6508,
+      "iou": 0.5462,
+      "precision": 0.7726,
+      "tp": 211873,
+      "fp": 62372,
+      "fn": 113692
+    },
+    "candidate": {
+      "recall": 0.6665,
+      "iou": 0.5566,
+      "precision": 0.7715,
+      "tp": 216973,
+      "fp": 64273,
+      "fn": 108592
+    },
+    "delta": {
+      "recall_gain_abs": 0.0157,
+      "recall_gain_pct": 2.41,
+      "iou_gain_abs": 0.0104,
+      "iou_gain_pct": 1.91,
+      "tp_delta": 5100,
+      "fp_delta": 1901
+    }
+  },
+  "per_category": {
+    "Oil": {
+      "n_scenes": 180,
+      "baseline_macro_iou": 0.6942,
+      "candidate_macro_iou": 0.6985,
+      "baseline_macro_recall": 0.7994,
+      "candidate_macro_recall": 0.8045,
+      "baseline_macro_precision": 0.8734,
+      "candidate_macro_precision": 0.8725
+    },
+    "Lookalike": {
+      "n_scenes": 103,
+      "baseline_fp_px": 42184,
+      "candidate_fp_px": 43715,
+      "fp_delta_px": 1531,
+      "fp_delta_pct": 3.63
+    },
+    "No-Oil": {
+      "n_scenes": 103,
+      "baseline_fp_px": 1055,
+      "candidate_fp_px": 1055,
+      "fp_delta_px": 0
+    }
+  },
+  "quartiles": {
+    "Q1": {
+      "baseline_mean_recall": 0.8405,
+      "candidate_mean_recall": 0.8405,
+      "baseline_mean_iou": 0.6184,
+      "candidate_mean_iou": 0.6184,
+      "baseline_mean_area_ratio": 1.2281,
+      "candidate_mean_area_ratio": 1.2281
+    },
+    "Q4": {
+      "baseline_mean_recall": 0.674,
+      "candidate_mean_recall": 0.6911,
+      "baseline_pooled_recall": 0.5561,
+      "candidate_pooled_recall": 0.5792,
+      "baseline_mean_iou": 0.6536,
+      "candidate_mean_iou": 0.6698,
+      "baseline_mean_area_ratio": 0.7022,
+      "candidate_mean_area_ratio": 0.7207
+    }
+  }
+}

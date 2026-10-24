@@ -1,0 +1,18 @@
+{
+  "dataset_root": "D:\\zenodo_sar",
+  "manifest_dir": "D:\\zenodo_sar\\manifests",
+  "model": "classifier",
+  "architecture": "SceneClassifierV2",
+  "epochs": 50,
+  "batch_size": 16,
+  "lr": 0.0003,
+  "image_size": 256,
+  "seed": 2026,
+  "device": "cuda",
+  "checkpoint_dir": "backend/data/ml_checkpoints/v2_seed2026",
+  "bce_weight": 0.5,
+  "num_workers": 0,
+  "limit_train_samples": null,
+  "started_at": "2026-10-07T18:31:55.251488",
+  "resumed_from": "backend/data/ml_checkpoints/v2_seed2026/classifier_real_last.pth"
+}

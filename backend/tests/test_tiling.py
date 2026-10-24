@@ -159,3 +159,81 @@ class TestEndToEndLargeScene:
         vh = rng.random((1024, 1024)).astype(np.float32)
         result = engine.detect(vv, vh)
         assert not result.success  # tiling off -> same as the old outright-refusal behavior
+
+
+class TestRobustTilingAudited:
+    """Rigorous audit test suite covering all edge cases specified in Phase 2 Priority 3:
+    sub-tile, single-tile, non-divisible, border preservation, various overlaps,
+    all-zero/all-one masks, and deterministic identity reconstructions.
+    """
+
+    def test_sub_tile_image(self):
+        stacked = np.ones((2, 95, 140), dtype=np.float32)
+        out = stitch_tiled_segmentation(lambda tile: np.full(tile.shape[1:], 0.75, dtype=np.float32), stacked, 256, 32)
+        assert out.shape == (95, 140)
+        assert np.allclose(out, 0.75)
+
+    def test_exact_one_tile(self):
+        stacked = np.ones((2, 256, 256), dtype=np.float32)
+        out = stitch_tiled_segmentation(lambda tile: np.full(tile.shape[1:], 0.42, dtype=np.float32), stacked, 256, 32)
+        assert out.shape == (256, 256)
+        assert np.allclose(out, 0.42)
+
+    def test_non_divisible_dimensions_and_border_pixels(self):
+        h, w = 317, 523
+        stacked = np.zeros((2, h, w), dtype=np.float32)
+        # Mark borders
+        stacked[0, 0, :] = 1.0
+        stacked[0, -1, :] = 1.0
+        stacked[0, :, 0] = 1.0
+        stacked[0, :, -1] = 1.0
+
+        def identity_run(tile):
+            return tile[0]
+
+        out = stitch_tiled_segmentation(identity_run, stacked, tile_size=256, overlap=48)
+        assert out.shape == (h, w)
+        assert np.all(np.isfinite(out))
+        # Borders must be preserved
+        assert np.allclose(out[0, :], 1.0)
+        assert np.allclose(out[-1, :], 1.0)
+        assert np.allclose(out[:, 0], 1.0)
+        assert np.allclose(out[:, -1], 1.0)
+
+    def test_various_overlaps_reconstruct_uniform_inputs(self):
+        h, w = 400, 400
+        stacked = np.full((2, h, w), 0.88, dtype=np.float32)
+        for ov in [0, 16, 32, 64, 120]:
+            out = stitch_tiled_segmentation(lambda tile: np.full(tile.shape[1:], 0.88, dtype=np.float32), stacked, 256, ov)
+            assert np.allclose(out, 0.88, atol=1e-5), f"Failed for overlap {ov}"
+
+    def test_all_zero_and_all_one_masks(self):
+        h, w = 350, 450
+        zeros_in = np.zeros((2, h, w), dtype=np.float32)
+        out_zero = stitch_tiled_segmentation(lambda tile: np.zeros(tile.shape[1:], dtype=np.float32), zeros_in, 256, 32)
+        assert np.allclose(out_zero, 0.0)
+
+        ones_in = np.ones((2, h, w), dtype=np.float32)
+        out_one = stitch_tiled_segmentation(lambda tile: np.ones(tile.shape[1:], dtype=np.float32), ones_in, 256, 32)
+        assert np.allclose(out_one, 1.0)
+
+    def test_deterministic_known_slick_reconstruction(self):
+        """Places a synthetic slick in a non-divisible scene and checks exact identity reconstruction."""
+        h, w = 500, 600
+        scene = np.zeros((2, h, w), dtype=np.float32)
+        # Synthetic rectangular slick at center
+        scene[0, 180:320, 220:410] = 0.95
+        scene[1, 180:320, 220:410] = 0.80
+
+        def segmenter_mock(tile):
+            # Model returns high probability if VV is > 0.5
+            return (tile[0] > 0.5).astype(np.float32)
+
+        out = stitch_tiled_segmentation(segmenter_mock, scene, tile_size=256, overlap=32)
+        expected = np.zeros((h, w), dtype=np.float32)
+        expected[180:320, 220:410] = 1.0
+
+        # Seam blending may produce smooth transitions near boundary, but interior must be 1.0 and exterior 0.0
+        assert np.allclose(out[200:300, 250:380], 1.0)
+        assert np.allclose(out[:150, :], 0.0)
+        assert np.allclose(out[350:, :], 0.0)

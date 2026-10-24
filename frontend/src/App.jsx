@@ -254,7 +254,20 @@ export default function App() {
           {!running && activeTab !== 'mltraining' && investigation && (
             <>
               {activeTab === 'dashboard' && (
-                <DashboardTab investigation={investigation} selectedMmsi={selectedMmsi} onSelectVessel={setSelectedMmsi} />
+                <DashboardTab
+                  investigation={investigation}
+                  selectedMmsi={selectedMmsi}
+                  onSelectVessel={setSelectedMmsi}
+                  onRunDemo={runDemo}
+                  onUploadAis={() => setShowUpload(true)}
+                  onUploadSatellite={() => setShowSatelliteUpload(true)}
+                  onSelectInvestigation={(id) => {
+                    api.getInvestigation(id).then(inv => {
+                      storeInvestigationId(inv.id)
+                      setInvestigation(inv)
+                    }).catch(console.error)
+                  }}
+                />
               )}
               {activeTab === 'satellite' && <SatelliteTab investigation={investigation} />}
               {activeTab === 'ais' && (

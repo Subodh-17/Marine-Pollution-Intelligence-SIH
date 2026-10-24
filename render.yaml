@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: marine-pollution-intelligence-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_ENABLED
+        value: "true"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://marine-pollution-intelligence-sih.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+      - key: ML_RUNTIME
+        value: auto
+      - key: ML_MAX_INFERENCE_PIXELS
+        value: "262144"
+      - key: ML_TILING_ENABLED
+        value: "true"

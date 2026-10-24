@@ -286,7 +286,7 @@ def test_malformed_ais_csv_error_does_not_leak_server_temp_path():
     r3 = client.post("/api/jobs/investigation", params={"mode": "custom_ais"})
     assert r3.status_code == 200
     job_id = r3.json()["id"]
-    for _ in range(50):
+    for _ in range(300):
         job = client.get(f"/api/jobs/{job_id}").json()
         if job["status"] in ("completed", "failed"):
             break

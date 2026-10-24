@@ -1,0 +1,198 @@
+{
+  "diagnostic_title": "SIH-26143 Demonstration SAR Scene ML Diagnosis",
+  "timestamp": "2026-10-20T00:48:00Z",
+  "model_hashes": {
+    "classifier_onnx": "sha256:dc68400ca1b54116e75dc900afb63ac5f0cb48db452892c0ac8e401c44fdf6b7",
+    "segmenter_onnx": "sha256:da94d5af9b68155a883365b8a2eb615cc296f12df1926c4f612ea1bcb7656d8c"
+  },
+  "samples": [
+    {
+      "input_path": "data/sample_sar\\demo_oil_scene_01.tif",
+      "provenance": "procedural_synthetic_gaussian_noise",
+      "is_real_sentinel1": false,
+      "ground_truth": "Oil (Synthetic Procedural)",
+      "ground_truth_mask_pixels": 11789,
+      "dimensions": [
+        512,
+        512,
+        2
+      ],
+      "channel_statistics": {
+        "vv": {
+          "min": -24.098796844482422,
+          "max": -1.7248932123184204,
+          "mean": -10.384916305541992,
+          "std": 2.415390968322754
+        },
+        "vh": {
+          "min": -31.993087768554688,
+          "max": -10.503988265991211,
+          "mean": -20.27618408203125,
+          "std": 2.073129415512085
+        },
+        "noise_correlation_ratio": 0.9896,
+        "noise_type": "uncorrelated_gaussian_white_noise"
+      },
+      "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+      "raw_logits": [
+        -1.8505,
+        1.4029,
+        0.7148
+      ],
+      "probabilities": {
+        "Oil": 0.0251,
+        "No-Oil": 0.6489,
+        "Lookalike": 0.3261
+      },
+      "predicted_class": "No-Oil",
+      "confidence": 0.6489,
+      "calibration_ece": 0.094,
+      "segmentation_mask_pixel_count": 0,
+      "inference_method": "onnxruntime_cpu (SpillUNet + SceneClassifierV2)",
+      "fallback_state": "CLASSICAL_DARK_SPOT_ML_FALLBACK",
+      "classical_fallback_mask_pixels": 11702,
+      "root_cause": "Input scene contains synthetic i.i.d. Gaussian white noise (noise ratio ~1.00) rather than real Sentinel-1 SAR speckle and wave clutter. Deep CNN features trained on Zenodo real SAR do not activate on synthetic Gaussian noise, predicting No-Oil (~90%). Orchestrator safely falls back to classical dark spot detector with explicit non-ML provenance labeling."
+    },
+    {
+      "input_path": "data/sample_sar\\demo_oil_scene_02.tif",
+      "provenance": "procedural_synthetic_gaussian_noise",
+      "is_real_sentinel1": false,
+      "ground_truth": "Oil (Synthetic Procedural)",
+      "ground_truth_mask_pixels": 11789,
+      "dimensions": [
+        512,
+        512,
+        2
+      ],
+      "channel_statistics": {
+        "vv": {
+          "min": -24.000797271728516,
+          "max": -2.0136590003967285,
+          "mean": -10.386144638061523,
+          "std": 2.4234964847564697
+        },
+        "vh": {
+          "min": -31.847261428833008,
+          "max": -10.751769065856934,
+          "mean": -20.276390075683594,
+          "std": 2.07466197013855
+        },
+        "noise_correlation_ratio": 1.003,
+        "noise_type": "uncorrelated_gaussian_white_noise"
+      },
+      "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+      "raw_logits": [
+        -1.8885,
+        1.3819,
+        0.6736
+      ],
+      "probabilities": {
+        "Oil": 0.0248,
+        "No-Oil": 0.6534,
+        "Lookalike": 0.3218
+      },
+      "predicted_class": "No-Oil",
+      "confidence": 0.6534,
+      "calibration_ece": 0.094,
+      "segmentation_mask_pixel_count": 0,
+      "inference_method": "onnxruntime_cpu (SpillUNet + SceneClassifierV2)",
+      "fallback_state": "CLASSICAL_DARK_SPOT_ML_FALLBACK",
+      "classical_fallback_mask_pixels": 11743,
+      "root_cause": "Input scene contains synthetic i.i.d. Gaussian white noise (noise ratio ~1.00) rather than real Sentinel-1 SAR speckle and wave clutter. Deep CNN features trained on Zenodo real SAR do not activate on synthetic Gaussian noise, predicting No-Oil (~90%). Orchestrator safely falls back to classical dark spot detector with explicit non-ML provenance labeling."
+    },
+    {
+      "input_path": "data/sample_sar\\demo_lookalike_scene_01.tif",
+      "provenance": "procedural_synthetic_gaussian_noise",
+      "is_real_sentinel1": false,
+      "ground_truth": "Lookalike (Synthetic Procedural)",
+      "ground_truth_mask_pixels": 25433,
+      "dimensions": [
+        512,
+        512,
+        2
+      ],
+      "channel_statistics": {
+        "vv": {
+          "min": -20.149169921875,
+          "max": -1.6282625198364258,
+          "mean": -10.385200500488281,
+          "std": 2.034027576446533
+        },
+        "vh": {
+          "min": -30.619382858276367,
+          "max": -11.383989334106445,
+          "mean": -20.289878845214844,
+          "std": 1.8863013982772827
+        },
+        "noise_correlation_ratio": 0.9932,
+        "noise_type": "uncorrelated_gaussian_white_noise"
+      },
+      "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+      "raw_logits": [
+        -2.1459,
+        1.2652,
+        0.6971
+      ],
+      "probabilities": {
+        "Oil": 0.0206,
+        "No-Oil": 0.6252,
+        "Lookalike": 0.3542
+      },
+      "predicted_class": "No-Oil",
+      "confidence": 0.6252,
+      "calibration_ece": 0.094,
+      "segmentation_mask_pixel_count": 0,
+      "inference_method": "onnxruntime_cpu (SpillUNet + SceneClassifierV2)",
+      "fallback_state": "CLASSICAL_DARK_SPOT_ML_FALLBACK",
+      "classical_fallback_mask_pixels": 165,
+      "root_cause": "Input scene contains synthetic i.i.d. Gaussian white noise (noise ratio ~1.00) rather than real Sentinel-1 SAR speckle and wave clutter. Deep CNN features trained on Zenodo real SAR do not activate on synthetic Gaussian noise, predicting No-Oil (~90%). Orchestrator safely falls back to classical dark spot detector with explicit non-ML provenance labeling."
+    },
+    {
+      "input_path": "data/sample_sar\\demo_no_oil_scene_01.tif",
+      "provenance": "procedural_synthetic_gaussian_noise",
+      "is_real_sentinel1": false,
+      "ground_truth": "No-Oil (Synthetic Procedural)",
+      "ground_truth_mask_pixels": 0,
+      "dimensions": [
+        512,
+        512,
+        2
+      ],
+      "channel_statistics": {
+        "vv": {
+          "min": -17.457061767578125,
+          "max": -1.4913313388824463,
+          "mean": -9.99775505065918,
+          "std": 1.6611287593841553
+        },
+        "vh": {
+          "min": -27.21099090576172,
+          "max": -10.347418785095215,
+          "mean": -20.00094223022461,
+          "std": 1.6566376686096191
+        },
+        "noise_correlation_ratio": 0.9992,
+        "noise_type": "uncorrelated_gaussian_white_noise"
+      },
+      "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+      "raw_logits": [
+        -1.8993,
+        1.7774,
+        -0.5138
+      ],
+      "probabilities": {
+        "Oil": 0.0225,
+        "No-Oil": 0.8877,
+        "Lookalike": 0.0898
+      },
+      "predicted_class": "No-Oil",
+      "confidence": 0.8877,
+      "calibration_ece": 0.094,
+      "segmentation_mask_pixel_count": 0,
+      "inference_method": "onnxruntime_cpu (SpillUNet + SceneClassifierV2)",
+      "fallback_state": "CLASSICAL_DARK_SPOT_ML_FALLBACK",
+      "classical_fallback_mask_pixels": 199,
+      "root_cause": "Input scene contains synthetic i.i.d. Gaussian white noise (noise ratio ~1.00) rather than real Sentinel-1 SAR speckle and wave clutter. Deep CNN features trained on Zenodo real SAR do not activate on synthetic Gaussian noise, predicting No-Oil (~90%). Orchestrator safely falls back to classical dark spot detector with explicit non-ML provenance labeling."
+    }
+  ]
+}

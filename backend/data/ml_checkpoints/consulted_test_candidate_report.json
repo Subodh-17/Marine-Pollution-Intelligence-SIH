@@ -1,0 +1,43 @@
+{
+  "dataset_split": "previously_consulted_test_split",
+  "num_scenes": 450,
+  "pixel_pooled": {
+    "baseline": {
+      "recall": 0.3949,
+      "iou": 0.3577,
+      "precision": 0.7915,
+      "tp": 385457,
+      "fp": 101511
+    },
+    "candidate": {
+      "recall": 0.4183,
+      "iou": 0.3755,
+      "precision": 0.7859,
+      "tp": 408281,
+      "fp": 111252
+    }
+  },
+  "lookalike": {
+    "baseline_fp": 85187,
+    "candidate_fp": 94276,
+    "delta_fp": 9089,
+    "delta_pct": 10.67
+  },
+  "no_oil": {
+    "baseline_fp": 150,
+    "candidate_fp": 150,
+    "delta_fp": 0
+  },
+  "q4": {
+    "baseline_mean_recall": 0.3354,
+    "candidate_mean_recall": 0.3666,
+    "baseline_pooled_recall": 0.2608,
+    "candidate_pooled_recall": 0.2884,
+    "baseline_mean_iou": 0.3344,
+    "candidate_mean_iou": 0.3653
+  },
+  "q1": {
+    "baseline_area_ratio": 1.0611,
+    "candidate_area_ratio": 1.0639
+  }
+}

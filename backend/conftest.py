@@ -27,6 +27,7 @@ def _isolated_database(tmp_path, monkeypatch):
 
     db_path = str(tmp_path / "test_app.db")
     monkeypatch.setenv("DATABASE_PATH", db_path)
+    monkeypatch.setenv("DATASET_ROOT", str(tmp_path / "test_zenodo_sar"))
     get_settings.cache_clear()
     _db.reset_schema_cache()
     yield

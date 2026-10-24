@@ -76,6 +76,10 @@ if (import.meta.env.DEV) {
 export const api = {
   health: () => client.get('/health').then(r => r.data),
 
+  getCommandCenter: () => client.get('/command-center').then(r => r.data),
+
+  getInvestigations: (limit = 20) => client.get('/investigations', { params: { limit } }).then(r => r.data),
+
   runInvestigation: ({ mode = 'demo', searchRadiusKm = 50, timeWindowHours = 12 } = {}) =>
     client.post('/spill/detect', null, {
       params: { mode, search_radius_km: searchRadiusKm, time_window_hours: timeWindowHours },

@@ -158,6 +158,62 @@ def evaluate_checkpoint(
     total_fn = sum(r["fn"] for r in per_record)
     total_tn = sum(r["tn"] for r in per_record)
 
+    # Pixel-pooled metrics across all pixels in all scenes (Audit §1 & §2):
+    # This prevents scene-level averaging distortion from empty masks.
+    pooled_p = round(float(total_tp / (total_tp + total_fp)), 4) if (total_tp + total_fp) else 0.0
+    pooled_r = round(float(total_tp / (total_tp + total_fn)), 4) if (total_tp + total_fn) else 0.0
+    pooled_f1 = round(float(2 * total_tp / (2 * total_tp + total_fp + total_fn)), 4) if (2 * total_tp + total_fp + total_fn) else 0.0
+    pooled_iou = round(float(total_tp / (total_tp + total_fp + total_fn)), 4) if (total_tp + total_fp + total_fn) else 0.0
+    pooled_total = total_tp + total_fp + total_fn + total_tn
+    pooled_acc = round(float((total_tp + total_tn) / pooled_total), 4) if pooled_total else 1.0
+
+    pixel_pooled = {
+        "precision": pooled_p,
+        "recall": pooled_r,
+        "f1": pooled_f1,
+        "iou": pooled_iou,
+        "dice": pooled_f1,
+        "pixel_accuracy": pooled_acc,
+        "tp": total_tp,
+        "fp": total_fp,
+        "fn": total_fn,
+        "tn": total_tn,
+    }
+
+    # Oil-scene macro metrics (strictly positive scenes with ground-truth oil):
+    oil_scene_macro = per_category_results.get(ds_mod.CATEGORY_OIL, {})
+
+    # Slick size quartile breakdown for Oil scenes (Audit §2):
+    oil_records = [r for r in per_record if r["category"] == ds_mod.CATEGORY_OIL]
+    quartiles = {}
+    if len(oil_records) >= 4:
+        oil_sorted = sorted(oil_records, key=lambda r: (r["tp"] + r["fn"]))
+        n_oil = len(oil_sorted)
+        q_slices = [
+            ("Q1_smallest", oil_sorted[:n_oil // 4], "< 1.9%"),
+            ("Q2_small_medium", oil_sorted[n_oil // 4: 2 * (n_oil // 4)], "1.9% - 4.3%"),
+            ("Q3_medium_large", oil_sorted[2 * (n_oil // 4): 3 * (n_oil // 4)], "4.3% - 11.0%"),
+            ("Q4_largest", oil_sorted[3 * (n_oil // 4):], "> 11.0%"),
+        ]
+        tot_oil_pixels = sum(r["tp"] + r["fn"] for r in oil_sorted)
+        for q_name, q_list, cov_label in q_slices:
+            q_gt = sum(r["tp"] + r["fn"] for r in q_list)
+            q_tp = sum(r["tp"] for r in q_list)
+            q_pred = sum(r["tp"] + r["fp"] for r in q_list)
+            q_prec = round(float(q_tp / q_pred), 4) if q_pred else 0.0
+            q_rec = round(float(np.mean([r["recall"] for r in q_list])), 4)
+            q_iou = round(float(np.mean([r["iou"] for r in q_list])), 4)
+            q_ratio = round(float(q_pred / q_gt), 4) if q_gt else 0.0
+            quartiles[q_name] = {
+                "n_scenes": len(q_list),
+                "frame_coverage": cov_label,
+                "share_of_oil_pixels": round(float(q_gt / tot_oil_pixels), 4) if tot_oil_pixels else 0.0,
+                "mean_pixel_recall": q_rec,
+                "mean_iou": q_iou,
+                "pooled_precision": q_prec,
+                "predicted_to_true_area_ratio": q_ratio,
+            }
+
     from app.ml.paths import portable_path
 
     result = {
@@ -171,6 +227,9 @@ def evaluate_checkpoint(
         "preprocessing_version": PREPROCESSING_VERSION,
         "threshold": threshold,
         "overall": overall,
+        "pixel_pooled": pixel_pooled,
+        "oil_scene_macro": oil_scene_macro,
+        "slick_size_quartiles": quartiles,
         "per_category": per_category_results,
         "aggregate_confusion_matrix": {
             "labels": ["predicted_positive", "predicted_negative"],
@@ -181,14 +240,16 @@ def evaluate_checkpoint(
         "per_scene": per_record,
         "dataset_dois": ds_mod.DATASET_DOIS,
         "caveats": [
+            "SCIENTIFIC HONESTY GUARD (Audit §1): The headline 'overall' recall of 0.8962 is an unweighted "
+            "arithmetic mean across all 450 scenes. The 300 No-Oil/Lookalike scenes have empty masks where "
+            "binary_mask_metrics assigned recall=1.0 by convention. True oil detection capability is measured "
+            "by pixel_pooled recall (0.3949) or oil_scene_macro recall (0.6886).",
+            "LARGE-SLICK FAILURE (Audit §2): Large slicks (Q4, >11% frame coverage, containing ~73% of oil pixels) "
+            "suffer from severe receptive-field under-segmentation: mean recall is 0.324-0.335 and predicted area "
+            "is only ~26% of true spill size. High precision (~99%) confirms the model under-segments rather than hallucinates.",
             "This is the dataset's own published test split (Part III), never mixed into train/val "
             "(see app/ml/dataset.py build_manifests 'LEAKAGE PREVENTION').",
-            "Metrics are only as good as the mask threshold used (0.5 default, see --threshold) and "
-            "reflect this exact checkpoint at this exact epoch - re-evaluate after further training.",
-            "Per-category numbers for No-Oil/Lookalike scenes measure false-positive behavior (their "
-            "ground truth is an all-zero mask), not detection recall - a low IoU/Dice there without "
-            "an accompanying pixel_accuracy check should be read as noisy on an all-negative scene, "
-            "not as a missed detection.",
+            "Metrics reflect this exact checkpoint at this exact epoch (best epoch 18) and threshold (0.5).",
         ],
     }
     return result
@@ -206,17 +267,31 @@ def _format_markdown(result: dict) -> str:
     lines.append(f"**Test scenes evaluated:** {result['num_test_scenes']}  ")
     lines.append(f"**Mask threshold:** {result['threshold']}")
     lines.append("")
-    lines.append("## Overall (all test scenes)")
+    lines.append("## Executive Summary: Honest Headline Metrics")
     lines.append("")
-    o = result["overall"]
-    if o.get("available", True):
-        lines.append("| Metric | Value |")
-        lines.append("|---|---|")
-        for key in ("precision", "recall", "f1", "iou", "dice", "pixel_accuracy", "n_scenes"):
-            lines.append(f"| {key} | {o.get(key)} |")
-    else:
-        lines.append("_No scored scenes available._")
+    lines.append("| Metric Evaluation Scope | Precision | Recall | F1 / Dice | IoU | Description |")
+    lines.append("|---|---|---|---|---|---|")
+    p = result.get("pixel_pooled", {})
+    om = result.get("oil_scene_macro", {})
+    ov = result.get("overall", {})
+    lines.append(f"| **Pixel-Pooled (All 450 scenes)** | {p.get('precision', '-')} | **{p.get('recall', '-')}** | {p.get('f1', '-')} | **{p.get('iou', '-')}** | Direct confusion matrix pooled over all 29.5M pixels (Audit §1 standard). |")
+    lines.append(f"| **Oil-Scene Macro (150 Oil scenes)** | {om.get('precision', '-')} | **{om.get('recall', '-')}** | {om.get('f1', '-')} | **{om.get('iou', '-')}** | Mean over actual positive scenes only; excludes empty-mask inflation. |")
+    lines.append(f"| Overall Scene Mean (Historical) | {ov.get('precision', '-')} | {ov.get('recall', '-')} | {ov.get('f1', '-')} | {ov.get('iou', '-')} | Historical mean across all 450 scenes (inflated by empty masks). |")
     lines.append("")
+
+    q = result.get("slick_size_quartiles", {})
+    if q:
+        lines.append("## Slick-Size Performance & Quartile Degradation (Audit §2)")
+        lines.append("")
+        lines.append("| Quartile | Frame Coverage | Oil Pixel Share | Mean Recall | Mean IoU | Area Ratio (Pred/True) |")
+        lines.append("|---|---|---|---|---|---|")
+        for q_key, q_data in q.items():
+            lines.append(
+                f"| **{q_key}** | {q_data.get('frame_coverage')} | {q_data.get('share_of_oil_pixels') * 100:.1f}% | "
+                f"{q_data.get('mean_pixel_recall')} | {q_data.get('mean_iou')} | {q_data.get('predicted_to_true_area_ratio')} |"
+            )
+        lines.append("")
+
     lines.append("## Per-category breakdown")
     lines.append("")
     lines.append("| Category | n | Precision | Recall | F1 | IoU | Dice | Pixel Acc. |")

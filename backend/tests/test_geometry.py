@@ -48,3 +48,32 @@ def test_perimeter_and_area_positive_and_consistent():
     assert result.area_km2 > 0
     # a square's perimeter^2 should be substantially larger than its area (sanity bound)
     assert result.perimeter_km ** 2 > result.area_km2
+
+
+def test_characterize_slick_filters_tiny_noise():
+    mask = np.zeros((50, 50), dtype=bool)
+    mask[10, 10] = True
+    mask[10, 11] = True
+    # 2 pixels total < min_area_px (10)
+    result = characterize_slick(mask, 0.5, _flat_gt())
+    assert result is None
+
+
+def test_characterize_slick_multi_component_aggregation():
+    mask = np.zeros((100, 100), dtype=bool)
+    # Component 1: 10x10 = 100 px at (10, 10)
+    mask[10:20, 10:20] = True
+    # Component 2: 10x20 = 200 px at (60, 60)
+    mask[60:70, 60:80] = True
+
+    result = characterize_slick(mask, 0.85, _flat_gt())
+    assert result is not None
+    assert result.component_count == 2
+    assert result.area_px == 300
+    assert result.largest_component_area_px == 200
+    assert result.fragmentation_index > 0.0
+    # Verify centroid is weighted between the two components
+    gt = _flat_gt()
+    # Weighted row should be (100*14.5 + 200*64.5) / 300 = (1450 + 12900)/300 = 47.83
+    c_lat, c_lon = gt.pixel_to_latlon(47.83, 47.83)
+    assert abs(result.centroid_lat - c_lat) < 0.01

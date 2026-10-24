@@ -1,0 +1,241 @@
+{
+  "timestamp": "2026-10-23T17:56:35Z",
+  "release_verdict": "EXPERIMENTAL_CANDIDATE_FROZEN",
+  "overall_checks_passed": true,
+  "production_default": "SINGLE_SCALE_BASELINE",
+  "independent_validation_status": "BLOCKED_DATA_UNAVAILABLE",
+  "checkpoint_integrity": {
+    "spill_unet_real_best.pt": {
+      "status": "VERIFIED",
+      "path": "E:\\Projects\\Marine_Pollution_Intelligence_SIH_FINAL\\backend\\data\\ml_checkpoints\\spill_unet_real_best.pt",
+      "expected": "af725b2587baed621b6ee264598a44dea008dc7214ccf454ccadc2fdd50e4361",
+      "actual": "af725b2587baed621b6ee264598a44dea008dc7214ccf454ccadc2fdd50e4361",
+      "match": true
+    },
+    "classifier_real_promoted.pth": {
+      "status": "VERIFIED",
+      "path": "E:\\Projects\\Marine_Pollution_Intelligence_SIH_FINAL\\backend\\data\\ml_checkpoints\\classifier_real_promoted.pth",
+      "expected": "0f587cb7604047247424bf7a79a9f07ae0ab66b9e4a3070cf32c2c1957fed1ee",
+      "actual": "0f587cb7604047247424bf7a79a9f07ae0ab66b9e4a3070cf32c2c1957fed1ee",
+      "match": true
+    },
+    "spill_unet_real_best.onnx": {
+      "status": "VERIFIED",
+      "path": "E:\\Projects\\Marine_Pollution_Intelligence_SIH_FINAL\\backend\\data\\ml_checkpoints\\spill_unet_real_best.onnx",
+      "expected": "da94d5af9b68155a883365b8a2eb615cc296f12df1926c4f612ea1bcb7656d8c",
+      "actual": "da94d5af9b68155a883365b8a2eb615cc296f12df1926c4f612ea1bcb7656d8c",
+      "match": true
+    },
+    "classifier_real_best.onnx": {
+      "status": "VERIFIED",
+      "path": "E:\\Projects\\Marine_Pollution_Intelligence_SIH_FINAL\\backend\\data\\ml_checkpoints\\classifier_real_best.onnx",
+      "expected": "dc68400ca1b54116e75dc900afb63ac5f0cb48db452892c0ac8e401c44fdf6b7",
+      "actual": "dc68400ca1b54116e75dc900afb63ac5f0cb48db452892c0ac8e401c44fdf6b7",
+      "match": true
+    }
+  },
+  "configuration_defaults": {
+    "production_default_is_single_scale": true,
+    "config_ml_multiscale_segmentation": false,
+    "detector_resolved_multiscale_enabled": false,
+    "config_ml_multiscale_fusion_strategy": "size_gated_closure",
+    "detector_resolved_fusion_strategy": "size_gated_closure",
+    "status": "VERIFIED"
+  },
+  "splits_and_leakage": {
+    "manifests": {
+      "train": {
+        "status": "VALID",
+        "path": "D:\\zenodo_sar\\manifests\\train_manifest.json",
+        "num_records": 2184,
+        "sha256": "3a5d1d6152fffec5a0e3e5a8c1937d39a9fcda317ec9f9c89cd8f4601c1008e8",
+        "provenance_classification": "TRAINING",
+        "is_independent": false
+      },
+      "val": {
+        "status": "VALID",
+        "path": "D:\\zenodo_sar\\manifests\\val_manifest.json",
+        "num_records": 386,
+        "sha256": "ba3a40ed2132310fae860cc2ba40ac936d10e042ba0224a7362936205c2d49f5",
+        "provenance_classification": "VALIDATION",
+        "is_independent": false
+      },
+      "test": {
+        "status": "VALID",
+        "path": "D:\\zenodo_sar\\manifests\\test_manifest.json",
+        "num_records": 450,
+        "sha256": "22e57c4771209f2c72eeb30aed1cdaacafbccdb8d5f77cb762551c7298991b0b",
+        "provenance_classification": "PREVIOUSLY_CONSULTED_TEST",
+        "is_independent": false
+      }
+    },
+    "split_leakage_checks": {
+      "train_vs_val": {
+        "overlap_count": 0,
+        "clean": true
+      },
+      "train_vs_test": {
+        "overlap_count": 0,
+        "clean": true
+      },
+      "val_vs_test": {
+        "overlap_count": 0,
+        "clean": true
+      }
+    }
+  },
+  "frozen_candidate_configuration": {
+    "strategy_name": "size_gated_closure",
+    "implementation_version": "size_gated_closure_v1",
+    "base_resolution": [
+      256,
+      256
+    ],
+    "coarse_resolution": [
+      128,
+      128
+    ],
+    "scale_factor": 0.5,
+    "seed_probability_threshold": 0.45,
+    "decision_probability_threshold": 0.5,
+    "min_component_area_pixels": 100,
+    "morphological_footprint": "25x25_square",
+    "hole_filling_enabled": true,
+    "coarse_weight": 0.95,
+    "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+    "production_default": "SINGLE_SCALE_BASELINE",
+    "production_default_flag": "ML_MULTISCALE_SEGMENTATION=false",
+    "rollback_strategy": "base_only",
+    "is_newly_trained_model": false,
+    "candidate_nature": "Inference-time multiscale fusion strategy on frozen UNet checkpoint"
+  },
+  "validation_evaluation": {
+    "timestamp": "2026-10-20T15:17:14Z",
+    "dataset_split": "validation",
+    "num_scenes": 386,
+    "strategy_evaluated": "size_gated_closure_100_25",
+    "parameters": {
+      "min_area": 100,
+      "struct_size": 25,
+      "coarse_weight": 0.95,
+      "threshold": 0.5
+    },
+    "latency_ms": {
+      "mean_baseline": 72.28,
+      "mean_candidate": 94.33
+    },
+    "pixel_pooled": {
+      "baseline": {
+        "recall": 0.6508,
+        "iou": 0.5462,
+        "precision": 0.7726,
+        "tp": 211873,
+        "fp": 62372,
+        "fn": 113692
+      },
+      "candidate": {
+        "recall": 0.6665,
+        "iou": 0.5566,
+        "precision": 0.7715,
+        "tp": 216973,
+        "fp": 64273,
+        "fn": 108592
+      },
+      "delta": {
+        "recall_gain_abs": 0.0157,
+        "recall_gain_pct": 2.41,
+        "iou_gain_abs": 0.0104,
+        "iou_gain_pct": 1.91,
+        "tp_delta": 5100,
+        "fp_delta": 1901
+      }
+    },
+    "per_category": {
+      "Oil": {
+        "n_scenes": 180,
+        "baseline_macro_iou": 0.6942,
+        "candidate_macro_iou": 0.6985,
+        "baseline_macro_recall": 0.7994,
+        "candidate_macro_recall": 0.8045,
+        "baseline_macro_precision": 0.8734,
+        "candidate_macro_precision": 0.8725
+      },
+      "Lookalike": {
+        "n_scenes": 103,
+        "baseline_fp_px": 42184,
+        "candidate_fp_px": 43715,
+        "fp_delta_px": 1531,
+        "fp_delta_pct": 3.63
+      },
+      "No-Oil": {
+        "n_scenes": 103,
+        "baseline_fp_px": 1055,
+        "candidate_fp_px": 1055,
+        "fp_delta_px": 0
+      }
+    },
+    "quartiles": {
+      "Q1": {
+        "baseline_mean_recall": 0.8405,
+        "candidate_mean_recall": 0.8405,
+        "baseline_mean_iou": 0.6184,
+        "candidate_mean_iou": 0.6184,
+        "baseline_mean_area_ratio": 1.2281,
+        "candidate_mean_area_ratio": 1.2281
+      },
+      "Q4": {
+        "baseline_mean_recall": 0.674,
+        "candidate_mean_recall": 0.6911,
+        "baseline_pooled_recall": 0.5561,
+        "candidate_pooled_recall": 0.5792,
+        "baseline_mean_iou": 0.6536,
+        "candidate_mean_iou": 0.6698,
+        "baseline_mean_area_ratio": 0.7022,
+        "candidate_mean_area_ratio": 0.7207
+      }
+    }
+  },
+  "consulted_test_evaluation": {
+    "dataset_split": "previously_consulted_test_split",
+    "num_scenes": 450,
+    "pixel_pooled": {
+      "baseline": {
+        "recall": 0.3949,
+        "iou": 0.3577,
+        "precision": 0.7915,
+        "tp": 385457,
+        "fp": 101511
+      },
+      "candidate": {
+        "recall": 0.4183,
+        "iou": 0.3755,
+        "precision": 0.7859,
+        "tp": 408281,
+        "fp": 111252
+      }
+    },
+    "lookalike": {
+      "baseline_fp": 85187,
+      "candidate_fp": 94276,
+      "delta_fp": 9089,
+      "delta_pct": 10.67
+    },
+    "no_oil": {
+      "baseline_fp": 150,
+      "candidate_fp": 150,
+      "delta_fp": 0
+    },
+    "q4": {
+      "baseline_mean_recall": 0.3354,
+      "candidate_mean_recall": 0.3666,
+      "baseline_pooled_recall": 0.2608,
+      "candidate_pooled_recall": 0.2884,
+      "baseline_mean_iou": 0.3344,
+      "candidate_mean_iou": 0.3653
+    },
+    "q1": {
+      "baseline_area_ratio": 1.0611,
+      "candidate_area_ratio": 1.0639
+    }
+  }
+}

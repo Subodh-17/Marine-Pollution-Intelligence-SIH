@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './SatelliteTab.css'
 import { getProvenanceInfo, DETECTOR_PROVENANCE } from '../../lib/detectorProvenance'
 import { formatSourceLabel, formatMethodLabel } from '../../lib/formatters'
@@ -6,13 +7,6 @@ export default function SatelliteTab({ investigation }) {
   const sat = investigation.satellite
   const geo = sat.geometry
   const age = sat.age_estimate
-  // The confidence number's actual mechanism - and what "fallback" even
-  // means - differs across all THREE possible detector_provenance values,
-  // not just "ML vs not-ML": a fallback result must never be captioned as
-  // if the ML model produced it, and must never be presented identically
-  // to a genuine classical-by-request result either, since the person
-  // asked for ML and didn't get it (see MODEL_CARD.md "ML confidence must
-  // be honest").
   const provenance = sat.detector_provenance
   const provenanceInfo = getProvenanceInfo(provenance)
   const isFallback = provenance === DETECTOR_PROVENANCE.ML_FALLBACK
@@ -20,24 +14,12 @@ export default function SatelliteTab({ investigation }) {
   const isMlReal = provenance === DETECTOR_PROVENANCE.ML_REAL
   const confidenceInlineLabel = provenanceInfo.confidenceInline
   const confidenceCaveat = provenanceInfo.confidenceCaveat
-  // Structured model-provenance metadata (Part E/F/G) - present whenever the
-  // ML engine was actually invoked, regardless of whether its result
-  // ultimately qualified (see backend/app/investigation/orchestrator.py).
-  // Never contains a raw filesystem path - only names/versions/DOIs/dates.
-  const modelInfo = sat.model_provenance_info
-
-  // Lookalike safety (Part 6): the classifier's own scene-level verdict -
-  // Oil / No-Oil / Lookalike / Uncertain - is a structured field, separate
-  // from (and independent of) the segmenter's pixel mask above and the
-  // aggregate `sat.confidence` number in the panel below. Before this
-  // block existed, a Lookalike or low-confidence classification was only
-  // ever visible buried inside the free-text "Detection notes" list further
-  // down this page - never as its own clearly-labelled state - so a
-  // confident Lookalike call could reach an investigator looking exactly
-  // like a confirmed oil detection. Only present when the ML classifier
-  // actually ran (see app/satellite/detection.py's scene_classification
-  // docstring) - always null for a classical-only or fallback result.
   const sceneClassification = sat.scene_classification
+  const gating = sat.attribution_gating || {}
+
+  const [overlayOpacity, setOverlayOpacity] = useState(0.75)
+  const [viewMode, setViewMode] = useState('gallery') // 'gallery' | 'overlay'
+
   const SCENE_CLASSIFICATION_COPY = {
     LIKELY_OIL: {
       badge: 'Oil', modifier: 'oil',
@@ -59,15 +41,38 @@ export default function SatelliteTab({ investigation }) {
   const sceneCopy = sceneClassification ? SCENE_CLASSIFICATION_COPY[sceneClassification.oil_status] : null
 
   return (
-    <div>
+    <div className="satellite-workspace">
+      {/* Header */}
       <div className="section-head">
         <div>
-          <span className="eyebrow">Stage 1–4 · SAR processing chain</span>
-          <h2>Satellite detection & segmentation</h2>
+          <span className="eyebrow">Stage 1–4 · SAR Geospatial Intelligence</span>
+          <h2>Satellite Detection & Segmentation Workspace</h2>
         </div>
         <p>Source: {formatSourceLabel(sat.source)} &middot; Method: {formatMethodLabel(sat.method)}</p>
       </div>
 
+      {/* Fail-closed Attribution Warning Banner (Audit §3) */}
+      {gating.gated && (
+        <div className="safety-alert-banner safety-alert-banner--amber">
+          <div style={{ flexShrink: 0, marginTop: '2px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--signal-amber)" strokeWidth="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <strong style={{ color: 'var(--signal-amber)', fontSize: '13px', display: 'block', marginBottom: '2px' }}>
+              ATTRIBUTION SAFETY GATE ACTIVE: {gating.status}
+            </strong>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              {gating.reason} (Audit §3: Ungated policy flagged 34% of lookalike/non-oil scenes).
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Model Provenance Banner */}
       <div className={`provenance-banner provenance-banner--${isMlReal ? 'ml-real' : isMl ? 'ml' : isFallback ? 'fallback' : 'classical'}`}>
         <span className="provenance-banner__badge">{provenanceInfo.badge}</span>
         {isFallback && (
@@ -85,13 +90,13 @@ export default function SatelliteTab({ investigation }) {
         )}
         {isMlReal && (
           <span className="provenance-banner__note">
-            Genuine PyTorch inference produced this result, using a checkpoint trained on the
-            real Zenodo Sentinel-1 SAR Oil Spill Dataset. See the model limitations below and
-            its evaluation report before relying on this in a new deployment context.
+            Genuine PyTorch/ONNX inference produced this result, using a checkpoint trained on the
+            real Zenodo Sentinel-1 SAR Oil Spill Dataset.
           </span>
         )}
       </div>
 
+      {/* Scene Classification Banner */}
       {sceneClassification && sceneCopy && (
         <div className={`scene-classification-banner scene-classification-banner--${sceneCopy.modifier}`}>
           <span className="scene-classification-banner__badge">{sceneCopy.badge}</span>
@@ -109,104 +114,167 @@ export default function SatelliteTab({ investigation }) {
         </div>
       )}
 
-      {modelInfo && (
-        <div className="panel model-provenance-panel" style={{ marginBottom: 'var(--sp-4)' }}>
-          <h3 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>Model provenance</h3>
-          <dl style={{ margin: 0 }}>
-            <dt>Model</dt>
-            <dd>{modelInfo.model_name} {modelInfo.model_version != null && <>(version {String(modelInfo.model_version)})</>}</dd>
+      {/* Interactive Imagery Viewer & Opacity Controls */}
+      <div className="bento-card bento-card--glass" style={{ marginBottom: 'var(--sp-5)', padding: '16px' }}>
+        <div className="bento-card__header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h3 className="bento-card__title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--signal-cyan)" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              Dual-Polarization SAR Imagery & Segmentation
+            </h3>
+            <div className="view-mode-toggle" style={{ display: 'flex', gap: '4px' }}>
+              <button
+                className={`bento-action-btn ${viewMode === 'gallery' ? 'bento-action-btn--primary' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setViewMode('gallery')}
+              >
+                Gallery (3-Step)
+              </button>
+              <button
+                className={`bento-action-btn ${viewMode === 'overlay' ? 'bento-action-btn--primary' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setViewMode('overlay')}
+              >
+                Adjustable Opacity Overlay
+              </button>
+            </div>
+          </div>
 
-            <dt>Trained on real Sentinel-1 SAR data</dt>
-            <dd>{modelInfo.is_real_data_trained ? 'Yes' : 'No'}</dd>
-
-            <dt>Training dataset</dt>
-            <dd>{modelInfo.dataset_used_for_training}</dd>
-
-            {modelInfo.dataset_dois && (
-              <>
-                <dt>Dataset DOIs</dt>
-                <dd>
-                  {Object.entries(modelInfo.dataset_dois).map(([part, doi], i, arr) => (
-                    <span key={part}>
-                      <a href={`https://doi.org/${doi}`} target="_blank" rel="noreferrer">{doi}</a>
-                      {i < arr.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}
-                </dd>
-              </>
-            )}
-
-            <dt>Input channels / preprocessing version</dt>
-            <dd>{modelInfo.input_channels} channel(s) &middot; <code>{modelInfo.preprocessing_version}</code></dd>
-
-            {modelInfo.training_date && (
-              <>
-                <dt>Training date</dt>
-                <dd>{modelInfo.training_date}</dd>
-              </>
-            )}
-
-            {modelInfo.dataset_split && (modelInfo.dataset_split.train != null || modelInfo.dataset_split.val != null) && (
-              <>
-                <dt>Dataset split (train / val samples)</dt>
-                <dd>{modelInfo.dataset_split.train ?? '—'} / {modelInfo.dataset_split.val ?? '—'}</dd>
-              </>
-            )}
-
-            <dt>Detection method used</dt>
-            <dd>{modelInfo.fallback_status === 'not_used' ? 'ML result used as requested' : 'Classical detector used (ML result not applied)'}</dd>
-          </dl>
-          {modelInfo.limitations && modelInfo.limitations.length > 0 && (
-            <>
-              <dt style={{ display: 'block' }}>Model limitations</dt>
-              <ul>
-                {modelInfo.limitations.map((lim, i) => <li key={i}>{lim}</li>)}
-              </ul>
-            </>
+          {viewMode === 'overlay' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                MASK OPACITY: {Math.round(overlayOpacity * 100)}%
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={overlayOpacity}
+                onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
+                style={{ accentColor: 'var(--signal-cyan)', cursor: 'pointer', width: '120px' }}
+              />
+            </div>
           )}
         </div>
-      )}
 
-      <div className="sat-image-row">
-        <div className="sat-image-card">
-          <img src={sat.original_image} alt="Original SAR scene" />
-          <div className="sat-image-card__label"><span className="step-num">1</span> Original SAR</div>
-        </div>
-        <div className="sat-image-card">
-          <img src={sat.processed_image} alt="Despeckled, normalized SAR scene" />
-          <div className="sat-image-card__label"><span className="step-num">2</span> Despeckled / normalized</div>
-        </div>
-        <div className="sat-image-card">
-          <img src={sat.detection_overlay} alt="Detected slick overlay" />
-          <div className="sat-image-card__label"><span className="step-num">3</span> Detected slick overlay</div>
-        </div>
+        {viewMode === 'gallery' ? (
+          <div className="sat-image-row" style={{ margin: 0 }}>
+            <div className="sat-image-card">
+              <img src={sat.original_image} alt="Original SAR scene" />
+              <div className="sat-image-card__label"><span className="step-num">1</span> Original SAR</div>
+            </div>
+            <div className="sat-image-card">
+              <img src={sat.processed_image} alt="Despeckled, normalized SAR scene" />
+              <div className="sat-image-card__label"><span className="step-num">2</span> Despeckled & Normalized</div>
+            </div>
+            <div className="sat-image-card">
+              <img src={sat.detection_overlay} alt="Detected slick overlay" />
+              <div className="sat-image-card__label"><span className="step-num">3</span> Oil Slick Overlay</div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ position: 'relative', width: '100%', maxHeight: '520px', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
+            <img
+              src={sat.processed_image}
+              alt="Base SAR scene"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+            <img
+              src={sat.detection_overlay}
+              alt="Overlay mask"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                opacity: overlayOpacity,
+                mixBlendMode: 'screen',
+                pointerEvents: 'none',
+              }}
+            />
+          </div>
+        )}
       </div>
 
+      {/* Diagnostics and Characterisation */}
       <div className="two-col">
+        {/* Slick Characterisation Panel */}
         <div className="panel">
-          <h3 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>Slick characterisation</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>
+              Slick Characterisation & Multi-Component Diagnostics
+            </h3>
+            {geo?.slick_quartile && (
+              <span className={`bento-badge ${geo.slick_quartile === 'q4' ? 'bento-badge--coral' : 'bento-badge--amber'}`}>
+                {geo.slick_quartile.toUpperCase()} QUARTILE
+              </span>
+            )}
+          </div>
+
           {geo ? (
-            <table className="geometry-table">
-              <tbody>
-                <tr><td>Detection confidence <span className="caveat-inline">{confidenceInlineLabel}</span></td><td>{(sat.confidence * 100).toFixed(1)}%</td></tr>
-                <tr><td>Area</td><td>{geo.area_km2} km²</td></tr>
-                <tr><td>Perimeter</td><td>{geo.perimeter_km} km</td></tr>
-                <tr><td>Length</td><td>{geo.length_km} km</td></tr>
-                <tr><td>Width</td><td>{geo.width_km} km</td></tr>
-                <tr><td>Aspect ratio</td><td>{geo.aspect_ratio}</td></tr>
-                <tr><td>Orientation</td><td>{geo.orientation_deg}°</td></tr>
-                <tr><td>Centroid</td><td>{geo.centroid_lat}°, {geo.centroid_lon}°</td></tr>
-              </tbody>
-            </table>
+            <>
+              {geo.slick_quartile === 'q4' && (
+                <div style={{
+                  padding: '10px 12px',
+                  background: 'rgba(255, 107, 92, 0.08)',
+                  borderLeft: '3px solid var(--signal-coral)',
+                  marginBottom: '14px',
+                  borderRadius: '4px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <strong style={{ color: 'var(--signal-coral)', fontSize: '12px' }}>
+                      Large-Slick Q4 Diagnostic
+                    </strong>
+                    {sat.detection_notes?.some(n => n.includes('Multiscale')) ? (
+                      <span className="bento-badge bento-badge--cyan" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                        EXPERIMENTAL CANDIDATE: MULTISCALE (size_gated_closure)
+                      </span>
+                    ) : (
+                      <span className="bento-badge bento-badge--green" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                        PRODUCTION DEFAULT: SINGLE-SCALE BASELINE
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.5, display: 'block' }}>
+                    {sat.detection_notes?.some(n => n.includes('Multiscale'))
+                      ? "Slick spans >11% of image frame (Q4 category). Experimental candidate size_gated_closure active: coarse-scale infill supplements receptive field for components >= 100 px. Not a production guarantee."
+                      : "Slick spans >11% of image frame (Q4 category). Running production single-scale segmenter (ML_MULTISCALE_SEGMENTATION=false). Multiscale recovery remains an opt-in experimental candidate pending independent validation."}
+                  </span>
+                </div>
+              )}
+
+              <table className="geometry-table">
+                <tbody>
+                  <tr><td>Detection confidence <span className="caveat-inline">{confidenceInlineLabel}</span></td><td>{(sat.confidence * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Slick Area</td><td>{geo.area_km2} km² ({geo.area_px} pixels)</td></tr>
+                  <tr><td>Size Quartile</td><td>{geo.slick_quartile ? geo.slick_quartile.toUpperCase() : 'CALCULATED'}</td></tr>
+                  <tr><td>Perimeter</td><td>{geo.perimeter_km} km</td></tr>
+                  <tr><td>Length / Width</td><td>{geo.length_km} km / {geo.width_km} km</td></tr>
+                  <tr><td>Aspect ratio</td><td>{geo.aspect_ratio} : 1</td></tr>
+                  <tr><td>Orientation</td><td>{geo.orientation_deg}°</td></tr>
+                  <tr><td>Connected Components</td><td>{geo.component_count ?? 1} parts</td></tr>
+                  <tr><td>Fragmentation Index</td><td>{geo.fragmentation_index != null ? `${(geo.fragmentation_index * 100).toFixed(1)}%` : '0%'}</td></tr>
+                  <tr><td>Centroid (Area-Weighted)</td><td>{geo.centroid_lat}°, {geo.centroid_lon}°</td></tr>
+                </tbody>
+              </table>
+            </>
           ) : <p>No slick detected in this scene.</p>}
-          <div className="confidence-bar-track">
+
+          <div className="confidence-bar-track" style={{ marginTop: '16px' }}>
             <div className="confidence-bar-fill" style={{ width: `${sat.confidence * 100}%` }} />
           </div>
-          <p className="caveat-note">{confidenceCaveat}</p>
+          <p className="caveat-note" style={{ marginTop: '12px' }}>{confidenceCaveat}</p>
         </div>
 
+        {/* Acquisition Metadata & Estimated Spill Age */}
         <div className="panel">
-          <h3 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>Estimated spill age</h3>
+          <h3 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>Estimated Spill Age</h3>
           {!age || age.confidence === 'unavailable' ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: 13.5 }}>
               {age?.caveat || 'Age estimate unavailable: no slick was detected in this scene.'}
@@ -223,7 +291,19 @@ export default function SatelliteTab({ investigation }) {
             </>
           )}
 
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginTop: 'var(--sp-5)' }}>Detection notes</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginTop: 'var(--sp-5)' }}>
+            Sensor & Geolocation Metadata
+          </h3>
+          <table className="geometry-table" style={{ fontSize: '12px' }}>
+            <tbody>
+              <tr><td>Sensor Source</td><td>{formatSourceLabel(sat.source)}</td></tr>
+              <tr><td>Geolocation Tag</td><td>{sat.geolocation_source} {sat.geolocation_is_assumed ? '(Assumed Anchor)' : '(Embedded GeoTIFF Tags)'}</td></tr>
+              <tr><td>Detector Version</td><td>{sat.detector_version}</td></tr>
+              <tr><td>Attribution Safety Status</td><td style={{ color: gating.gated ? 'var(--signal-amber)' : 'var(--signal-green)' }}>{gating.status || 'UNCHECKED'}</td></tr>
+            </tbody>
+          </table>
+
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, marginTop: 'var(--sp-5)' }}>Detection Notes</h3>
           <ul style={{ fontSize: 12.5, color: 'var(--text-secondary)', paddingLeft: 18, lineHeight: 1.6 }}>
             {sat.detection_notes.map((n, i) => <li key={i}>{n}</li>)}
           </ul>

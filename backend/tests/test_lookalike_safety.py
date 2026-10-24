@@ -129,3 +129,93 @@ class TestOrchestratorSurfacesOilStatus:
             assert has_caveat, (
                 f"oil_status={sc['oil_status']} but no safety caveat found in notes: {notes_text}"
             )
+
+    def test_attribution_abstention_on_non_confirmed_oil(self):
+        """SIH-26143 Audit §3: Vessel attribution MUST fail closed when oil status
+        is not LIKELY_OIL or mask area is below threshold."""
+        import app.investigation.orchestrator as orch
+        sample = os.path.join(os.path.dirname(__file__), "..", "data", "sample_sar",
+                               "demo_lookalike_scene_01.tif")
+        if not os.path.exists(sample):
+            pytest.skip("bundled sample SAR image not present")
+        inv = orch.run_investigation(mode="real_satellite", image_path=sample, detector="ml")
+        sat = inv.satellite
+        sc = sat.get("scene_classification")
+        if sc is not None and sc["oil_status"] in ("LOOKALIKE", "NO_OIL"):
+            assert sat["attribution_status"].startswith("ABSTAINED_")
+            assert sat["attribution_gating"]["gated"] is True
+            assert len(inv.candidates) == 0, "No vessel candidates should be accused for non-oil scenes!"
+
+
+class TestAttributionPolicyBypassResistance:
+    """Rigorous tests proving that vessel attribution safeguards CANNOT be bypassed
+    via manual masks, sub-endpoints, ambiguous classifications, or stale data.
+    """
+
+    def test_policy_empty_mask_abstention(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_EMPTY_MASK
+        res = evaluate_attribution_eligibility(mask=np.zeros((100, 100)), observed_time=None)
+        assert res.eligible is False
+        assert res.status == STATUS_EMPTY_MASK
+
+    def test_policy_lookalike_classification_abstention(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_LOOKALIKE
+        sc = {"oil_status": "LOOKALIKE", "probabilities": {"Oil": 0.05, "Lookalike": 0.90, "No-Oil": 0.05}}
+        res = evaluate_attribution_eligibility(scene_classification=sc, mask=np.ones((50, 50)), observed_time=None)
+        assert res.eligible is False
+        assert res.status == STATUS_LOOKALIKE
+        assert "Lookalike" in res.reason
+
+    def test_policy_no_oil_classification_abstention(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_NO_OIL
+        sc = {"oil_status": "NO_OIL", "probabilities": {"Oil": 0.01, "No-Oil": 0.98, "Lookalike": 0.01}}
+        res = evaluate_attribution_eligibility(scene_classification=sc, mask=np.ones((50, 50)), observed_time=None)
+        assert res.eligible is False
+        assert res.status == STATUS_NO_OIL
+
+    def test_policy_tiny_mask_below_threshold_abstention(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_BELOW_MIN_AREA
+        mask = np.zeros((100, 100))
+        mask[:5, :5] = 1  # 25 pixels (well below 250 px default)
+        from datetime import datetime, timezone
+        res = evaluate_attribution_eligibility(mask=mask, observed_time=datetime.now(timezone.utc), min_mask_area_px=250)
+        assert res.eligible is False
+        assert res.status == STATUS_BELOW_MIN_AREA
+
+    def test_policy_ambiguous_probability_review_required(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_UNCERTAIN
+        sc = {"oil_status": "UNCERTAIN", "probabilities": {"Oil": 0.42, "No-Oil": 0.38, "Lookalike": 0.20}}
+        mask = np.ones((50, 50))  # 2500 px
+        from datetime import datetime, timezone
+        res = evaluate_attribution_eligibility(scene_classification=sc, mask=mask, observed_time=datetime.now(timezone.utc))
+        assert res.eligible is False
+        assert res.status == STATUS_UNCERTAIN
+        assert "ambiguous" in res.reason
+
+    def test_policy_stale_ais_abstention(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_STALE_AIS
+        from app.ais.schema import AISRecord
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        stale_time = now - timedelta(days=5)  # 120 hours old (exceeds 72h max)
+        stale_record = AISRecord(mmsi="123456789", timestamp=stale_time, lat=19.0, lon=71.0, sog=10.0, cog=180.0)
+        mask = np.ones((50, 50))  # 2500 px
+        res = evaluate_attribution_eligibility(
+            mask=mask, observed_time=now, ais_records=[stale_record], max_ais_staleness_hours=72.0
+        )
+        assert res.eligible is False
+        assert res.status == STATUS_STALE_AIS
+
+    def test_policy_permits_confirmed_oil_with_valid_data(self):
+        from app.investigation.policy import evaluate_attribution_eligibility, STATUS_PERMITTED
+        from app.ais.schema import AISRecord
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+        fresh_record = AISRecord(mmsi="123456789", timestamp=now - timedelta(hours=2), lat=19.0, lon=71.0, sog=10.0, cog=180.0)
+        mask = np.ones((50, 50))  # 2500 px
+        sc = {"oil_status": "LIKELY_OIL", "probabilities": {"Oil": 0.88, "No-Oil": 0.08, "Lookalike": 0.04}}
+        res = evaluate_attribution_eligibility(
+            scene_classification=sc, mask=mask, observed_time=now, ais_records=[fresh_record]
+        )
+        assert res.eligible is True
+        assert res.status == STATUS_PERMITTED
