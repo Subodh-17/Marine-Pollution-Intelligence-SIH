@@ -13,19 +13,24 @@
 // changes — the two are intentionally kept in lockstep so there is exactly
 // one place (README/DEMO_GUIDE) that needs to document the storage key.
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 
-export const STORAGE_KEY = 'mpi-theme-preference'
+const STORAGE_KEY = 'mpi-theme-preference'
 const PREFERENCES = ['light', 'dark', 'system']
 
-function systemPrefersDark() {
-  return typeof window !== 'undefined'
-    && window.matchMedia
-    && window.matchMedia('(prefers-color-scheme: dark)').matches
+function subscribeToSystemDark(callback) {
+  if (typeof window === 'undefined' || !window.matchMedia) return () => {}
+  const mql = window.matchMedia('(prefers-color-scheme: dark)')
+  mql.addEventListener('change', callback)
+  return () => mql.removeEventListener('change', callback)
 }
 
-function resolve(preference) {
-  return preference === 'system' ? (systemPrefersDark() ? 'dark' : 'light') : preference
+function getSystemDarkSnapshot() {
+  return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches)
+}
+
+function getServerDarkSnapshot() {
+  return false
 }
 
 function readStoredPreference() {
@@ -40,6 +45,7 @@ function readStoredPreference() {
 }
 
 function applyResolvedTheme(resolved) {
+  if (typeof document === 'undefined') return
   document.documentElement.setAttribute('data-theme', resolved)
   // Lets native form controls (checkboxes, scrollbars in some browsers,
   // date pickers, etc.) pick a matching light/dark rendering too.
@@ -50,28 +56,14 @@ const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children }) {
   const [preference, setPreference] = useState(readStoredPreference)
-  const [resolvedTheme, setResolvedTheme] = useState(() => resolve(readStoredPreference()))
+  const systemDark = useSyncExternalStore(subscribeToSystemDark, getSystemDarkSnapshot, getServerDarkSnapshot)
 
-  // Keep the DOM attribute in sync whenever the user's choice changes.
-  useEffect(() => {
-    const resolved = resolve(preference)
-    setResolvedTheme(resolved)
-    applyResolvedTheme(resolved)
-  }, [preference])
+  const resolvedTheme = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference
 
-  // In "system" mode, follow live OS theme changes (e.g. the user's OS
-  // switches to dark mode at sunset) without needing a page refresh.
+  // Keep the DOM attribute in sync whenever the resolved theme changes.
   useEffect(() => {
-    if (preference !== 'system' || !window.matchMedia) return undefined
-    const mql = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => {
-      const resolved = resolve('system')
-      setResolvedTheme(resolved)
-      applyResolvedTheme(resolved)
-    }
-    mql.addEventListener('change', onChange)
-    return () => mql.removeEventListener('change', onChange)
-  }, [preference])
+    applyResolvedTheme(resolvedTheme)
+  }, [resolvedTheme])
 
   const setTheme = useCallback((next) => {
     if (!PREFERENCES.includes(next)) return
@@ -92,6 +84,7 @@ export function ThemeProvider({ children }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
+// oxlint-disable-next-line react/only-export-components
 export function useTheme() {
   const ctx = useContext(ThemeContext)
   if (!ctx) throw new Error('useTheme must be used within a ThemeProvider')

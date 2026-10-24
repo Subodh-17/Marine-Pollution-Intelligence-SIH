@@ -276,7 +276,7 @@ function MlTrainingContent({ status, historyRes, metricsRes, onRetryHistory, onR
           ) : history && history.available ? (
             <>
               <div className="ml-chart-wrap">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
                   <LineChart data={history.epochs} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" />
                     <XAxis dataKey="epoch" stroke="var(--text-muted)" fontSize={11} label={{ value: 'Epoch', position: 'insideBottom', offset: -2, fill: 'var(--text-muted)', fontSize: 11 }} />

@@ -43,12 +43,60 @@ from app.persistence import db as _db
 
 _log = get_logger("orchestrator")
 
+import threading
+from collections import OrderedDict
+
 # Fixed observation time for the deterministic demo scenario. Kept as a
 # constant (not "now") so the whole pipeline - including the synthetic
 # environment field - is exactly reproducible run to run.
 DEMO_OBSERVATION_TIME = datetime(2026, 8, 28, 6, 0, 0, tzinfo=timezone.utc).replace(tzinfo=None)
 
-_STORE: dict[str, "Investigation"] = {}
+
+class _BoundedInvestigationStore(OrderedDict):
+    """Thread-safe LRU in-memory store for investigations to prevent unbounded memory
+    growth on memory-constrained production platforms (e.g. 512MB RAM containers).
+    Older entries are safely evicted from memory because they are durably persisted
+    in the database and rehydrated on-demand via get_investigation()."""
+
+    def __init__(self, max_entries: int = 100):
+        super().__init__()
+        self.max_entries = max_entries
+        self._lock = threading.Lock()
+
+    def __setitem__(self, key, value):
+        with self._lock:
+            super().__setitem__(key, value)
+            self.move_to_end(key)
+            while len(self) > self.max_entries:
+                self.popitem(last=False)
+
+    def __getitem__(self, key):
+        with self._lock:
+            val = super().__getitem__(key)
+            self.move_to_end(key)
+            return val
+
+    def get(self, key, default=None):
+        with self._lock:
+            if key in self:
+                self.move_to_end(key)
+                return super().__getitem__(key)
+            return default
+
+    def values(self):
+        with self._lock:
+            return list(super().values())
+
+    def items(self):
+        with self._lock:
+            return list(super().items())
+
+    def clear(self):
+        with self._lock:
+            super().clear()
+
+
+_STORE: _BoundedInvestigationStore = _BoundedInvestigationStore(max_entries=100)
 
 
 def _sanitize_for_json(val):
@@ -779,7 +827,7 @@ class RehydratedInvestigation:
     owner: str = "anonymous"
 
     def to_dict(self) -> dict:
-        return {
+        raw = {
             "id": self.id, "created_at": self.created_at, "mode": self.mode,
             "data_sources": self.data_sources, "satellite": self.satellite,
             "environment": self.environment, "drift": self.drift,
@@ -788,6 +836,7 @@ class RehydratedInvestigation:
             "progress_log": self.progress_log, "config_used": self.config_used,
             "processing_time_ms": self.processing_time_ms,
         }
+        return _sanitize_for_json(raw)
 
 
 def get_investigation(inv_id: str):

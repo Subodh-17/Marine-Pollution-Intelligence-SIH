@@ -447,10 +447,13 @@ def command_center(current_user: str = Depends(get_current_user)):
 def get_investigations_list(limit: int = Query(20, le=100), current_user: str = Depends(get_current_user)):
     """List recent investigations."""
     from app.investigation.orchestrator import _STORE
+    owner_filter = current_user if get_settings().auth_enabled else None
     if _persistence_db.get_settings().database_enabled:
-        return _persistence_db.list_investigations(owner=None, limit=limit)
+        return _persistence_db.list_investigations(owner=owner_filter, limit=limit)
     items = []
-    for inv in list(_STORE.values())[-limit:]:
+    for inv in list(_STORE.values()):
+        if get_settings().auth_enabled and getattr(inv, "owner", "anonymous") != current_user:
+            continue
         sat = getattr(inv, "satellite", {}) or {}
         items.append({
             "id": inv.id,
@@ -460,6 +463,7 @@ def get_investigations_list(limit: int = Query(20, le=100), current_user: str = 
             "detector_provenance": sat.get("detector_provenance"),
             "candidate_count": len(getattr(inv, "candidates", []) or []),
         })
+    items = items[-limit:]
     items.reverse()
     return items
 
@@ -510,7 +514,7 @@ def spill_detect(
     hindcast -> AIS analysis -> attribution scoring. Returns the complete
     investigation object (this single call powers the 'Run Demo
     Investigation' button)."""
-    ais_path = _LAST_UPLOADED_AIS.get("path") if mode == "custom_ais" else None
+    ais_path = _get_user_ais_path(current_user) if mode == "custom_ais" else None
     if mode == "custom_ais" and not ais_path:
         raise HTTPException(400, "mode=custom_ais requires an AIS CSV to be uploaded first via POST /api/ais/upload.")
     try:
@@ -529,6 +533,16 @@ def spill_detect(
 
 
 _LAST_UPLOADED_AIS: dict = {}
+_USER_UPLOADED_AIS: dict[str, dict] = {}
+
+
+def _get_user_ais_path(user_or_owner: str | None = None) -> str | None:
+    if get_settings().auth_enabled:
+        if not user_or_owner:
+            return None
+        user_data = _USER_UPLOADED_AIS.get(user_or_owner)
+        return user_data.get("path") if user_data else None
+    return _LAST_UPLOADED_AIS.get("path")
 
 
 def _save_upload_with_size_limit(file, suffix: str, max_bytes: int) -> tuple[str, str]:
@@ -586,17 +600,21 @@ async def upload_ais(file: UploadFile = File(...), current_user: str = Depends(g
         )
     tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, settings.max_upload_size_bytes)
     # Section 9 fix: a previous upload's temp file was silently orphaned on
-    # disk every time a new one replaced it in _LAST_UPLOADED_AIS - clean it
-    # up now that it's about to be superseded.
-    previous_path = _LAST_UPLOADED_AIS.get("path")
+    # disk every time a new one replaced it - clean it up now that it's about
+    # to be superseded, scoped per user to prevent cross-user races.
+    user_key = current_user if get_settings().auth_enabled else "anonymous"
+    previous_path = _USER_UPLOADED_AIS.get(user_key, {}).get("path") or (
+        _LAST_UPLOADED_AIS.get("path") if not get_settings().auth_enabled else None
+    )
     if previous_path and previous_path != tmp_path:
         try:
             os.unlink(previous_path)
         except OSError:
             pass
-    _LAST_UPLOADED_AIS["path"] = tmp_path
-    _LAST_UPLOADED_AIS["filename"] = file.filename
-    _LAST_UPLOADED_AIS["sha256"] = upload_sha256
+    entry = {"path": tmp_path, "filename": file.filename, "sha256": upload_sha256}
+    _USER_UPLOADED_AIS[user_key] = entry
+    _LAST_UPLOADED_AIS.clear()
+    _LAST_UPLOADED_AIS.update(entry)
     _log.info("ais_uploaded", extra={"uploaded_filename": file.filename})
     return {"status": "uploaded", "filename": file.filename}
 
@@ -813,7 +831,7 @@ def create_investigation_job(
     POST /api/satellite/upload; a background variant of that would need a
     two-step "upload then start job" flow, out of scope for this pass).
     Returns immediately with a job id to poll via GET /api/jobs/{job_id}."""
-    ais_path = _LAST_UPLOADED_AIS.get("path") if mode == "custom_ais" else None
+    ais_path = _get_user_ais_path(current_user) if mode == "custom_ais" else None
     if mode == "custom_ais" and not ais_path:
         raise HTTPException(400, "mode=custom_ais requires an AIS CSV to be uploaded first via POST /api/ais/upload.")
 
@@ -1092,10 +1110,11 @@ def analyze_ais(
     origin_time = datetime.fromisoformat(origin["timestamp"])
     observed = inv.drift.get("observed") or {}
     detection_time = datetime.fromisoformat(observed["timestamp"]) if observed.get("timestamp") else None
-    if inv.mode == "custom_ais" and _LAST_UPLOADED_AIS.get("path"):
+    custom_ais_path = _get_user_ais_path(getattr(inv, "owner", current_user))
+    if inv.mode == "custom_ais" and custom_ais_path:
         from app.ais.adapters import GenericCSVAISAdapter
         try:
-            raw = GenericCSVAISAdapter().read(_LAST_UPLOADED_AIS["path"])
+            raw = GenericCSVAISAdapter().read(custom_ais_path)
         except ValueError as e:
             raise HTTPException(400, f"Could not re-analyze AIS traffic: {e}")
     else:
@@ -1147,6 +1166,8 @@ def analyze_ais(
     inv.ais_summary["window_start"] = window_start.isoformat()
     inv.ais_summary["window_end"] = window_end.isoformat()
     inv.ais_summary["excluded_vessels"] = excluded_vessels
+
+    _persistence_db.save_investigation(inv)
 
     return {
         "search_radius_km": search_radius_km,
@@ -1217,9 +1238,10 @@ def attribution_analyze(investigation_id: str, weights: dict | None = None, curr
     radius = inv.ais_summary["search_radius_km"]
     window_hours = inv.ais_summary["time_window_hours"]
 
-    if inv.mode == "custom_ais" and _LAST_UPLOADED_AIS.get("path"):
+    custom_ais_path = _get_user_ais_path(getattr(inv, "owner", current_user))
+    if inv.mode == "custom_ais" and custom_ais_path:
         from app.ais.adapters import GenericCSVAISAdapter
-        raw = GenericCSVAISAdapter().read(_LAST_UPLOADED_AIS["path"])
+        raw = GenericCSVAISAdapter().read(custom_ais_path)
     else:
         raw = build_demo_ais_fleet(origin["lat"], origin["lon"], origin_time)
 
@@ -1248,6 +1270,7 @@ def attribution_analyze(investigation_id: str, weights: dict | None = None, curr
     is_gated = not policy_eval.eligible or (sat_dict.get("attribution_gating") or {}).get("gated", False)
     if is_gated:
         inv.candidates = []
+        _persistence_db.save_investigation(inv)
         return {
             "weights_used": normalized,
             "candidates": [],
@@ -1264,6 +1287,7 @@ def attribution_analyze(investigation_id: str, weights: dict | None = None, curr
         detection_time=detection_time,
     )
     inv.candidates = candidates
+    _persistence_db.save_investigation(inv)
     return {"weights_used": normalized, "candidates": [c.to_dict() for c in candidates]}
 
 

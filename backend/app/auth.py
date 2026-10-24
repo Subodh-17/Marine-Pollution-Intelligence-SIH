@@ -106,8 +106,10 @@ def create_user(username: str, password: str) -> None:
                 "INSERT INTO users (username, password_hash, salt, created_at) VALUES (?, ?, ?, ?)",
                 (username, password_hash, salt, datetime.now(timezone.utc).isoformat()),
             )
-        except sqlite3.IntegrityError:
-            raise AuthError(f"Username '{username}' is already taken.")
+        except Exception as e:
+            if any(c.__name__ in ("IntegrityError", "UniqueViolation") for c in type(e).__mro__):
+                raise AuthError(f"Username '{username}' is already taken.")
+            raise
 
 
 def _get_user_row(username: str):
