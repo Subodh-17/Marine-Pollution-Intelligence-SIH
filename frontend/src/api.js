@@ -88,7 +88,7 @@ export const api = {
   uploadAis: (file) => {
     const form = new FormData()
     form.append('file', file)
-    return client.post('/ais/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data)
+    return client.post('/ais/upload', form).then(r => r.data)
   },
 
   // Given its own long per-request timeout (5 min), NOT the client's global
@@ -110,11 +110,18 @@ export const api = {
     const form = new FormData()
     form.append('file', file)
     return client.post('/satellite/upload', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       params: { detector, center_lat: centerLat, center_lon: centerLon },
       timeout: 300000,
     }).then(r => r.data)
   },
+
+  runSampleSatellite: ({ sampleName = 'demo_oil_scene_01.tif', detector = 'classical', centerLat = 19.05, centerLon = 71.20 } = {}) =>
+    client.post('/satellite/sample', null, {
+      params: { sample_name: sampleName, detector, center_lat: centerLat, center_lon: centerLon },
+      timeout: 120000,
+    }).then(r => r.data),
+
+  getSampleScenes: () => client.get('/satellite/samples').then(r => r.data),
 
   getMlStatus: () => client.get('/ml/status').then(r => r.data),
 

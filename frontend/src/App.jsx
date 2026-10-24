@@ -27,6 +27,14 @@ import api from './api'
 function extractErrorDetail(e, fallback) {
   const detail = e?.response?.data?.detail
   if (typeof detail === 'string' && detail.trim()) return detail
+  const message = e?.response?.data?.message
+  if (typeof message === 'string' && message.trim()) return message
+  if (e?.code === 'ECONNABORTED' || e?.message?.toLowerCase().includes('timeout')) {
+    return `${fallback} (Request timed out on the server - please retry or try a smaller image)`
+  }
+  if (e?.response?.status === 502 || e?.response?.status === 504) {
+    return `${fallback} (Backend gateway waking up - please retry in a few moments)`
+  }
   return fallback
 }
 
@@ -176,7 +184,7 @@ export default function App() {
     }
   }, [stageProgress])
 
-  const runRealSatellite = useCallback(async (file, { detector, centerLat, centerLon }) => {
+  const runRealSatellite = useCallback(async (file, { detector, centerLat, centerLon, sampleName } = {}) => {
     if (satelliteUploadInFlightRef.current) {
       console.warn('runRealSatellite: upload already in flight, ignoring duplicate call')
       return
@@ -187,14 +195,26 @@ export default function App() {
     setRunning(true)
     setSelectedMmsi(null)
     try {
-      const inv = await api.uploadSatelliteImage(file, { detector, centerLat, centerLon })
+      let inv
+      if (sampleName) {
+        inv = await api.runSampleSatellite({ sampleName, detector, centerLat, centerLon })
+      } else {
+        inv = await api.uploadSatelliteImage(file, { detector, centerLat, centerLon })
+      }
       // A late-but-genuine success always wins over anything shown earlier
       // for this same attempt: error was already cleared above, and this
       // path never runs unless the request truly succeeded, so there is no
       // path left by which a stale failure banner and a successful current
       // investigation could ever be visible at the same time.
       storeInvestigationId(inv.id)
-      stageProgress(inv)
+      try {
+        stageProgress(inv)
+      } catch (stageErr) {
+        console.warn('stageProgress animation failed, falling back to direct render', stageErr)
+        setInvestigation(inv)
+        setRunning(false)
+        setActiveTab('dashboard')
+      }
     } catch (e) {
       console.error(e)
       setError(extractErrorDetail(e, 'Investigation on the uploaded satellite image failed. Check the file format (GeoTIFF/PNG) and try again.'))

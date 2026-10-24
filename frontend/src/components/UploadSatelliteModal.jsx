@@ -48,11 +48,91 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
         <input
           ref={fileRef}
           type="file"
-          accept=".tif,.tiff,.png,.jpg,.jpeg"
+          accept=".tif,.tiff,.geotiff,.png,.jpg,.jpeg,.webp"
           disabled={busy}
           onChange={e => setFileName(e.target.files[0]?.name || null)}
           style={{ margin: '10px 0', fontSize: 12.5, color: 'var(--text-secondary)' }}
         />
+
+        <div style={{ margin: '10px 0 14px', padding: '10px 12px', background: 'var(--bg-subtle, rgba(255,255,255,0.03))', borderRadius: 6, border: '1px solid var(--border-subtle, #333)' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Or analyze a bundled benchmark SAR scene:
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ fontSize: 11, padding: '6px 8px', textAlign: 'left', cursor: 'pointer' }}
+              disabled={busy}
+              onClick={() => {
+                if (submittingRef.current) return
+                submittingRef.current = true
+                setBusy(true)
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_01.tif' })
+                  .finally(() => {
+                    submittingRef.current = false
+                    setBusy(false)
+                  })
+              }}
+            >
+              🛢️ Oil Slick Scene 1
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ fontSize: 11, padding: '6px 8px', textAlign: 'left', cursor: 'pointer' }}
+              disabled={busy}
+              onClick={() => {
+                if (submittingRef.current) return
+                submittingRef.current = true
+                setBusy(true)
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_02.tif' })
+                  .finally(() => {
+                    submittingRef.current = false
+                    setBusy(false)
+                  })
+              }}
+            >
+              🛢️ Oil Slick Scene 2
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ fontSize: 11, padding: '6px 8px', textAlign: 'left', cursor: 'pointer' }}
+              disabled={busy}
+              onClick={() => {
+                if (submittingRef.current) return
+                submittingRef.current = true
+                setBusy(true)
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_lookalike_scene_01.tif' })
+                  .finally(() => {
+                    submittingRef.current = false
+                    setBusy(false)
+                  })
+              }}
+            >
+              🌊 Lookalike Anomaly
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ fontSize: 11, padding: '6px 8px', textAlign: 'left', cursor: 'pointer' }}
+              disabled={busy}
+              onClick={() => {
+                if (submittingRef.current) return
+                submittingRef.current = true
+                setBusy(true)
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_no_oil_scene_01.tif' })
+                  .finally(() => {
+                    submittingRef.current = false
+                    setBusy(false)
+                  })
+              }}
+            >
+              ✅ Clean Sea (No Oil)
+            </button>
+          </div>
+        </div>
 
         <div style={{ display: 'flex', gap: 16, margin: '10px 0', fontSize: 12.5 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

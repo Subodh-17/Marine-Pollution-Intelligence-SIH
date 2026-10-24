@@ -689,6 +689,78 @@ async def upload_satellite_image(
     return inv.to_dict()
 
 
+@app.get("/api/satellite/samples")
+def list_sample_satellite_scenes():
+    """Returns bundled real SAR GeoTIFF scenes available for instant analysis."""
+    return [
+        {
+            "id": "demo_oil_scene_01.tif",
+            "name": "Oil Spill Scene 1 (Dual-Pol SAR)",
+            "description": "Confirmed dual-pol VV/VH oil slick from Zenodo Sentinel-1 SAR dataset.",
+            "type": "oil",
+        },
+        {
+            "id": "demo_oil_scene_02.tif",
+            "name": "Oil Spill Scene 2 (Dual-Pol SAR)",
+            "description": "High-contrast dual-pol VV/VH slick candidate with active advection.",
+            "type": "oil",
+        },
+        {
+            "id": "demo_lookalike_scene_01.tif",
+            "name": "Lookalike Anomaly (Natural Slick)",
+            "description": "SAR lookalike low-wind dark patch for testing false-alarm rejection.",
+            "type": "lookalike",
+        },
+        {
+            "id": "demo_no_oil_scene_01.tif",
+            "name": "Clean Sea (No Oil)",
+            "description": "Clean background open ocean scene without slicks.",
+            "type": "clean",
+        },
+    ]
+
+
+@app.post("/api/satellite/sample")
+def analyze_sample_satellite(
+    sample_name: str = Query("demo_oil_scene_01.tif", description="Filename of the bundled sample SAR scene"),
+    detector: str = Query("classical", pattern="^(classical|ml)$"),
+    center_lat: float = Query(19.05),
+    center_lon: float = Query(71.20),
+    search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
+    time_window_hours: float = Query(TIME_WINDOW_HOURS_DEFAULT),
+    current_user: str = Depends(get_current_user),
+):
+    """Runs the full real-satellite investigation pipeline on a bundled sample GeoTIFF scene."""
+    sample_dir = os.path.join(os.path.dirname(__file__), "..", "data", "sample_sar")
+    safe_name = os.path.basename(sample_name)
+    sample_path = os.path.join(sample_dir, safe_name)
+    if not os.path.isfile(sample_path):
+        raise HTTPException(404, f"Sample SAR scene '{safe_name}' not found.")
+
+    with open(sample_path, "rb") as f:
+        file_sha256 = hashlib.sha256(f.read()).hexdigest()
+
+    try:
+        inv = run_investigation(
+            mode="real_satellite",
+            image_path=sample_path,
+            detector=detector,
+            center_lat=center_lat,
+            center_lon=center_lon,
+            search_radius_km=search_radius_km,
+            time_window_hours=time_window_hours,
+            owner=current_user,
+            input_file_sha256=file_sha256,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        _log.warning("sample_satellite_processing_failed", extra={"sample_name": safe_name, "error": str(e)})
+        raise HTTPException(422, f"Could not process sample scene '{safe_name}': {e}")
+
+    return inv.to_dict()
+
+
 def _check_image_dimensions(path: str, ext: str) -> None:
     """Section 9: rejects absurdly large images before they reach the
     detector pipeline (a decompression-bomb-style DoS vector), independent
@@ -696,11 +768,20 @@ def _check_image_dimensions(path: str, ext: str) -> None:
     (a small file can still decode to a huge array)."""
     max_dim = get_settings().max_image_dimension_px
     try:
-        if ext in (".tif", ".tiff"):
+        if ext in (".tif", ".tiff", ".geotiff"):
             import tifffile
             with tifffile.TiffFile(path) as tf:
                 page = tf.pages[0]
-                height, width = page.shape[0], page.shape[1]
+                shape = page.shape
+                if len(shape) == 2:
+                    height, width = shape[0], shape[1]
+                elif len(shape) == 3:
+                    if shape[0] <= 4:
+                        height, width = shape[1], shape[2]
+                    else:
+                        height, width = shape[0], shape[1]
+                else:
+                    height, width = shape[-2], shape[-1]
         else:
             from PIL import Image
             with Image.open(path) as img:

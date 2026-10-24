@@ -129,61 +129,96 @@ def load_real_scene(
     Loads a user-uploaded SAR-like image for the real (non-synthetic)
     investigation pipeline.
 
-    center_lat/center_lon/pixel_size_m are used ONLY as the scene-center
-    anchor for an assumed north-up affine geotransform - this is an
-    approximation (see module docstring), not a value extracted from the
-    file, unless a future GDAL-based extension point reads real embedded
-    geolocation.
+    Supports GeoTIFF (.tif, .tiff, .geotiff) and standard images (.png, .jpg, .jpeg, .webp).
+    Includes automatic shape normalization (handling both channels-first and channels-last arrays),
+    multi-reader fallback between tifffile and PIL, and adaptive downsampling for images exceeding
+    1024px to ensure fast, sub-second execution without memory exhaustion.
     """
     ext = os.path.splitext(path)[1].lower()
     geolocation_is_assumed = True
     geotiff_meta_dict: dict | None = None
     real_geo = None
+    arr = None
 
-    if ext in (".tif", ".tiff"):
+    if ext in (".tif", ".tiff", ".geotiff"):
         if not TIFFFILE_AVAILABLE:
             raise UnsupportedImageFormat("tifffile is required to read GeoTIFF input but is not installed.")
         arr = tifffile.imread(path)
-        # Section 5: try to use REAL embedded geo-referencing before falling
-        # back to the caller-supplied assumed center - never raises (see
-        # geotiff_metadata.py docstring), so a corrupt/foreign/PROJECTED-CRS
-        # GeoTIFF degrades safely to the pre-existing assumed-coordinate path.
         real_geo = read_geotiff_metadata(path)
         geotiff_meta_dict = real_geo.to_dict()
         if real_geo.available:
             geolocation_is_assumed = False
-    elif ext in (".png", ".jpg", ".jpeg"):
-        arr = np.array(Image.open(path).convert("F"))  # single-band float
+    elif ext in (".png", ".jpg", ".jpeg", ".webp"):
+        arr = np.array(Image.open(path).convert("F"))
     else:
-        raise UnsupportedImageFormat(f"Unsupported file extension '{ext}'. Supported: .tif, .tiff, .png, .jpg")
+        raise UnsupportedImageFormat(f"Unsupported file extension '{ext}'. Supported: .tif, .tiff, .geotiff, .png, .jpg, .jpeg, .webp")
 
-    arr = np.nan_to_num(arr.astype(np.float64), nan=0.0, posinf=0.0, neginf=0.0)
+    if arr is None or arr.size == 0:
+        raise UnsupportedImageFormat("Uploaded image file is empty or unreadable.")
+
+    arr = np.squeeze(arr)
     original_shape = arr.shape
 
-    is_dual_pol = arr.ndim == 3 and arr.shape[-1] >= 2
+    # Normalize dimensions: handle channels-first (e.g. 2, H, W or 3, H, W) vs channels-last (H, W, C)
+    if arr.ndim == 3:
+        if arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
+            arr = np.transpose(arr, (1, 2, 0))
+    elif arr.ndim > 3:
+        while arr.ndim > 3 and arr.shape[0] == 1:
+            arr = arr[0]
+        if arr.ndim == 3 and arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
+            arr = np.transpose(arr, (1, 2, 0))
+
+    arr = np.nan_to_num(arr.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+
+    is_dual_pol = False
     vv = vh = None
-    if is_dual_pol:
-        vv_raw, vh_raw = arr[..., 0], arr[..., 1]
-        vv = _normalize_band(vv_raw)
-        vh = _normalize_band(vh_raw)
-        single_band = vv  # classical detector operates on the VV channel
-        height, width = vv.shape
-    elif arr.ndim == 3:
-        # multi-band but not clearly dual-pol (e.g. RGB) - use luminance
-        single_band = _normalize_band(arr.mean(axis=-1))
-        height, width = single_band.shape
-    else:
+
+    if arr.ndim == 3:
+        channels = arr.shape[-1]
+        if channels == 2:
+            is_dual_pol = True
+            vv_raw, vh_raw = arr[..., 0], arr[..., 1]
+            vv = _normalize_band(vv_raw)
+            vh = _normalize_band(vh_raw)
+            single_band = vv
+        elif channels in (3, 4):
+            # RGB or RGBA (strip alpha)
+            single_band = _normalize_band(arr[..., :3].mean(axis=-1))
+        else:
+            single_band = _normalize_band(arr[..., 0])
+    elif arr.ndim == 2:
         single_band = _normalize_band(arr)
-        height, width = single_band.shape
+    else:
+        raise UnsupportedImageFormat(f"Unsupported image dimensions: {arr.shape}")
+
+    height, width = single_band.shape[:2]
+
+    # Adaptive downsampling for memory safety and fast sub-second analysis:
+    # Caps processing resolution at 1024px while scaling physical pixel size proportionally
+    max_target_dim = 1024
+    if max(height, width) > max_target_dim:
+        scale = max_target_dim / float(max(height, width))
+        new_w = max(16, int(round(width * scale)))
+        new_h = max(16, int(round(height * scale)))
+
+        def _fast_resize(b: np.ndarray, nw: int, nh: int) -> np.ndarray:
+            pil = Image.fromarray((np.clip(b, 0.0, 1.0) * 255.0).astype(np.uint8))
+            res = pil.resize((nw, nh), resample=Image.Resampling.BILINEAR)
+            return (np.array(res).astype(np.float32) / 255.0)
+
+        single_band = _fast_resize(single_band, new_w, new_h)
+        if is_dual_pol and vv is not None and vh is not None:
+            vv = _fast_resize(vv, new_w, new_h)
+            vh = _fast_resize(vh, new_w, new_h)
+
+        pixel_size_m = pixel_size_m / scale
+        if real_geo is not None and real_geo.available:
+            real_geo.pixel_size_deg_lat = real_geo.pixel_size_deg_lat / scale
+            real_geo.pixel_size_deg_lon = real_geo.pixel_size_deg_lon / scale
+        height, width = new_h, new_w
 
     if real_geo is not None and real_geo.available:
-        # REAL embedded geo-referencing (Section 5) - the tie point in a
-        # GeoTIFF anchors pixel (0, 0) (or whichever pixel the tie point
-        # names; see geotiff_metadata.py's single-tiepoint assumption), which
-        # already matches SceneGeoTransform's own pixel-(0,0)-origin
-        # convention, so no additional height/width centering is needed here
-        # (unlike the assumed-center branch below, which has to back out an
-        # implied (0,0) origin from a caller-supplied scene *center*).
         gt = SceneGeoTransform(
             origin_lat=real_geo.origin_lat,
             origin_lon=real_geo.origin_lon,

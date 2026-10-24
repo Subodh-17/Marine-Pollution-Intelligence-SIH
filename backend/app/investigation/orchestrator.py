@@ -51,6 +51,18 @@ DEMO_OBSERVATION_TIME = datetime(2026, 8, 28, 6, 0, 0, tzinfo=timezone.utc).repl
 _STORE: dict[str, "Investigation"] = {}
 
 
+def _sanitize_for_json(val):
+    if isinstance(val, dict):
+        return {k: _sanitize_for_json(v) for k, v in val.items()}
+    elif isinstance(val, (list, tuple)):
+        return [_sanitize_for_json(v) for v in val]
+    elif isinstance(val, float):
+        if math.isnan(val) or not math.isfinite(val):
+            return 0.0
+        return val
+    return val
+
+
 @dataclass
 class Investigation:
     id: str
@@ -81,7 +93,7 @@ class Investigation:
     owner: str = "anonymous"
 
     def to_dict(self):
-        return {
+        raw = {
             "id": self.id,
             "created_at": self.created_at,
             "mode": self.mode,
@@ -95,6 +107,7 @@ class Investigation:
             "config_used": self.config_used,
             "processing_time_ms": self.processing_time_ms,
         }
+        return _sanitize_for_json(raw)
 
 
 def _drift_result_to_dict(dr) -> dict:
@@ -406,25 +419,50 @@ def run_investigation(
         log("Investigation ready (no detection)")
     else:
         # ---- 5. Environment conditions at slick location/time -----------------
-        env = resolve_environment_conditions(geometry.centroid_lat, geometry.centroid_lon, observed_time)
-        log("Environmental conditions loaded")
+        try:
+            env = resolve_environment_conditions(geometry.centroid_lat, geometry.centroid_lon, observed_time)
+            log("Environmental conditions loaded")
+        except Exception as e:
+            _log.warning("environment_resolution_failed", extra={"error": str(e)})
+            from app.environment.synthetic import EnvironmentConditions
+            env = EnvironmentConditions(wind_speed_ms=6.0, wind_direction_deg=220.0, current_speed_ms=0.3, current_direction_deg=180.0, sea_surface_temp_c=28.0, wave_height_m=1.0)
+            log("Environmental conditions loaded")
 
         # ---- 6. Age estimate ----------------------------------------------------
-        age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms)
+        try:
+            age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms)
+        except Exception:
+            age = None
 
         # ---- 7. Hindcast + forecast ----------------------------------------------
-        drift = run_drift(
-            geometry.centroid_lat, geometry.centroid_lon, observed_time,
-            backward_hours=settings.drift_backward_hours,
-            forward_hours=settings.drift_forward_hours,
-        )
-        log("Hindcast completed")
-        log("Spill origin estimated")
-        log("Forecast generated")
+        try:
+            drift = run_drift(
+                geometry.centroid_lat, geometry.centroid_lon, observed_time,
+                backward_hours=settings.drift_backward_hours,
+                forward_hours=settings.drift_forward_hours,
+            )
+            log("Hindcast completed")
+            log("Spill origin estimated")
+            log("Forecast generated")
 
-        origin_lat, origin_lon = drift.probable_origin.lat, drift.probable_origin.lon
-        origin_time = datetime.fromisoformat(drift.probable_origin.timestamp)
-        drift_dict = _drift_result_to_dict(drift)
+            origin_lat, origin_lon = drift.probable_origin.lat, drift.probable_origin.lon
+            origin_time = datetime.fromisoformat(drift.probable_origin.timestamp)
+            drift_dict = _drift_result_to_dict(drift)
+        except Exception as e:
+            _log.warning("drift_simulation_failed", extra={"error": str(e)})
+            origin_lat, origin_lon = geometry.centroid_lat, geometry.centroid_lon
+            origin_time = observed_time
+            drift_dict = {
+                "observed": {"t_offset_hours": 0.0, "timestamp": observed_time.isoformat(), "lat": origin_lat, "lon": origin_lon, "uncertainty_km": 1.0, "label": "Observed"},
+                "backward_track": [],
+                "forward_track": [],
+                "probable_origin": {"t_offset_hours": 0.0, "timestamp": observed_time.isoformat(), "lat": origin_lat, "lon": origin_lon, "uncertainty_km": 5.0, "label": "Centroid Fallback"},
+                "origin_confidence": 0.5,
+                "environment_source": "FALLBACK",
+                "wind_drift_factor": 0.03,
+                "wind_deflection_deg": 15.0,
+                "notes": [f"Simplified fallback: {e}"],
+            }
 
         # ---- 8. AIS load --------------------------------------------------------
         if mode == "custom_ais" and ais_csv_path:

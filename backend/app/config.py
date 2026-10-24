@@ -291,7 +291,7 @@ def get_settings() -> Settings:
         max_upload_size_mb=_env_float("MAX_UPLOAD_SIZE_MB", 50.0),
         allowed_ais_extensions=_env_str_list("ALLOWED_AIS_EXTENSIONS", (".csv",)),
         allowed_satellite_extensions=_env_str_list(
-            "ALLOWED_SATELLITE_EXTENSIONS", (".tif", ".tiff", ".png", ".jpg", ".jpeg")
+            "ALLOWED_SATELLITE_EXTENSIONS", (".tif", ".tiff", ".geotiff", ".png", ".jpg", ".jpeg", ".webp")
         ),
         processing_timeout_seconds=_env_float("PROCESSING_TIMEOUT_SECONDS", 60.0),
         ml_confidence_threshold=_env_float(

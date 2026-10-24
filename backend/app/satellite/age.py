@@ -44,7 +44,15 @@ def estimate_age(aspect_ratio: float, area_km2: float, wind_speed_ms: float | No
     honestly-labelled placeholder that can be replaced with a real
     multi-temporal or physically calibrated model later.
     """
-    if aspect_ratio <= 0 or area_km2 <= 0:
+    import math
+    if (
+        aspect_ratio is None
+        or not math.isfinite(aspect_ratio)
+        or aspect_ratio <= 0
+        or area_km2 is None
+        or not math.isfinite(area_km2)
+        or area_km2 <= 0
+    ):
         return AgeEstimate(
             hours=None, hours_low=None, hours_high=None,
             confidence="unavailable", method="none",

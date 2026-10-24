@@ -9,6 +9,7 @@ scene (~100-250 km swath) and clearly documented as an approximation.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, asdict
 
 import numpy as np
@@ -99,7 +100,7 @@ def characterize_slick(
     # Length and width from primary component
     length_km = (r.axis_major_length * m_per_px) / 1000.0
     width_km = (r.axis_minor_length * m_per_px) / 1000.0
-    aspect_ratio = float(length_km / width_km) if width_km > 0 else float("nan")
+    aspect_ratio = float(length_km / width_km) if (width_km > 0 and math.isfinite(width_km) and math.isfinite(length_km)) else 1.0
 
     # Sum perimeters across all valid components
     total_perimeter_px = sum(p.perimeter for p in valid_props)
@@ -147,21 +148,26 @@ def characterize_slick(
     else:
         quartile = "Q4 (>11%)"
 
+    def _clean_float(val: float, default: float = 0.0, digits: int | None = None) -> float:
+        if val is None or not math.isfinite(val):
+            return default
+        return round(float(val), digits) if digits is not None else float(val)
+
     return SlickGeometry(
-        confidence=round(confidence, 4),
-        area_km2=round(total_area_km2, 3),
-        perimeter_km=round(perimeter_km, 3),
-        length_km=round(length_km, 3),
-        width_km=round(width_km, 3),
-        aspect_ratio=round(aspect_ratio, 2) if aspect_ratio == aspect_ratio else 0.0,
-        orientation_deg=round(orientation_deg, 1),
-        centroid_lat=round(centroid_lat, 5),
-        centroid_lon=round(centroid_lon, 5),
-        bbox_latlon=[[round(a, 5), round(b, 5)] for a, b in bbox_latlon],
+        confidence=_clean_float(confidence, 0.0, 4),
+        area_km2=_clean_float(total_area_km2, 0.0, 3),
+        perimeter_km=_clean_float(perimeter_km, 0.0, 3),
+        length_km=_clean_float(length_km, 0.0, 3),
+        width_km=_clean_float(width_km, 0.0, 3),
+        aspect_ratio=_clean_float(aspect_ratio, 1.0, 2),
+        orientation_deg=_clean_float(orientation_deg, 0.0, 1),
+        centroid_lat=_clean_float(centroid_lat, 0.0, 5),
+        centroid_lon=_clean_float(centroid_lon, 0.0, 5),
+        bbox_latlon=[[_clean_float(a, 0.0, 5), _clean_float(b, 0.0, 5)] for a, b in bbox_latlon],
         polygon_latlon=polygon_latlon,
         area_px=int(valid_area_px),
         component_count=len(valid_props),
         largest_component_area_px=int(r.area),
-        fragmentation_index=frag_index,
+        fragmentation_index=_clean_float(frag_index, 0.0, 3),
         slick_quartile=quartile,
     )
