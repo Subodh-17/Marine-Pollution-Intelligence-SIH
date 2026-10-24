@@ -6,6 +6,7 @@ export default function TimelineTab({ investigation, onSelectVessel }) {
   const drift = investigation.drift
 
   if (!drift.probable_origin) {
+    const isMetoceanUnavailable = drift.drift_status === 'UNAVAILABLE' || drift.environment_source === 'UNAVAILABLE'
     return (
       <div>
         <div className="section-head">
@@ -16,8 +17,9 @@ export default function TimelineTab({ investigation, onSelectVessel }) {
         </div>
         <div className="panel">
           <p style={{ color: 'var(--text-secondary)', fontSize: 13.5 }}>
-            No slick was detected in this scene, so there is no drift trajectory or probable
-            origin to build a timeline from.
+            {isMetoceanUnavailable
+              ? 'Drift reconstruction unavailable: real metocean data (wind and ocean currents) could not be retrieved. To maintain scientific validity, synthetic trajectories are refused for satellite observations.'
+              : 'No slick was detected in this scene, so there is no drift trajectory or probable origin to build a timeline from.'}
           </p>
         </div>
       </div>

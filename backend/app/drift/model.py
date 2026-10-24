@@ -65,10 +65,11 @@ class DriftResult:
     backward_track: list          # list[TrackPoint], ordered oldest -> observed (exclusive of observed)
     forward_track: list           # list[TrackPoint], ordered observed(exclusive) -> future
     probable_origin: TrackPoint
-    origin_confidence: str        # "low" | "medium" | "high" (heuristic, see notes)
+    origin_confidence: str        # "low" | "medium" | "high" | "none"
     environment_source: str
     wind_drift_factor: float = WIND_DRIFT_FACTOR
     wind_deflection_deg: float = WIND_DEFLECTION_DEG
+    drift_status: str = "COMPLETED"  # "COMPLETED" | "UNAVAILABLE" | "DEGRADED_PARTIAL_WIND"
     notes: list = field(default_factory=list)
 
 
@@ -99,9 +100,17 @@ def _vector_to_bearing_speed(u_east: float, v_north: float) -> tuple[float, floa
     return bearing, speed
 
 
-def _step_position(lat: float, lon: float, t: datetime, dt_seconds: float, direction: int) -> tuple[float, float]:
+def _step_position(
+    lat: float,
+    lon: float,
+    t: datetime,
+    dt_seconds: float,
+    direction: int,
+    allow_synthetic: bool = True,
+    mode: str | None = None,
+) -> tuple[float, float, str]:
     """One Euler advection step. `direction` is +1 (forward in time) or -1 (backward)."""
-    env = resolve_environment_conditions(lat, lon, t)
+    env = resolve_environment_conditions(lat, lon, t, allow_synthetic=allow_synthetic, mode=mode)
 
     # current: "direction current flows TOWARD" -> vector components
     cur_rad = math.radians(env.current_dir_deg)
@@ -134,6 +143,8 @@ def run_drift(
     backward_hours: tuple = (6, 12, 18, 24),
     forward_hours: tuple = (6, 12, 24, 48),
     step_minutes: int = 30,
+    allow_synthetic: bool = True,
+    mode: str | None = None,
 ) -> DriftResult:
     """Integrate the drift model backward (hindcast) and forward (forecast)
     from the observed slick centroid, sampling checkpoints at the requested
@@ -154,7 +165,9 @@ def run_drift(
         next_idx = 0
         total_steps = int((max_h * 3600) / dt)
         for i in range(1, total_steps + 1):
-            lat, lon, src = _step_position(lat, lon, t, dt, direction)
+            lat, lon, src = _step_position(
+                lat, lon, t, dt, direction, allow_synthetic=allow_synthetic, mode=mode
+            )
             sources.add(src)
             t = t + timedelta(seconds=direction * dt)
             elapsed_s += dt

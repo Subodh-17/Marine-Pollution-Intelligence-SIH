@@ -162,6 +162,8 @@ class Investigation:
 
 def _drift_result_to_dict(dr) -> dict:
     def pt(p):
+        if p is None:
+            return None
         return {"t_offset_hours": p.t_offset_hours, "timestamp": p.timestamp, "lat": p.lat, "lon": p.lon,
                 "uncertainty_km": p.uncertainty_km, "label": p.label}
     return {
@@ -173,6 +175,7 @@ def _drift_result_to_dict(dr) -> dict:
         "environment_source": dr.environment_source,
         "wind_drift_factor": dr.wind_drift_factor,
         "wind_deflection_deg": dr.wind_deflection_deg,
+        "drift_status": getattr(dr, "drift_status", "COMPLETED"),
         "notes": dr.notes,
     }
 
@@ -437,6 +440,8 @@ def run_investigation(
     # ---- 4. Characterisation ------------------------------------------------
     geometry = characterize_slick(det.mask, det.confidence, gt)
     log("Slick geometry calculated")
+    env = None
+    env_error_message = None
 
     if geometry is None:
         # SCIENTIFIC HONESTY GUARD (spec Sections 10/21/37): if no slick was
@@ -469,50 +474,95 @@ def run_investigation(
         log("Investigation ready (no detection)")
     else:
         # ---- 5. Environment conditions at slick location/time -----------------
+        env = None
+        env_error_message = None
         try:
-            env = resolve_environment_conditions(geometry.centroid_lat, geometry.centroid_lon, observed_time)
+            env = resolve_environment_conditions(
+                geometry.centroid_lat,
+                geometry.centroid_lon,
+                observed_time,
+                allow_synthetic=(mode != "real_satellite"),
+                mode=mode,
+            )
             log("Environmental conditions loaded")
         except Exception as e:
-            _log.warning("environment_resolution_failed", extra={"error": str(e)})
-            from app.environment.synthetic import EnvironmentConditions
-            env = EnvironmentConditions(wind_speed_ms=6.0, wind_direction_deg=220.0, current_speed_ms=0.3, current_direction_deg=180.0, sea_surface_temp_c=28.0, wave_height_m=1.0)
-            log("Environmental conditions loaded")
+            env_error_message = str(e)
+            _log.warning("environment_resolution_failed", extra={"error": env_error_message, "mode": mode})
+            if mode != "real_satellite":
+                from app.environment.adapters import SyntheticEnvironmentAdapter
+                env = SyntheticEnvironmentAdapter().fetch(
+                    geometry.centroid_lat, geometry.centroid_lon, observed_time, fallback_reason=env_error_message
+                )
+                log("Environmental conditions loaded (synthetic fallback)")
+            else:
+                log("Environmental data unavailable (synthetic substitution refused in real_satellite mode)")
 
         # ---- 6. Age estimate ----------------------------------------------------
         try:
-            age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms)
+            age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms) if env else None
         except Exception:
             age = None
 
         # ---- 7. Hindcast + forecast ----------------------------------------------
-        try:
-            drift = run_drift(
-                geometry.centroid_lat, geometry.centroid_lon, observed_time,
-                backward_hours=settings.drift_backward_hours,
-                forward_hours=settings.drift_forward_hours,
-            )
-            log("Hindcast completed")
-            log("Spill origin estimated")
-            log("Forecast generated")
+        if env is not None:
+            try:
+                drift = run_drift(
+                    geometry.centroid_lat, geometry.centroid_lon, observed_time,
+                    backward_hours=settings.drift_backward_hours,
+                    forward_hours=settings.drift_forward_hours,
+                    allow_synthetic=(mode != "real_satellite"),
+                    mode=mode,
+                )
+                log("Hindcast completed")
+                log("Spill origin estimated")
+                log("Forecast generated")
 
-            origin_lat, origin_lon = drift.probable_origin.lat, drift.probable_origin.lon
-            origin_time = datetime.fromisoformat(drift.probable_origin.timestamp)
-            drift_dict = _drift_result_to_dict(drift)
-        except Exception as e:
-            _log.warning("drift_simulation_failed", extra={"error": str(e)})
+                origin_lat, origin_lon = drift.probable_origin.lat, drift.probable_origin.lon
+                origin_time = datetime.fromisoformat(drift.probable_origin.timestamp)
+                drift_dict = _drift_result_to_dict(drift)
+            except Exception as e:
+                _log.warning("drift_simulation_failed", extra={"error": str(e)})
+                origin_lat, origin_lon = geometry.centroid_lat, geometry.centroid_lon
+                origin_time = observed_time
+                drift_dict = {
+                    "observed": {"t_offset_hours": 0.0, "timestamp": observed_time.isoformat(), "lat": round(origin_lat, 5), "lon": round(origin_lon, 5), "uncertainty_km": 1.0, "label": "Observed"},
+                    "backward_track": [],
+                    "forward_track": [],
+                    "probable_origin": None,
+                    "origin_confidence": "none",
+                    "environment_source": "UNAVAILABLE",
+                    "wind_drift_factor": 0.03,
+                    "wind_deflection_deg": 15.0,
+                    "drift_status": "UNAVAILABLE",
+                    "notes": [f"Drift simulation could not be completed: {e}"],
+                }
+        else:
+            # Operational honesty guard: Real satellite mode refuses silent synthetic drift
             origin_lat, origin_lon = geometry.centroid_lat, geometry.centroid_lon
             origin_time = observed_time
             drift_dict = {
-                "observed": {"t_offset_hours": 0.0, "timestamp": observed_time.isoformat(), "lat": origin_lat, "lon": origin_lon, "uncertainty_km": 1.0, "label": "Observed"},
+                "observed": {
+                    "t_offset_hours": 0.0,
+                    "timestamp": observed_time.isoformat(),
+                    "lat": round(origin_lat, 5),
+                    "lon": round(origin_lon, 5),
+                    "uncertainty_km": 1.0,
+                    "label": "Observed",
+                },
                 "backward_track": [],
                 "forward_track": [],
-                "probable_origin": {"t_offset_hours": 0.0, "timestamp": observed_time.isoformat(), "lat": origin_lat, "lon": origin_lon, "uncertainty_km": 5.0, "label": "Centroid Fallback"},
-                "origin_confidence": 0.5,
-                "environment_source": "FALLBACK",
+                "probable_origin": None,
+                "origin_confidence": "none",
+                "environment_source": "UNAVAILABLE",
                 "wind_drift_factor": 0.03,
                 "wind_deflection_deg": 15.0,
-                "notes": [f"Simplified fallback: {e}"],
+                "drift_status": "UNAVAILABLE",
+                "notes": [
+                    f"Drift reconstruction unavailable: real metocean data (wind/ocean current) could not be retrieved ({env_error_message}). "
+                    "Per scientific safety mandate, synthetic demonstration fields are not substituted in real_satellite mode."
+                ],
             }
+            log("Drift reconstruction skipped (real environmental data unavailable)")
 
         # ---- 8. AIS load --------------------------------------------------------
         if mode == "custom_ais" and ais_csv_path:
@@ -680,23 +730,56 @@ def run_investigation(
         },
     }
 
-    environment_payload = {
-        "wind_speed_ms": env.wind_speed_ms,
-        "wind_dir_deg": env.wind_dir_deg,
-        "current_speed_ms": env.current_speed_ms,
-        "current_dir_deg": env.current_dir_deg,
-        "wave_height_m": env.wave_height_m,
-        "source": env.source,
-        "retrieved_at": env.retrieved_at,
-        "fallback_reason": env.fallback_reason,
-    } if env else None
+    if geometry is None:
+        environment_payload = None
+    elif env:
+        environment_payload = {
+            "wind_speed_ms": env.wind_speed_ms,
+            "wind_dir_deg": env.wind_dir_deg,
+            "current_speed_ms": env.current_speed_ms,
+            "current_dir_deg": env.current_dir_deg,
+            "wave_height_m": env.wave_height_m,
+            "source": env.source,
+            "retrieved_at": env.retrieved_at,
+            "fallback_reason": env.fallback_reason,
+            "wind_provider": getattr(env, "wind_provider", None),
+            "current_provider": getattr(env, "current_provider", None),
+            "data_valid_time": getattr(env, "data_valid_time", None),
+            "data_age_hours": getattr(env, "data_age_hours", None),
+            "is_fallback": getattr(env, "is_fallback", False),
+            "coverage_status": getattr(env, "coverage_status", "FULL_METOCEAN"),
+            "notes": getattr(env, "notes", []),
+        }
+    else:
+        environment_payload = {
+            "wind_speed_ms": 0.0,
+            "wind_dir_deg": 0.0,
+            "current_speed_ms": 0.0,
+            "current_dir_deg": 0.0,
+            "wave_height_m": 0.0,
+            "source": "UNAVAILABLE",
+            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "fallback_reason": env_error_message or "Environmental data unavailable",
+            "wind_provider": "UNAVAILABLE",
+            "current_provider": "UNAVAILABLE",
+            "data_valid_time": None,
+            "data_age_hours": None,
+            "is_fallback": False,
+            "coverage_status": "UNAVAILABLE",
+            "notes": [
+                f"Operational real_satellite mode refused synthetic environmental data: {env_error_message}"
+            ],
+        }
 
     data_sources = {
         "satellite": dataset_reference,
         "ais": f"MarineCadastre AIS (reference schema) -> {ais_summary['ais_source']}",
         "environment": (
-            (env.source + (f" - {env.fallback_reason}" if env.fallback_reason else ""))
-            if env else "NOT_RUN"
+            "NOT_RUN" if geometry is None
+            else (
+                (env.source + (f" - {env.fallback_reason}" if env.fallback_reason else ""))
+                if env else f"UNAVAILABLE - {env_error_message or 'Live metocean feed unreachable'}"
+            )
         ),
         # Explicit, exhaustive map of every `detector_provenance` value this
         # orchestrator can produce (see the three/four-way assignment above:
@@ -727,7 +810,11 @@ def run_investigation(
                 "result - see detection_notes for why)"
             ),
         }[detector_provenance],
-        "drift_method": "Physics-based simplified advection (current + wind leeway)",
+        "drift_method": (
+            "Physics-based simplified advection (current + wind leeway)"
+            if (drift_dict.get("drift_status") != "UNAVAILABLE" and drift_dict.get("probable_origin"))
+            else "NOT_RUN (environmental data unavailable)"
+        ),
         "attribution_method": "Weighted spatio-temporal explainable scoring",
     }
 
