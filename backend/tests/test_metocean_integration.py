@@ -32,13 +32,17 @@ from app.investigation.orchestrator import run_investigation
 
 
 class _MockResponse:
-    def __init__(self, json_data: dict, status_code: int = 200):
+    def __init__(self, json_data: dict, status_code: int = 200, headers: dict | None = None):
         self._json = json_data
         self.status_code = status_code
+        self.headers = headers or {}
 
     def raise_for_status(self):
         if self.status_code >= 400:
-            raise RuntimeError(f"HTTP Error {self.status_code}")
+            import httpx
+            req = httpx.Request("GET", "https://mock.url")
+            resp = httpx.Response(self.status_code, request=req, headers=self.headers)
+            raise httpx.HTTPStatusError(f"HTTP Error {self.status_code}", request=req, response=resp)
 
     def json(self):
         return self._json
@@ -347,3 +351,361 @@ class TestOperationalHonestyGuards:
         assert inv.drift["probable_origin"] is None
         assert "NOT_RUN" in inv.data_sources["drift_method"]
         assert any("refused synthetic" in n for n in inv.drift["notes"])
+
+
+# ===========================================================================
+# 5. Rate Limiting, Backoff & Historical Routing Validation (Phase 4.8.23)
+# ===========================================================================
+class TestRateLimitAndRouting:
+    def setup_method(self):
+        get_open_meteo_cache().clear()
+        get_settings.cache_clear()
+
+    def teardown_method(self):
+        get_open_meteo_cache().clear()
+        get_settings.cache_clear()
+
+    def test_historical_timestamp_routes_to_archive_endpoint(self, monkeypatch):
+        """Past dates (before today) must route to the Historical Archive API."""
+        adapter = OpenMeteoOceanAdapter()
+        captured_urls = []
+
+        def mock_get(url, params, timeout):
+            captured_urls.append(url)
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        settings = get_settings()
+        assert cond.source == "REAL_OPEN_METEO"
+        assert any(settings.open_meteo_archive_url in u for u in captured_urls)
+        assert not any(settings.open_meteo_weather_url in u for u in captured_urls)
+        assert any(settings.open_meteo_marine_url in u for u in captured_urls)
+
+    def test_future_and_today_timestamp_routes_to_forecast_endpoint(self, monkeypatch):
+        """Future and current dates must route to the Weather Forecast API."""
+        from datetime import timedelta
+        adapter = OpenMeteoOceanAdapter()
+        captured_urls = []
+
+        def mock_get(url, params, timeout):
+            captured_urls.append(url)
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        future_ts = datetime.now(timezone.utc) + timedelta(days=2)
+        cond = adapter.fetch(19.05, 71.20, future_ts)
+
+        settings = get_settings()
+        assert cond.source == "REAL_OPEN_METEO"
+        assert any(settings.open_meteo_weather_url in u for u in captured_urls)
+        assert not any(settings.open_meteo_archive_url in u for u in captured_urls)
+
+    def test_http_429_respects_retry_after_header(self, monkeypatch):
+        """HTTP 429 with Retry-After header sleeps the requested duration and retries."""
+        adapter = OpenMeteoOceanAdapter()
+        weather_attempts = 0
+        marine_attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal weather_attempts, marine_attempts
+            if "marine" in url:
+                marine_attempts += 1
+                return _MockResponse(_sample_marine_json())
+            weather_attempts += 1
+            if weather_attempts == 1:
+                # First attempt fails with 429 and Retry-After: 2
+                return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429, headers={"Retry-After": "2"})
+            # Second attempt succeeds
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert weather_attempts == 2
+        assert marine_attempts == 1
+        assert sleep_durations == [2.0]
+
+    def test_http_429_excessive_retry_after_aborts_immediately(self, monkeypatch):
+        """HTTP 429 with excessive Retry-After (>10s) aborts immediately without hanging."""
+        adapter = OpenMeteoOceanAdapter()
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429, headers={"Retry-After": "120"})
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        with pytest.raises(EnvironmentDataUnavailable, match="exceeds maximum budget"):
+            adapter.fetch(19.05, 71.20, past_ts)
+
+        # No sleeps should have been performed
+        assert sleep_durations == []
+
+    def test_http_429_without_retry_after_uses_bounded_backoff(self, monkeypatch):
+        """HTTP 429 without Retry-After uses bounded exponential backoff with jitter."""
+        # Use deterministic jitter_fn returning the upper bound (1.0)
+        adapter = OpenMeteoOceanAdapter(jitter_fn=lambda low, high: high)
+        weather_attempts = 0
+        marine_attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal weather_attempts, marine_attempts
+            if "marine" in url:
+                marine_attempts += 1
+                return _MockResponse(_sample_marine_json())
+            weather_attempts += 1
+            if weather_attempts == 1:
+                return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429)
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert weather_attempts == 2
+        assert marine_attempts == 1
+        assert len(sleep_durations) == 1
+        assert sleep_durations == [1.0]
+
+    def test_http_backoff_jitter_bounds(self, monkeypatch):
+        """Default jitter function produces delays strictly bounded in [0.5 * base, base]."""
+        adapter = OpenMeteoOceanAdapter()
+        weather_attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal weather_attempts
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            weather_attempts += 1
+            if weather_attempts == 1:
+                return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429)
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert len(sleep_durations) == 1
+        # attempt 0 base is 1.0, jitter range is [0.5, 1.0]
+        assert 0.5 <= sleep_durations[0] <= 1.0
+
+    def test_http_429_exhaustion_falls_back_in_demo_mode(self, monkeypatch):
+        """When retries are exhausted under 429, demo mode falls back to synthetic with documented provenance."""
+        monkeypatch.setenv("ENV_PROVIDER", "open_meteo")
+        get_settings.cache_clear()
+
+        adapter = OpenMeteoOceanAdapter()
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429)
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        # Monkeypatch adapter instantiation in adapters.py
+        import app.environment.open_meteo as om_mod
+        monkeypatch.setattr(om_mod, "OpenMeteoOceanAdapter", lambda: adapter)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = resolve_environment_conditions(19.05, 71.20, past_ts, allow_synthetic=True, mode="demo")
+
+        assert cond.source == "SYNTHETIC_DEMO"
+        assert cond.is_fallback is True
+        assert cond.coverage_status == "SYNTHETIC"
+        assert "OpenMeteoOceanAdapter" in cond.fallback_reason
+        assert "429" in cond.fallback_reason
+
+    def test_timezone_aware_timestamp_normalizes_to_utc_date(self, monkeypatch):
+        """A timezone-aware timestamp across midnight (e.g. +05:30) must normalize to UTC date."""
+        from datetime import timezone as tz, timedelta as td
+        adapter = OpenMeteoOceanAdapter()
+        captured_params = []
+
+        def mock_get(url, params, timeout):
+            captured_params.append(dict(params))
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        # 01:00 AM on Oct 25 at +05:30 is 19:30 PM on Oct 24 UTC
+        ist = tz(td(hours=5, minutes=30))
+        t_ist = datetime(2026, 10, 25, 1, 0, tzinfo=ist)
+
+        cond = adapter.fetch(19.05, 71.20, t_ist)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        # The query to Open-Meteo must request 2026-10-24, NOT 2026-10-25
+        assert all(p.get("start_date") == "2026-10-24" for p in captured_params)
+
+    def test_non_retryable_client_error_aborts_immediately(self, monkeypatch):
+        """HTTP 400 Client Error aborts immediately on attempt 1 without sleeping or retrying."""
+        adapter = OpenMeteoOceanAdapter()
+        attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal attempts
+            attempts += 1
+            return _MockResponse({"error": True, "reason": "Bad parameter"}, status_code=400)
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        with pytest.raises(EnvironmentDataUnavailable, match="non-retryable status 400"):
+            adapter.fetch(19.05, 71.20, past_ts)
+
+        assert attempts == 1
+        assert sleep_durations == []
+
+    @pytest.mark.parametrize("status_code", [401, 403, 404, 405, 409, 422])
+    def test_other_non_retryable_client_errors_fail_fast(self, monkeypatch, status_code):
+        """HTTP client errors (401, 403, 404, 405, 409, 422) must fail fast without retrying."""
+        adapter = OpenMeteoOceanAdapter()
+        attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal attempts
+            attempts += 1
+            return _MockResponse({"error": True, "reason": "Client error"}, status_code=status_code)
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        with pytest.raises(EnvironmentDataUnavailable, match=f"non-retryable status {status_code}"):
+            adapter.fetch(19.05, 71.20, past_ts)
+
+        assert attempts == 1
+        assert sleep_durations == []
+
+    @pytest.mark.parametrize("status_code", [500, 502, 503, 504])
+    def test_transient_5xx_server_errors_retry_with_jitter(self, monkeypatch, status_code):
+        """Transient 5xx server errors must retry up to max_retries with jittered backoff."""
+        adapter = OpenMeteoOceanAdapter(jitter_fn=lambda low, high: high)
+        attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal attempts
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            attempts += 1
+            if attempts == 1:
+                return _MockResponse({"error": True, "reason": "Server error"}, status_code=status_code)
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert attempts == 2
+        assert len(sleep_durations) == 1
+        # attempt 0 for 5xx base is 0.25s
+        assert sleep_durations == [0.25]
+
+    def test_two_day_cutoff_routing_boundary(self, monkeypatch):
+        """Verify the 2-day historical cutoff: <= 2 days ago uses forecast, > 2 days ago uses archive."""
+        from datetime import timedelta
+        adapter = OpenMeteoOceanAdapter()
+        settings = get_settings()
+        now = datetime.now(timezone.utc)
+
+        # 1 day ago (near-term past) -> Forecast API
+        one_day_ago = now - timedelta(days=1)
+        w_url, m_url = adapter._determine_endpoints(one_day_ago)
+        assert w_url == settings.open_meteo_weather_url
+        assert m_url == settings.open_meteo_marine_url
+
+        # 2 days ago (cutoff boundary) -> Forecast API
+        two_days_ago = now - timedelta(days=2)
+        w_url, m_url = adapter._determine_endpoints(two_days_ago)
+        assert w_url == settings.open_meteo_weather_url
+        assert m_url == settings.open_meteo_marine_url
+
+        # 3 days ago (> 2 days past) -> Archive API
+        three_days_ago = now - timedelta(days=3)
+        w_url, m_url = adapter._determine_endpoints(three_days_ago)
+        assert w_url == settings.open_meteo_archive_url
+        assert m_url == settings.open_meteo_marine_url
+
+        # Deep historical (months ago) -> Archive API
+        deep_past = datetime(2026, 8, 28, 12, 0, tzinfo=timezone.utc)
+        w_url, m_url = adapter._determine_endpoints(deep_past)
+        assert w_url == settings.open_meteo_archive_url
+        assert m_url == settings.open_meteo_marine_url
+
+    def test_retry_after_http_date_format_parsing(self):
+        """_parse_retry_after parses RFC 7231 HTTP-date and delta-seconds."""
+        from app.environment.open_meteo import _parse_retry_after
+        from datetime import timezone as tz, timedelta as td
+
+        assert _parse_retry_after(None) is None
+        assert _parse_retry_after("") is None
+        assert _parse_retry_after("invalid") is None
+        assert _parse_retry_after("5") == 5.0
+        assert _parse_retry_after("  2.5  ") == 2.5
+        assert _parse_retry_after("-10") == 0.0
+
+        # Future HTTP-date
+        future_dt = datetime.now(tz.utc) + td(seconds=4)
+        from email.utils import format_datetime
+        header_date = format_datetime(future_dt)
+        parsed = _parse_retry_after(header_date)
+        assert parsed is not None
+        assert 1.0 <= parsed <= 6.0
