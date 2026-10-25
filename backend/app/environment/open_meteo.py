@@ -68,6 +68,31 @@ def get_open_meteo_cache() -> _OpenMeteoCache:
     return _CACHE
 
 
+OPEN_METEO_USER_AGENT = "MarinePollutionIntelligence/0.1.0 (https://marine-pollution-intelligence-sih.vercel.app)"
+MAX_RETRY_AFTER_SECONDS = 10.0
+
+
+def _parse_retry_after(header_val: str | None) -> float | None:
+    if not header_val:
+        return None
+    header_val = header_val.strip()
+    try:
+        val = float(header_val)
+        return max(0.0, val)
+    except ValueError:
+        pass
+    try:
+        from email.utils import parsedate_to_datetime
+        dt = parsedate_to_datetime(header_val)
+        if dt:
+            now = datetime.now(timezone.utc)
+            target = dt.astimezone(timezone.utc) if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+            return max(0.0, (target - now).total_seconds())
+    except Exception:
+        pass
+    return None
+
+
 class OpenMeteoOceanAdapter:
     """
     Adapter for Open-Meteo Marine and Weather APIs.
@@ -78,10 +103,15 @@ class OpenMeteoOceanAdapter:
     def __init__(self):
         self._cache = _CACHE
 
+    def _sleep(self, seconds: float) -> None:
+        """Isolated for deterministic testing without real wall-clock sleeps."""
+        time.sleep(seconds)
+
     def _http_get(self, url: str, params: dict, timeout: float):
         """Isolated for monkeypatching in unit tests without live internet access."""
         import httpx
-        return httpx.get(url, params=params, timeout=timeout)
+        headers = {"User-Agent": OPEN_METEO_USER_AGENT}
+        return httpx.get(url, params=params, timeout=timeout, headers=headers)
 
     def _fetch_with_retries(self, url: str, params: dict) -> dict:
         settings = get_settings()
@@ -96,12 +126,45 @@ class OpenMeteoOceanAdapter:
                 return resp.json()
             except Exception as e:
                 last_error = e
+                resp_obj = getattr(e, "response", None)
+                status_code = getattr(resp_obj, "status_code", None)
+                headers = getattr(resp_obj, "headers", {}) or {}
+
                 _log.warning(
                     "open_meteo_http_attempt_failed",
-                    extra={"attempt": attempt + 1, "url": url, "error": str(e)},
+                    extra={
+                        "attempt": attempt + 1,
+                        "url": url,
+                        "status_code": status_code,
+                        "error": str(e),
+                    },
                 )
+
+                # Non-retryable client errors (except 429 rate limit) should fail immediately
+                if status_code in (400, 401, 403, 404, 422):
+                    raise EnvironmentDataUnavailable(
+                        f"Open-Meteo request to {url} failed with client error {status_code}: {e}"
+                    )
+
                 if attempt < max_retries:
-                    time.sleep(0.05 * (2 ** attempt))
+                    retry_after = None
+                    if status_code == 429:
+                        raw_retry_after = headers.get("retry-after") or headers.get("Retry-After")
+                        retry_after = _parse_retry_after(raw_retry_after)
+                        if retry_after is not None and retry_after > MAX_RETRY_AFTER_SECONDS:
+                            raise EnvironmentDataUnavailable(
+                                f"Open-Meteo rate limit exceeded: Retry-After ({retry_after:.1f}s) exceeds maximum budget ({MAX_RETRY_AFTER_SECONDS:.1f}s)"
+                            )
+
+                    if retry_after is not None:
+                        sleep_s = retry_after
+                    elif status_code == 429:
+                        # Bounded backoff for 429 when Retry-After is absent
+                        sleep_s = min(1.0 * (2 ** attempt), 4.0)
+                    else:
+                        sleep_s = 0.25 * (2 ** attempt)
+
+                    self._sleep(sleep_s)
 
         raise EnvironmentDataUnavailable(
             f"Open-Meteo request to {url} failed after {max_retries + 1} attempt(s): {last_error}"
@@ -110,10 +173,11 @@ class OpenMeteoOceanAdapter:
     def _determine_endpoints(self, query_time: datetime) -> tuple[str, str]:
         settings = get_settings()
         now = datetime.now(timezone.utc)
-        target = query_time if query_time.tzinfo else query_time.replace(tzinfo=timezone.utc)
+        target = query_time.astimezone(timezone.utc) if query_time.tzinfo else query_time.replace(tzinfo=timezone.utc)
 
-        # If timestamp is more than 85 days in the past, use archive endpoint for weather
-        if target < (now - timedelta(days=85)):
+        # Dates before today (in the past) use the Historical Archive API (ERA5 reanalysis).
+        # Today and future dates use the Forecast API.
+        if target.date() < now.date():
             weather_url = settings.open_meteo_archive_url
         else:
             weather_url = settings.open_meteo_weather_url
@@ -128,7 +192,7 @@ class OpenMeteoOceanAdapter:
             raise EnvironmentDataUnavailable(f"Invalid geographical coordinates: ({lat}, {lon})")
 
         settings = get_settings()
-        ts_utc = timestamp if timestamp.tzinfo else timestamp.replace(tzinfo=timezone.utc)
+        ts_utc = timestamp.astimezone(timezone.utc) if timestamp.tzinfo else timestamp.replace(tzinfo=timezone.utc)
         date_str = ts_utc.strftime("%Y-%m-%d")
         cache_key = f"{round(lat, 2):.2f}:{round(lon, 2):.2f}:{date_str}"
 
