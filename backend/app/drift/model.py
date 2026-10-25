@@ -108,9 +108,16 @@ def _step_position(
     direction: int,
     allow_synthetic: bool = True,
     mode: str | None = None,
+    fallback_env: Any = None,
 ) -> tuple[float, float, str]:
     """One Euler advection step. `direction` is +1 (forward in time) or -1 (backward)."""
-    env = resolve_environment_conditions(lat, lon, t, allow_synthetic=allow_synthetic, mode=mode)
+    try:
+        env = resolve_environment_conditions(lat, lon, t, allow_synthetic=allow_synthetic, mode=mode)
+    except Exception:
+        if fallback_env is not None and (getattr(fallback_env, "wind_speed_ms", None) is not None or getattr(fallback_env, "current_speed_ms", None) is not None):
+            env = fallback_env
+        else:
+            raise
 
     # current: "direction current flows TOWARD" -> vector components
     cur_speed = env.current_speed_ms if env.current_speed_ms is not None else 0.0
@@ -163,6 +170,10 @@ def run_drift(
         "No spreading/diffusion term - centroid trajectory only.",
     ]
 
+    initial_env = resolve_environment_conditions(
+        observed_lat, observed_lon, observed_time, allow_synthetic=allow_synthetic, mode=mode
+    )
+
     def integrate(direction: int, target_hours: tuple) -> tuple[list, str]:
         points = []
         lat, lon, t = observed_lat, observed_lon, observed_time
@@ -174,7 +185,7 @@ def run_drift(
         total_steps = int((max_h * 3600) / dt)
         for i in range(1, total_steps + 1):
             lat, lon, src = _step_position(
-                lat, lon, t, dt, direction, allow_synthetic=allow_synthetic, mode=mode
+                lat, lon, t, dt, direction, allow_synthetic=allow_synthetic, mode=mode, fallback_env=initial_env
             )
             sources.add(src)
             t = t + timedelta(seconds=direction * dt)
