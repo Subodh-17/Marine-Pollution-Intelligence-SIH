@@ -136,10 +136,22 @@ export default function App() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [])
+
   const stageProgress = useCallback((inv) => {
-    const steps = inv.progress_log.map(p => p.step)
+    const steps = (inv?.progress_log || []).map(p => p.step)
     setProgressSteps(steps)
     setRevealedCount(0)
+    if (steps.length === 0) {
+      setInvestigation(inv)
+      setRunning(false)
+      setActiveTab('dashboard')
+      return
+    }
     let i = 0
     clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {

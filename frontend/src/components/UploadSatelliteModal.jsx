@@ -157,13 +157,31 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
         <div style={{ display: 'flex', gap: 10, fontSize: 12.5, marginBottom: 4 }}>
           <label style={{ flex: 1 }}>
             Center lat
-            <input type="number" step="0.01" value={centerLat} onChange={e => setCenterLat(parseFloat(e.target.value))}
-              style={{ width: '100%', marginTop: 4 }} />
+            <input
+              type="number"
+              step="0.01"
+              value={centerLat}
+              disabled={busy}
+              onChange={e => {
+                const val = e.target.value === '' ? '' : parseFloat(e.target.value)
+                setCenterLat(val)
+              }}
+              style={{ width: '100%', marginTop: 4 }}
+            />
           </label>
           <label style={{ flex: 1 }}>
             Center lon
-            <input type="number" step="0.01" value={centerLon} onChange={e => setCenterLon(parseFloat(e.target.value))}
-              style={{ width: '100%', marginTop: 4 }} />
+            <input
+              type="number"
+              step="0.01"
+              value={centerLon}
+              disabled={busy}
+              onChange={e => {
+                const val = e.target.value === '' ? '' : parseFloat(e.target.value)
+                setCenterLon(val)
+              }}
+              style={{ width: '100%', marginTop: 4 }}
+            />
           </label>
         </div>
 
@@ -182,7 +200,9 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
               submittingRef.current = true
               setBusy(true)
               try {
-                await onSubmit(fileRef.current.files[0], { detector, centerLat, centerLon })
+                const safeLat = centerLat !== '' && Number.isFinite(parseFloat(centerLat)) ? parseFloat(centerLat) : 19.05
+                const safeLon = centerLon !== '' && Number.isFinite(parseFloat(centerLon)) ? parseFloat(centerLon) : 71.20
+                await onSubmit(fileRef.current.files[0], { detector, centerLat: safeLat, centerLon: safeLon })
               } finally {
                 // The modal is typically closed by the parent (via onClose,
                 // triggered from onSubmit's own success/failure handling)

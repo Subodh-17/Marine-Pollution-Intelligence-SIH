@@ -1,6 +1,17 @@
 import { useEffect } from 'react'
 import './VesselDetailDrawer.css'
 
+function formatTimeSafe(ts) {
+  if (!ts) return 'N/A'
+  try {
+    const d = new Date(ts)
+    if (isNaN(d.getTime())) return String(ts)
+    return d.toISOString().slice(0, 16).replace('T', ' ')
+  } catch {
+    return String(ts)
+  }
+}
+
 export default function VesselDetailDrawer({ investigation, mmsi, rank, onClose }) {
   useEffect(() => {
     if (!mmsi) return undefined
@@ -10,7 +21,7 @@ export default function VesselDetailDrawer({ investigation, mmsi, rank, onClose 
   }, [mmsi, onClose])
 
   if (!mmsi) return null
-  const c = investigation.candidates.find(v => v.mmsi === mmsi)
+  const c = investigation?.candidates?.find(v => v.mmsi === mmsi)
   if (!c) return null
 
   return (
@@ -37,11 +48,11 @@ export default function VesselDetailDrawer({ investigation, mmsi, rank, onClose 
 
         <div className="drawer__section-title">Why this vessel ranked #{rank + 1}</div>
         <ul className="evidence-list">
-          {c.evidence_summary.map((e, i) => <li key={i}>{e}</li>)}
+          {(c.evidence_summary || []).map((e, i) => <li key={i}>{e}</li>)}
         </ul>
 
         <div className="drawer__section-title">Score breakdown</div>
-        {c.breakdown.map(b => (
+        {(c.breakdown || []).map(b => (
           <div className="breakdown-row" key={b.component}>
             <div className="breakdown-row__top">
               <span>{b.component.replaceAll('_', ' ')}</span>
@@ -58,7 +69,7 @@ export default function VesselDetailDrawer({ investigation, mmsi, rank, onClose 
         <table className="geometry-table">
           <tbody>
             <tr><td>Distance from estimated origin</td><td>{c.min_distance_km} km</td></tr>
-            <tr><td>Closest approach time</td><td>{new Date(c.closest_approach_time).toISOString().slice(0, 16).replace('T', ' ')}</td></tr>
+            <tr><td>Closest approach time</td><td>{formatTimeSafe(c.closest_approach_time)}</td></tr>
             <tr><td>Time delta from origin</td><td>{c.time_delta_hours} h</td></tr>
             {c.distance_from_detection_km != null && (
               <tr><td>Distance from raw detection location</td><td>{c.distance_from_detection_km} km</td></tr>
@@ -66,7 +77,7 @@ export default function VesselDetailDrawer({ investigation, mmsi, rank, onClose 
             {c.time_delta_from_detection_hours != null && (
               <tr><td>Time delta from detection</td><td>{c.time_delta_from_detection_hours} h</td></tr>
             )}
-            <tr><td>AIS positions in window</td><td>{c.trajectory_points.length}</td></tr>
+            <tr><td>AIS positions in window</td><td>{(c.trajectory_points || []).length}</td></tr>
             <tr><td>Data completeness</td><td>{c.data_completeness_pct}%</td></tr>
           </tbody>
         </table>

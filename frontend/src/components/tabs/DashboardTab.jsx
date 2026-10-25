@@ -211,7 +211,7 @@ export default function DashboardTab({
                 <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Ocean Current (HYCOM):</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Ocean Current (CMEMS):</span>
                 <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
