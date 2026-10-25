@@ -277,7 +277,9 @@ export default function SatelliteTab({ investigation }) {
           <h3 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: 15 }}>Estimated Spill Age</h3>
           {!age || age.confidence === 'unavailable' ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: 13.5 }}>
-              {age?.caveat || 'Age estimate unavailable: no slick was detected in this scene.'}
+              {age?.caveat || (geo
+                ? 'Age estimate unavailable: metocean wind data could not be retrieved. Spreading-rate heuristics require verified 10m wind speed vectors.'
+                : 'Age estimate unavailable: no slick was detected in this scene.')}
             </p>
           ) : (
             <>
