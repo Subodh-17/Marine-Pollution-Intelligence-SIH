@@ -154,8 +154,16 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
   }
 
   const mapCenter = origin ? [origin.lat, origin.lon] : [observed.lat, observed.lon]
-  const backwardLine = origin ? [...drift.backward_track, observed].map(p => [p.lat, p.lon]) : []
-  const forwardLine = drift.forward_track.length ? [observed, ...drift.forward_track].map(p => [p.lat, p.lon]) : []
+  const backwardLine = origin
+    ? [...(drift.backward_track || []), observed]
+        .filter(p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon))
+        .map(p => [p.lat, p.lon])
+    : []
+  const forwardLine = (drift.forward_track || []).length
+    ? [observed, ...(drift.forward_track || [])]
+        .filter(p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon))
+        .map(p => [p.lat, p.lon])
+    : []
 
   const fitBounds = sceneBounds || (geo ? [[geo.centroid_lat - 0.3, geo.centroid_lon - 0.3], [geo.centroid_lat + 0.3, geo.centroid_lon + 0.3]] : null)
 
@@ -199,8 +207,8 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
         {layers.hindcast && origin && (
           <>
             <Polyline positions={backwardLine} pathOptions={{ color: 'var(--signal-amber)', weight: 2, dashArray: '5 5' }} />
-            {drift.backward_track.map((p, i) => (
-              <Circle key={i} center={[p.lat, p.lon]} radius={p.uncertainty_km * 1000}
+            {(drift.backward_track || []).map((p, i) => (
+              <Circle key={i} center={[p.lat, p.lon]} radius={(Number.isFinite(p?.uncertainty_km) && p.uncertainty_km > 0 ? p.uncertainty_km : 1) * 1000}
                 pathOptions={{ color: 'var(--signal-amber)', weight: 1, fillOpacity: 0.04, opacity: 0.35 }} />
             ))}
             <Marker position={[origin.lat, origin.lon]} icon={pinIcon('var(--signal-amber)')}>
@@ -216,8 +224,8 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
         {layers.forecast && forwardLine.length > 1 && (
           <>
             <Polyline positions={forwardLine} pathOptions={{ color: 'var(--signal-violet)', weight: 2, dashArray: '2 6' }} />
-            {drift.forward_track.map((p, i) => (
-              <Circle key={i} center={[p.lat, p.lon]} radius={p.uncertainty_km * 1000}
+            {(drift.forward_track || []).map((p, i) => (
+              <Circle key={i} center={[p.lat, p.lon]} radius={(Number.isFinite(p?.uncertainty_km) && p.uncertainty_km > 0 ? p.uncertainty_km : 1) * 1000}
                 pathOptions={{ color: 'var(--signal-violet)', weight: 1, fillOpacity: 0.04, opacity: 0.3 }} />
             ))}
           </>
@@ -228,21 +236,28 @@ export default function InteractiveMap({ investigation, height = 460, defaultLay
         </CircleMarker>
 
         {layers.radius && (
-          <Circle center={origin ? [origin.lat, origin.lon] : [observed.lat, observed.lon]} radius={searchRadiusKm * 1000}
-            pathOptions={{ color: 'var(--text-muted)', weight: 1, dashArray: '4 4', fillOpacity: 0.02 }} />
+          <Circle
+            center={origin ? [origin.lat, origin.lon] : [observed.lat, observed.lon]}
+            radius={(Number.isFinite(Number(searchRadiusKm)) && Number(searchRadiusKm) > 0 ? Number(searchRadiusKm) : 50) * 1000}
+            pathOptions={{ color: 'var(--text-muted)', weight: 1, dashArray: '4 4', fillOpacity: 0.02 }}
+          />
         )}
 
-        {layers.ais && candidates.map((c, i) => {
-          const line = c.trajectory_points.map(p => [p.lat, p.lon])
+        {layers.ais && (candidates || []).map((c, i) => {
+          const line = (c.trajectory_points || [])
+            .filter(p => p && Number.isFinite(p.lat) && Number.isFinite(p.lon))
+            .map(p => [p.lat, p.lon])
           const color = colorForRank(i)
           const isSelected = selectedMmsi === c.mmsi
           return (
             <React.Fragment key={c.mmsi}>
-              <Polyline
-                positions={line}
-                pathOptions={{ color, weight: isSelected ? 4 : 2, opacity: isSelected ? 1 : 0.75 }}
-                eventHandlers={{ click: () => onSelectVessel && onSelectVessel(c.mmsi) }}
-              />
+              {line.length > 0 && (
+                <Polyline
+                  positions={line}
+                  pathOptions={{ color, weight: isSelected ? 4 : 2, opacity: isSelected ? 1 : 0.75 }}
+                  eventHandlers={{ click: () => onSelectVessel && onSelectVessel(c.mmsi) }}
+                />
+              )}
               {line.length > 0 && (
                 <Marker position={line[line.length - 1]} icon={pinIcon(color)}
                   eventHandlers={{ click: () => onSelectVessel && onSelectVessel(c.mmsi) }}>

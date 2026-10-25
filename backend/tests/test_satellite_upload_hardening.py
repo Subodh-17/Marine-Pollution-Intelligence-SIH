@@ -93,3 +93,25 @@ def test_characterize_slick_nan_safety():
     assert math.isfinite(geom.area_km2)
     assert math.isfinite(geom.length_km)
     assert math.isfinite(geom.width_km)
+
+
+def test_satellite_upload_async_to_thread_success(client):
+    img = Image.new("L", (64, 64), color=200)
+    for y in range(25, 40):
+        for x in range(25, 40):
+            img.putpixel((x, y), 30)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    r = client.post(
+        "/api/satellite/upload?detector=classical&center_lat=19.05&center_lon=71.20",
+        files={"file": ("test_slick.png", buf.getvalue(), "image/png")},
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["id"]
+    assert data["mode"] == "real_satellite"
+    assert "satellite" in data
+    assert "candidates" in data
+

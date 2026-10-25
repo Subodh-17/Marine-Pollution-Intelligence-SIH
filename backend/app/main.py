@@ -5,6 +5,7 @@ Run with:  uvicorn app.main:app --reload --port 8000
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import tempfile
 import time
@@ -661,7 +662,8 @@ async def upload_satellite_image(
     tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, settings.max_upload_size_bytes)
     try:
         _check_image_dimensions(tmp_path, ext)
-        inv = run_investigation(
+        inv = await asyncio.to_thread(
+            run_investigation,
             mode="real_satellite",
             image_path=tmp_path,
             detector=detector,

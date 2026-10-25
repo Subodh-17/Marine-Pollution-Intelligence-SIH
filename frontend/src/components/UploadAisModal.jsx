@@ -4,6 +4,7 @@ export default function UploadAisModal({ onClose, onSubmit }) {
   const fileRef = useRef(null)
   const [fileName, setFileName] = useState(null)
   const [busy, setBusy] = useState(false)
+  const submittingRef = useRef(false)
 
   useEffect(() => {
     const onKeyDown = e => { if (e.key === 'Escape') onClose() }
@@ -33,18 +34,25 @@ export default function UploadAisModal({ onClose, onSubmit }) {
           ref={fileRef}
           type="file"
           accept=".csv"
+          disabled={busy}
           onChange={e => setFileName(e.target.files[0]?.name || null)}
           style={{ margin: '12px 0', fontSize: 12.5, color: 'var(--text-secondary)' }}
         />
         <div style={{ display: 'flex', gap: 10, marginTop: 16, justifyContent: 'flex-end' }}>
-          <button className="btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn-secondary" onClick={onClose} disabled={busy}>Cancel</button>
           <button
             className="btn-run-demo"
             disabled={!fileName || busy}
             onClick={async () => {
+              if (submittingRef.current) return
+              submittingRef.current = true
               setBusy(true)
-              await onSubmit(fileRef.current.files[0])
-              setBusy(false)
+              try {
+                await onSubmit(fileRef.current.files[0])
+              } finally {
+                submittingRef.current = false
+                setBusy(false)
+              }
             }}
           >
             {busy ? 'Uploading…' : 'Upload & run'}
