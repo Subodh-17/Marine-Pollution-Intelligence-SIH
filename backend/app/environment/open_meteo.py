@@ -37,12 +37,12 @@ def cmems_grid_node(lat: float, lon: float) -> tuple[float, float]:
 
     Physics justification:
     Copernicus CMEMS (GLOBAL_ANALYSISFORECAST_PHY_001_024) is the highest-resolution global
-    provider in this system (1/12° vs NOAA GFS/ERA5 1/4°). Any sub-grid coordinates within
-    the same 1/12° cell interval [k/12, (k+1)/12) map to the exact same physical model grid
-    node and return identical vectors from the provider.
+    provider in this system (1/12° vs NOAA GFS/ERA5 1/4°). Model nodes sit at multiples of
+    1/12° (e.g. k/12). Snapping coordinates to the nearest provider grid node (round(x * 12) / 12)
+    aligns requests directly with native provider grid points, avoiding artificial midpoint ties.
     """
-    node_lat = (math.floor(lat * 12.0) + 0.5) / 12.0
-    node_lon = (math.floor(lon * 12.0) + 0.5) / 12.0
+    node_lat = round(lat * 12.0) / 12.0
+    node_lon = round(lon * 12.0) / 12.0
     return round(node_lat, 4), round(node_lon, 4)
 
 
@@ -230,7 +230,7 @@ class OpenMeteoOceanAdapter:
 
         # Determine endpoint routing (forecast vs historical archive)
         weather_url, marine_url = self._determine_endpoints(ts_utc)
-        endpoint_type = "archive" if "archive" in weather_url else "forecast"
+        endpoint_type = "archive" if weather_url == settings.open_meteo_archive_url or "archive" in weather_url else "forecast"
 
         # Snap coordinates to Copernicus CMEMS 1/12° (~9.25 km) provider grid node
         grid_lat, grid_lon = cmems_grid_node(lat, lon)
