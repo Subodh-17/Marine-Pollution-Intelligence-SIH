@@ -16,11 +16,12 @@ Supports:
 """
 from __future__ import annotations
 
+import random
 import threading
 import time
 from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Callable
 
 from app.config import get_settings
 from app.environment.adapters import EnvironmentConditions, EnvironmentDataUnavailable
@@ -100,12 +101,21 @@ class OpenMeteoOceanAdapter:
     (10m winds).
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        sleep_fn: Callable[[float], None] | None = None,
+        jitter_fn: Callable[[float, float], float] | None = None,
+    ):
         self._cache = _CACHE
+        self._custom_sleep = sleep_fn
+        self._jitter_fn = jitter_fn or random.uniform
 
     def _sleep(self, seconds: float) -> None:
         """Isolated for deterministic testing without real wall-clock sleeps."""
-        time.sleep(seconds)
+        if self._custom_sleep is not None:
+            self._custom_sleep(seconds)
+        else:
+            time.sleep(seconds)
 
     def _http_get(self, url: str, params: dict, timeout: float):
         """Isolated for monkeypatching in unit tests without live internet access."""
@@ -140,10 +150,12 @@ class OpenMeteoOceanAdapter:
                     },
                 )
 
-                # Non-retryable client errors (except 429 rate limit) should fail immediately
-                if status_code in (400, 401, 403, 404, 422):
+                # Only retry transient failures: HTTP 429 (rate limit), 500, 502, 503, 504,
+                # or network/connection/timeout errors where no HTTP status code was returned.
+                # All other status codes (e.g. 400, 401, 403, 404, 405, 409, 422) must fail fast immediately.
+                if status_code is not None and status_code not in (429, 500, 502, 503, 504):
                     raise EnvironmentDataUnavailable(
-                        f"Open-Meteo request to {url} failed with client error {status_code}: {e}"
+                        f"Open-Meteo request to {url} failed with non-retryable status {status_code}: {e}"
                     )
 
                 if attempt < max_retries:
@@ -159,10 +171,13 @@ class OpenMeteoOceanAdapter:
                     if retry_after is not None:
                         sleep_s = retry_after
                     elif status_code == 429:
-                        # Bounded backoff for 429 when Retry-After is absent
-                        sleep_s = min(1.0 * (2 ** attempt), 4.0)
+                        # Bounded backoff with jitter for 429 when Retry-After is absent
+                        base = min(1.0 * (2 ** attempt), 4.0)
+                        sleep_s = self._jitter_fn(0.5 * base, base)
                     else:
-                        sleep_s = 0.25 * (2 ** attempt)
+                        # Bounded backoff with jitter for 5xx transient server errors
+                        base = 0.25 * (2 ** attempt)
+                        sleep_s = self._jitter_fn(0.5 * base, base)
 
                     self._sleep(sleep_s)
 
@@ -175,9 +190,11 @@ class OpenMeteoOceanAdapter:
         now = datetime.now(timezone.utc)
         target = query_time.astimezone(timezone.utc) if query_time.tzinfo else query_time.replace(tzinfo=timezone.utc)
 
-        # Dates before today (in the past) use the Historical Archive API (ERA5 reanalysis).
-        # Today and future dates use the Forecast API.
-        if target.date() < now.date():
+        # Open-Meteo Forecast API seamlessly serves operational forecast/nowcast data for
+        # current dates and recent past timestamps up to 2 days prior to today (past_days cutoff).
+        # Historical timestamps older than 2 days in the past use the Historical Archive API (ERA5 reanalysis).
+        historical_cutoff = (now - timedelta(days=2)).date()
+        if target.date() < historical_cutoff:
             weather_url = settings.open_meteo_archive_url
         else:
             weather_url = settings.open_meteo_weather_url
