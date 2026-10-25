@@ -20,6 +20,14 @@ export default function KpiCards({ investigation }) {
   const ageLabel = age && age.confidence !== 'unavailable'
     ? `~${age.hours}` : 'N/A'
   const ageUnit = age && age.confidence !== 'unavailable' ? 'h' : ''
+  const ageSub = age
+    ? (age.confidence === 'unavailable' ? 'Unavailable / low confidence' : `Confidence: ${age.confidence}`)
+    : (geo ? 'Metocean data unavailable' : 'No slick detected')
+
+  const isDriftUnavailable = investigation.drift?.drift_status === 'UNAVAILABLE' || investigation.drift?.environment_source === 'UNAVAILABLE'
+  const originSub = origin
+    ? `${origin.lat.toFixed(3)}° · ${investigation.drift.origin_confidence} confidence`
+    : (isDriftUnavailable ? 'Drift unavailable (metocean unreachable)' : (geo ? 'Drift unavailable' : 'No slick detected'))
 
   return (
     <div className="kpi-grid">
@@ -41,13 +49,13 @@ export default function KpiCards({ investigation }) {
         label="Estimated age"
         value={ageLabel}
         unit={ageUnit}
-        sub={age?.confidence === 'unavailable' ? 'Unavailable / low confidence' : `Confidence: ${age?.confidence}`}
+        sub={ageSub}
         accent="var(--signal-amber)"
       />
       <Card
         label="Probable origin"
         value={origin ? `${origin.lat.toFixed(3)}°` : 'N/A'}
-        sub={origin ? `${origin.lon.toFixed(3)}° · ${investigation.drift.origin_confidence} confidence` : (geo ? 'Drift unavailable' : 'No slick detected')}
+        sub={originSub}
         accent="var(--signal-violet)"
       />
       <Card

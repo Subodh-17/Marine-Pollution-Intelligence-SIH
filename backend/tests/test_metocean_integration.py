@@ -922,3 +922,187 @@ class TestCmemsGridResolutionAndCaching:
         assert len(drift.forward_track) == 4
         # Requests bounded to <= 56 (27 unique spatial-temporal CMEMS nodes x 2 endpoints, down from 286)
         assert http_calls <= 56
+
+
+# ===========================================================================
+# 4. Phase 4.8.39 — Metocean Resilience & Provenance Hardening
+# ===========================================================================
+class TestPhase4839MetoceanResilience:
+    def setup_method(self):
+        get_open_meteo_cache().clear()
+        from app.environment.open_meteo import get_open_meteo_coalescer
+        get_open_meteo_coalescer().clear()
+        get_settings.cache_clear()
+
+    def teardown_method(self):
+        get_open_meteo_cache().clear()
+        from app.environment.open_meteo import get_open_meteo_coalescer
+        get_open_meteo_coalescer().clear()
+        get_settings.cache_clear()
+
+    def test_http_429_cumulative_backoff_budget_exceeded(self, monkeypatch):
+        """When multiple 429 retries accumulate sleep exceeding the 12s budget, abort immediately."""
+        adapter = OpenMeteoOceanAdapter()
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        attempts = 0
+
+        def mock_get(url, params, timeout):
+            nonlocal attempts
+            attempts += 1
+            # Attempt 1 sleeps 7s; Attempt 2 requests 6s (7 + 6 = 13s > 12s budget)
+            retry_after = "7" if attempts == 1 else "6"
+            return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429, headers={"Retry-After": retry_after})
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        with pytest.raises(EnvironmentDataUnavailable, match="rate limit backoff budget exceeded"):
+            adapter.fetch(19.05, 71.20, past_ts)
+
+        # Attempt 1 slept 7.0s; Attempt 2 aborted before sleeping 6.0s
+        assert sleep_durations == [7.0]
+        assert attempts == 2
+
+    def test_http_429_burst_recovery_on_third_attempt(self, monkeypatch):
+        """When attempts 1 and 2 fail with 429, attempt 3 recovers within the budget, preserving REAL provenance."""
+        adapter = OpenMeteoOceanAdapter(jitter_fn=lambda low, high: high)
+        weather_attempts = 0
+        marine_attempts = 0
+        sleep_durations = []
+
+        def mock_sleep(seconds):
+            sleep_durations.append(seconds)
+
+        def mock_get(url, params, timeout):
+            nonlocal weather_attempts, marine_attempts
+            if "marine" in url:
+                marine_attempts += 1
+                return _MockResponse(_sample_marine_json())
+            weather_attempts += 1
+            if weather_attempts < 3:
+                # Attempts 1 and 2 fail with 429
+                return _MockResponse({"error": True, "reason": "rate limit burst"}, status_code=429)
+            # Attempt 3 succeeds
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_sleep", mock_sleep)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert weather_attempts == 3
+        assert marine_attempts == 1
+        # attempt 0 base=1.0, attempt 1 base=2.0 (total sleep 3.0s <= 12.0s)
+        assert len(sleep_durations) == 2
+        assert sleep_durations == [1.0, 2.0]
+
+    def test_open_meteo_api_key_configuration_and_masking(self, monkeypatch):
+        """When OPEN_METEO_API_KEY is configured, attach apikey parameter and mask it in logs/errors."""
+        monkeypatch.setenv("OPEN_METEO_API_KEY", "super-secret-customer-key-xyz")
+        get_settings.cache_clear()
+
+        adapter = OpenMeteoOceanAdapter()
+        captured_params = []
+
+        def mock_get(url, params, timeout):
+            captured_params.append(dict(params))
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        cond = adapter.fetch(19.05, 71.20, past_ts)
+
+        assert cond.source == "REAL_OPEN_METEO"
+        assert len(captured_params) == 2
+        for p in captured_params:
+            assert p.get("apikey") == "super-secret-customer-key-xyz"
+
+        # Verify error masking: simulated error with apikey in URL masks the secret
+        from app.environment.open_meteo import _sanitize_url, _sanitize_params
+        leak_url = "https://api.open-meteo.com/v1/forecast?latitude=10&apikey=super-secret-customer-key-xyz&longitude=20"
+        clean_url = _sanitize_url(leak_url)
+        assert "super-secret-customer-key-xyz" not in clean_url
+        assert "apikey=***" in clean_url
+
+        clean_p = _sanitize_params({"apikey": "super-secret-customer-key-xyz", "lat": 10})
+        assert clean_p["apikey"] == "***"
+
+    def test_in_flight_coalescing_prevents_duplicate_concurrent_requests(self, monkeypatch):
+        """Concurrent requests for the exact same spatial grid cell and date reuse the in-flight fetch."""
+        import threading
+        import time
+
+        adapter = OpenMeteoOceanAdapter()
+        get_open_meteo_cache().clear()
+        from app.environment.open_meteo import get_open_meteo_coalescer
+        get_open_meteo_coalescer().clear()
+
+        http_calls = 0
+        call_lock = threading.Lock()
+
+        def slow_mock_get(url, params, timeout):
+            nonlocal http_calls
+            with call_lock:
+                http_calls += 1
+            # Simulate network latency so concurrent callers collide
+            time.sleep(0.05)
+            if "marine" in url:
+                return _MockResponse(_sample_marine_json())
+            return _MockResponse(_sample_weather_json())
+
+        monkeypatch.setattr(adapter, "_http_get", slow_mock_get)
+
+        past_ts = datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc)
+        results = [None, None]
+        errors = []
+
+        def worker(idx):
+            try:
+                results[idx] = adapter.fetch(19.05, 71.20, past_ts)
+            except Exception as e:
+                errors.append(e)
+
+        t1 = threading.Thread(target=worker, args=(0,))
+        t2 = threading.Thread(target=worker, args=(1,))
+
+        t1.start()
+        t2.start()
+        t1.join(timeout=5.0)
+        t2.join(timeout=5.0)
+
+        assert not errors
+        assert results[0] is not None
+        assert results[1] is not None
+        assert results[0].wind_speed_ms == results[1].wind_speed_ms
+        # Only 2 HTTP calls (1 weather + 1 marine) were made despite 2 concurrent requests
+        assert http_calls == 2
+
+    def test_real_satellite_mode_truthfully_refuses_synthetic_on_429_exhaustion(self, monkeypatch):
+        """In real_satellite mode, exhausting 429 retries strictly refuses synthetic mock substitution."""
+        monkeypatch.setenv("ENV_PROVIDER", "open_meteo")
+        get_settings.cache_clear()
+
+        adapter = OpenMeteoOceanAdapter()
+
+        def mock_get(url, params, timeout):
+            return _MockResponse({"error": True, "reason": "rate limit"}, status_code=429)
+
+        monkeypatch.setattr(adapter, "_sleep", lambda s: None)
+        monkeypatch.setattr(adapter, "_http_get", mock_get)
+
+        import app.environment.open_meteo as om_mod
+        monkeypatch.setattr(om_mod, "OpenMeteoOceanAdapter", lambda: adapter)
+
+        ts = datetime(2026, 10, 25, 14, 0, tzinfo=timezone.utc)
+        with pytest.raises(EnvironmentDataUnavailable, match="Operational mode refused synthetic environmental fallback"):
+            resolve_environment_conditions(-3.95, 116.52, ts, allow_synthetic=False, mode="real_satellite")

@@ -85,8 +85,67 @@ def get_open_meteo_cache() -> _OpenMeteoCache:
     return _CACHE
 
 
+class _InFlightCoalescer:
+    """Thread-safe request coalescing (single-flight) to prevent duplicate
+    concurrent upstream queries for the same spatial grid node and date."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._events: dict[str, threading.Event] = {}
+
+    def acquire(self, key: str) -> bool:
+        with self._lock:
+            if key in self._events:
+                return False
+            self._events[key] = threading.Event()
+            return True
+
+    def wait(self, key: str, timeout: float = 20.0) -> bool:
+        with self._lock:
+            event = self._events.get(key)
+        if event is None:
+            return True
+        return event.wait(timeout=timeout)
+
+    def release(self, key: str) -> None:
+        with self._lock:
+            event = self._events.pop(key, None)
+        if event is not None:
+            event.set()
+
+    def clear(self) -> None:
+        with self._lock:
+            for event in self._events.values():
+                event.set()
+            self._events.clear()
+
+
+_COALESCER = _InFlightCoalescer()
+
+
+def get_open_meteo_coalescer() -> _InFlightCoalescer:
+    return _COALESCER
+
+
 OPEN_METEO_USER_AGENT = "MarinePollutionIntelligence/0.1.0 (https://marine-pollution-intelligence-sih.vercel.app)"
 MAX_RETRY_AFTER_SECONDS = 10.0
+MAX_CUMULATIVE_429_BACKOFF_SECONDS = 12.0
+
+
+def _sanitize_url(url_str: str | None) -> str:
+    if not url_str:
+        return ""
+    import re
+    return re.sub(r"([?&]apikey=)[^\s&'\"]+", r"\g<1>***", str(url_str))
+
+
+def _sanitize_params(params: dict | None) -> dict:
+    if not params:
+        return {}
+    sanitized = dict(params)
+    if "apikey" in sanitized:
+        sanitized["apikey"] = "***"
+    return sanitized
 
 
 def _parse_retry_after(header_val: str | None) -> float | None:
@@ -121,8 +180,10 @@ class OpenMeteoOceanAdapter:
         self,
         sleep_fn: Callable[[float], None] | None = None,
         jitter_fn: Callable[[float, float], float] | None = None,
+        coalescer: _InFlightCoalescer | None = None,
     ):
         self._cache = _CACHE
+        self._coalescer = coalescer or _COALESCER
         self._custom_sleep = sleep_fn
         self._jitter_fn = jitter_fn or random.uniform
 
@@ -143,9 +204,13 @@ class OpenMeteoOceanAdapter:
         settings = get_settings()
         timeout = settings.env_live_timeout_seconds
         max_retries = settings.env_live_max_retries
+        max_attempts = max(max_retries, 3) + 1  # allows bounded retries for transient 429 bursts
+        cumulative_sleep = 0.0
         last_error: Exception | None = None
+        clean_url = _sanitize_url(url)
+        clean_params = _sanitize_params(params)
 
-        for attempt in range(max_retries + 1):
+        for attempt in range(max_attempts):
             try:
                 resp = self._http_get(url, params=params, timeout=timeout)
                 resp.raise_for_status()
@@ -160,9 +225,10 @@ class OpenMeteoOceanAdapter:
                     "open_meteo_http_attempt_failed",
                     extra={
                         "attempt": attempt + 1,
-                        "url": url,
+                        "url": clean_url,
                         "status_code": status_code,
-                        "error": str(e),
+                        "params": clean_params,
+                        "error": _sanitize_url(str(e)),
                     },
                 )
 
@@ -171,34 +237,47 @@ class OpenMeteoOceanAdapter:
                 # All other status codes (e.g. 400, 401, 403, 404, 405, 409, 422) must fail fast immediately.
                 if status_code is not None and status_code not in (429, 500, 502, 503, 504):
                     raise EnvironmentDataUnavailable(
-                        f"Open-Meteo request to {url} failed with non-retryable status {status_code}: {e}"
+                        f"Open-Meteo request to {clean_url} failed with non-retryable status {status_code}: {_sanitize_url(str(e))}"
                     )
 
-                if attempt < max_retries:
-                    retry_after = None
-                    if status_code == 429:
-                        raw_retry_after = headers.get("retry-after") or headers.get("Retry-After")
-                        retry_after = _parse_retry_after(raw_retry_after)
-                        if retry_after is not None and retry_after > MAX_RETRY_AFTER_SECONDS:
-                            raise EnvironmentDataUnavailable(
-                                f"Open-Meteo rate limit exceeded: Retry-After ({retry_after:.1f}s) exceeds maximum budget ({MAX_RETRY_AFTER_SECONDS:.1f}s)"
-                            )
+                # For non-429 transient errors (5xx / network), cap at settings.env_live_max_retries
+                if status_code != 429 and attempt >= max_retries:
+                    break
 
-                    if retry_after is not None:
-                        sleep_s = retry_after
-                    elif status_code == 429:
-                        # Bounded backoff with jitter for 429 when Retry-After is absent
-                        base = min(1.0 * (2 ** attempt), 4.0)
-                        sleep_s = self._jitter_fn(0.5 * base, base)
-                    else:
-                        # Bounded backoff with jitter for 5xx transient server errors
-                        base = 0.25 * (2 ** attempt)
-                        sleep_s = self._jitter_fn(0.5 * base, base)
+                # For 429 or transient errors, check if further retry is allowed
+                if attempt >= max_attempts - 1:
+                    break
 
-                    self._sleep(sleep_s)
+                retry_after = None
+                if status_code == 429:
+                    raw_retry_after = headers.get("retry-after") or headers.get("Retry-After")
+                    retry_after = _parse_retry_after(raw_retry_after)
+                    if retry_after is not None and retry_after > MAX_RETRY_AFTER_SECONDS:
+                        raise EnvironmentDataUnavailable(
+                            f"Open-Meteo rate limit exceeded: Retry-After ({retry_after:.1f}s) exceeds maximum budget ({MAX_RETRY_AFTER_SECONDS:.1f}s)"
+                        )
+
+                if retry_after is not None:
+                    sleep_s = retry_after
+                elif status_code == 429:
+                    # Bounded exponential backoff with jitter for 429 when Retry-After is absent
+                    base = min(1.0 * (2 ** attempt), 4.0)
+                    sleep_s = self._jitter_fn(0.5 * base, base)
+                else:
+                    # Bounded backoff with jitter for 5xx transient server errors
+                    base = 0.25 * (2 ** attempt)
+                    sleep_s = self._jitter_fn(0.5 * base, base)
+
+                if cumulative_sleep + sleep_s > MAX_CUMULATIVE_429_BACKOFF_SECONDS:
+                    raise EnvironmentDataUnavailable(
+                        f"Open-Meteo rate limit backoff budget exceeded: {cumulative_sleep + sleep_s:.1f}s exceeds maximum cumulative budget ({MAX_CUMULATIVE_429_BACKOFF_SECONDS:.1f}s)"
+                    )
+
+                cumulative_sleep += sleep_s
+                self._sleep(sleep_s)
 
         raise EnvironmentDataUnavailable(
-            f"Open-Meteo request to {url} failed after {max_retries + 1} attempt(s): {last_error}"
+            f"Open-Meteo request to {clean_url} failed after {attempt + 1} attempt(s): {_sanitize_url(str(last_error))}"
         )
 
     def _determine_endpoints(self, query_time: datetime) -> tuple[str, str]:
@@ -241,54 +320,74 @@ class OpenMeteoOceanAdapter:
         if cached_day and ts_utc.hour in cached_day:
             return cached_day[ts_utc.hour]
 
-        # 2. Cache miss: fetch hourly vectors for the target day at the grid node center
+        # 2. Single-flight request coalescing: prevent concurrent duplicate requests for the same grid cell
+        is_leader = self._coalescer.acquire(cache_key)
+        if not is_leader:
+            self._coalescer.wait(cache_key, timeout=settings.env_live_timeout_seconds + 5.0)
+            cached_day = self._cache.get(cache_key, settings.env_cache_ttl_seconds)
+            if cached_day and ts_utc.hour in cached_day:
+                return cached_day[ts_utc.hour]
+            is_leader = self._coalescer.acquire(cache_key)
 
-        weather_params = {
-            "latitude": grid_lat,
-            "longitude": grid_lon,
-            "hourly": "wind_speed_10m,wind_direction_10m",
-            "wind_speed_unit": "ms",
-            "start_date": date_str,
-            "end_date": date_str,
-            "timezone": "UTC",
-        }
-
-        marine_params = {
-            "latitude": grid_lat,
-            "longitude": grid_lon,
-            "hourly": "ocean_current_velocity,ocean_current_direction,wave_height",
-            "start_date": date_str,
-            "end_date": date_str,
-            "timezone": "UTC",
-        }
-
-        # Query weather (wind)
         try:
-            weather_data = self._fetch_with_retries(weather_url, weather_params)
-        except Exception as e:
-            raise EnvironmentDataUnavailable(f"Failed to retrieve wind data from {weather_url}: {e}")
+            # Re-check cache in case leader populated it before acquire
+            cached_day = self._cache.get(cache_key, settings.env_cache_ttl_seconds)
+            if cached_day and ts_utc.hour in cached_day:
+                return cached_day[ts_utc.hour]
 
-        # Query marine (currents + waves)
-        marine_data = None
-        marine_error = None
-        try:
-            marine_data = self._fetch_with_retries(marine_url, marine_params)
-        except Exception as e:
-            marine_error = str(e)
-            _log.info("open_meteo_marine_unavailable", extra={"lat": grid_lat, "lon": grid_lon, "error": marine_error})
+            weather_params = {
+                "latitude": grid_lat,
+                "longitude": grid_lon,
+                "hourly": "wind_speed_10m,wind_direction_10m",
+                "wind_speed_unit": "ms",
+                "start_date": date_str,
+                "end_date": date_str,
+                "timezone": "UTC",
+            }
 
-        # 3. Parse and cache all 24 hours of the day
-        day_conditions = self._parse_day_response(
-            grid_lat, grid_lon, date_str, weather_data, marine_data, marine_error
-        )
-        self._cache.put(cache_key, day_conditions)
+            marine_params = {
+                "latitude": grid_lat,
+                "longitude": grid_lon,
+                "hourly": "ocean_current_velocity,ocean_current_direction,wave_height",
+                "start_date": date_str,
+                "end_date": date_str,
+                "timezone": "UTC",
+            }
 
-        if ts_utc.hour in day_conditions:
-            return day_conditions[ts_utc.hour]
+            if settings.open_meteo_api_key:
+                weather_params["apikey"] = settings.open_meteo_api_key
+                marine_params["apikey"] = settings.open_meteo_api_key
 
-        # Fallback to closest available hour
-        closest_hour = min(day_conditions.keys(), key=lambda h: abs(h - ts_utc.hour))
-        return day_conditions[closest_hour]
+            # Query weather (wind)
+            try:
+                weather_data = self._fetch_with_retries(weather_url, weather_params)
+            except Exception as e:
+                raise EnvironmentDataUnavailable(f"Failed to retrieve wind data from {_sanitize_url(weather_url)}: {_sanitize_url(str(e))}")
+
+            # Query marine (currents + waves)
+            marine_data = None
+            marine_error = None
+            try:
+                marine_data = self._fetch_with_retries(marine_url, marine_params)
+            except Exception as e:
+                marine_error = _sanitize_url(str(e))
+                _log.info("open_meteo_marine_unavailable", extra={"lat": grid_lat, "lon": grid_lon, "error": marine_error})
+
+            # 3. Parse and cache all 24 hours of the day
+            day_conditions = self._parse_day_response(
+                grid_lat, grid_lon, date_str, weather_data, marine_data, marine_error
+            )
+            self._cache.put(cache_key, day_conditions)
+
+            if ts_utc.hour in day_conditions:
+                return day_conditions[ts_utc.hour]
+
+            # Fallback to closest available hour
+            closest_hour = min(day_conditions.keys(), key=lambda h: abs(h - ts_utc.hour))
+            return day_conditions[closest_hour]
+        finally:
+            if is_leader:
+                self._coalescer.release(cache_key)
 
     def _parse_day_response(
         self,

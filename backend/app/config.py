@@ -220,6 +220,7 @@ class Settings:
     open_meteo_marine_url: str
     open_meteo_weather_url: str
     open_meteo_archive_url: str
+    open_meteo_api_key: str | None
 
     # ---- Upload hardening (Section 9) ------------------------------------------
     max_image_dimension_px: int
@@ -345,6 +346,7 @@ def get_settings() -> Settings:
         open_meteo_marine_url=_env_str("OPEN_METEO_MARINE_URL", "https://marine-api.open-meteo.com/v1/marine"),
         open_meteo_weather_url=_env_str("OPEN_METEO_WEATHER_URL", "https://api.open-meteo.com/v1/forecast"),
         open_meteo_archive_url=_env_str("OPEN_METEO_ARCHIVE_URL", "https://archive-api.open-meteo.com/v1/archive"),
+        open_meteo_api_key=_env_optional_str("OPEN_METEO_API_KEY"),
         max_image_dimension_px=_env_int("MAX_IMAGE_DIMENSION_PX", 8000),
         enable_zenodo_data=_env_bool("ENABLE_ZENODO_DATA", False),
         dataset_root=_resolve_default_dataset_root(),
