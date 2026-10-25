@@ -187,8 +187,8 @@ class MetNorwayWeatherAdapter:
         if closest_point is None:
             raise EnvironmentDataUnavailable("No valid time steps found in MET Norway forecast.")
 
-        # Ensure matched time step is reasonably aligned (within 6 hours)
-        max_allowed_delta = 6.0 * 3600.0
+        # Ensure matched time step is reasonably aligned (within 48 hours for operational window)
+        max_allowed_delta = 48.0 * 3600.0
         if min_dt_seconds > max_allowed_delta:
             raise EnvironmentDataUnavailable(
                 f"Closest MET Norway forecast time step is {min_dt_seconds / 3600.0:.1f}h from requested "

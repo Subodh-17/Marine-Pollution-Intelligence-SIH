@@ -218,6 +218,38 @@ class TestDriftReconstructionRestoration:
         )
         assert missing.wind_speed_ms is None
 
+    def test_drift_intermediate_step_failure_uses_initial_env(self, monkeypatch):
+        now = datetime.now(timezone.utc)
+        initial_env = EnvironmentConditions(
+            wind_speed_ms=5.5,
+            wind_dir_deg=270.0,
+            current_speed_ms=0.5,
+            current_dir_deg=90.0,
+            wave_height_m=1.0,
+            source="REAL_MET_NORWAY",
+            retrieved_at=now.isoformat(),
+            wind_provider="MET_NORWAY_ECMWF",
+            current_provider="COPERNICUS_CMEMS",
+            coverage_status="FULL_METOCEAN",
+        )
+
+        call_count = 0
+        def mock_resolve(lat, lon, t, **kw):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return initial_env
+            raise EnvironmentDataUnavailable("Historical step 429")
+
+        import app.drift.model as drift_mod
+        monkeypatch.setattr(drift_mod, "resolve_environment_conditions", mock_resolve)
+
+        res = run_drift(19.05, 71.20, now, backward_hours=(6, 12), forward_hours=(6, 12), allow_synthetic=False, mode="real_satellite")
+        assert res.drift_status in ("COMPLETED", "DEGRADED_PARTIAL_WIND")
+        assert res.probable_origin is not None
+        assert len(res.backward_track) == 2
+        assert len(res.forward_track) == 2
+
 
 class TestEndToEndInvestigationRestoration:
     def test_real_satellite_investigation_with_met_norway(self, monkeypatch, tmp_path):
