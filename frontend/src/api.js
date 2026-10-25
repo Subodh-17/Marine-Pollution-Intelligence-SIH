@@ -80,9 +80,12 @@ export const api = {
 
   getInvestigations: (limit = 20) => client.get('/investigations', { params: { limit } }).then(r => r.data),
 
+  // Given a 75s timeout (below Render's 100s proxy threshold): allows absorbing a
+  // 35-50s container cold start plus live Open-Meteo fetches (~10-15s), avoiding client aborts.
   runInvestigation: ({ mode = 'demo', searchRadiusKm = 50, timeWindowHours = 12 } = {}) =>
     client.post('/spill/detect', null, {
       params: { mode, search_radius_km: searchRadiusKm, time_window_hours: timeWindowHours },
+      timeout: 75000,
     }).then(r => r.data),
 
   uploadAis: (file) => {

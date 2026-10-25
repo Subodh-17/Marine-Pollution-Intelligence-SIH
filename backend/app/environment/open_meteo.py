@@ -16,6 +16,7 @@ Supports:
 """
 from __future__ import annotations
 
+import math
 import random
 import threading
 import time
@@ -30,9 +31,24 @@ from app.logging_config import get_logger
 _log = get_logger("environment.open_meteo")
 
 
+def cmems_grid_node(lat: float, lon: float) -> tuple[float, float]:
+    """Maps continuous geographical coordinates to the nearest Copernicus CMEMS 1/12° (~9.25 km)
+    global equi-angular model grid node.
+
+    Physics justification:
+    Copernicus CMEMS (GLOBAL_ANALYSISFORECAST_PHY_001_024) is the highest-resolution global
+    provider in this system (1/12° vs NOAA GFS/ERA5 1/4°). Any sub-grid coordinates within
+    the same 1/12° cell interval [k/12, (k+1)/12) map to the exact same physical model grid
+    node and return identical vectors from the provider.
+    """
+    node_lat = (math.floor(lat * 12.0) + 0.5) / 12.0
+    node_lon = (math.floor(lon * 12.0) + 0.5) / 12.0
+    return round(node_lat, 4), round(node_lon, 4)
+
+
 class _OpenMeteoCache:
     """Thread-safe bounded in-memory LRU cache for hourly metocean fields.
-    Keys are spatial-temporal grid bins: (round(lat, 2), round(lon, 2), date_str)."""
+    Keys are spatial-temporal grid bins: (cmems_grid_node(lat, lon), date_str)."""
 
     def __init__(self, max_entries: int = 200):
         self._entries: OrderedDict[str, tuple[float, dict[int, Any]]] = OrderedDict()
@@ -211,19 +227,25 @@ class OpenMeteoOceanAdapter:
         settings = get_settings()
         ts_utc = timestamp.astimezone(timezone.utc) if timestamp.tzinfo else timestamp.replace(tzinfo=timezone.utc)
         date_str = ts_utc.strftime("%Y-%m-%d")
-        cache_key = f"{round(lat, 2):.2f}:{round(lon, 2):.2f}:{date_str}"
+
+        # Determine endpoint routing (forecast vs historical archive)
+        weather_url, marine_url = self._determine_endpoints(ts_utc)
+        endpoint_type = "archive" if "archive" in weather_url else "forecast"
+
+        # Snap coordinates to Copernicus CMEMS 1/12° (~9.25 km) provider grid node
+        grid_lat, grid_lon = cmems_grid_node(lat, lon)
+        cache_key = f"{endpoint_type}:{grid_lat:.4f}:{grid_lon:.4f}:{date_str}"
 
         # 1. Check in-memory LRU cache
         cached_day = self._cache.get(cache_key, settings.env_cache_ttl_seconds)
         if cached_day and ts_utc.hour in cached_day:
             return cached_day[ts_utc.hour]
 
-        # 2. Cache miss: fetch hourly vectors for the target day
-        weather_url, marine_url = self._determine_endpoints(ts_utc)
+        # 2. Cache miss: fetch hourly vectors for the target day at the grid node center
 
         weather_params = {
-            "latitude": round(lat, 4),
-            "longitude": round(lon, 4),
+            "latitude": grid_lat,
+            "longitude": grid_lon,
             "hourly": "wind_speed_10m,wind_direction_10m",
             "wind_speed_unit": "ms",
             "start_date": date_str,
@@ -232,8 +254,8 @@ class OpenMeteoOceanAdapter:
         }
 
         marine_params = {
-            "latitude": round(lat, 4),
-            "longitude": round(lon, 4),
+            "latitude": grid_lat,
+            "longitude": grid_lon,
             "hourly": "ocean_current_velocity,ocean_current_direction,wave_height",
             "start_date": date_str,
             "end_date": date_str,
@@ -253,11 +275,11 @@ class OpenMeteoOceanAdapter:
             marine_data = self._fetch_with_retries(marine_url, marine_params)
         except Exception as e:
             marine_error = str(e)
-            _log.info("open_meteo_marine_unavailable", extra={"lat": lat, "lon": lon, "error": marine_error})
+            _log.info("open_meteo_marine_unavailable", extra={"lat": grid_lat, "lon": grid_lon, "error": marine_error})
 
         # 3. Parse and cache all 24 hours of the day
         day_conditions = self._parse_day_response(
-            lat, lon, date_str, weather_data, marine_data, marine_error
+            grid_lat, grid_lon, date_str, weather_data, marine_data, marine_error
         )
         self._cache.put(cache_key, day_conditions)
 
