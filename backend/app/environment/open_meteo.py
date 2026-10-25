@@ -76,6 +76,7 @@ class _OpenMeteoCache:
     def clear(self) -> None:
         with self._lock:
             self._entries.clear()
+        reset_rate_limit_cooldown()
 
 
 _CACHE = _OpenMeteoCache(max_entries=200)
@@ -129,6 +130,13 @@ def get_open_meteo_coalescer() -> _InFlightCoalescer:
 
 OPEN_METEO_USER_AGENT = "MarinePollutionIntelligence/0.1.0 (https://marine-pollution-intelligence-sih.vercel.app)"
 MAX_RETRY_AFTER_SECONDS = 10.0
+
+_RATE_LIMIT_COOLDOWN_UNTIL = 0.0
+
+
+def reset_rate_limit_cooldown() -> None:
+    global _RATE_LIMIT_COOLDOWN_UNTIL
+    _RATE_LIMIT_COOLDOWN_UNTIL = 0.0
 MAX_CUMULATIVE_429_BACKOFF_SECONDS = 12.0
 
 
@@ -201,6 +209,15 @@ class OpenMeteoOceanAdapter:
         return httpx.get(url, params=params, timeout=timeout, headers=headers)
 
     def _fetch_with_retries(self, url: str, params: dict) -> dict:
+        global _RATE_LIMIT_COOLDOWN_UNTIL
+        now_mono = time.time()
+        if now_mono < _RATE_LIMIT_COOLDOWN_UNTIL:
+            remaining = _RATE_LIMIT_COOLDOWN_UNTIL - now_mono
+            clean_url = _sanitize_url(url)
+            raise EnvironmentDataUnavailable(
+                f"Open-Meteo request to {clean_url} skipped: rate limit cooldown active ({remaining:.1f}s remaining)."
+            )
+
         settings = get_settings()
         timeout = settings.env_live_timeout_seconds
         max_retries = settings.env_live_max_retries
@@ -253,6 +270,7 @@ class OpenMeteoOceanAdapter:
                     raw_retry_after = headers.get("retry-after") or headers.get("Retry-After")
                     retry_after = _parse_retry_after(raw_retry_after)
                     if retry_after is not None and retry_after > MAX_RETRY_AFTER_SECONDS:
+                        _RATE_LIMIT_COOLDOWN_UNTIL = time.time() + min(retry_after, 60.0)
                         raise EnvironmentDataUnavailable(
                             f"Open-Meteo rate limit exceeded: Retry-After ({retry_after:.1f}s) exceeds maximum budget ({MAX_RETRY_AFTER_SECONDS:.1f}s)"
                         )
@@ -269,12 +287,18 @@ class OpenMeteoOceanAdapter:
                     sleep_s = self._jitter_fn(0.5 * base, base)
 
                 if cumulative_sleep + sleep_s > MAX_CUMULATIVE_429_BACKOFF_SECONDS:
+                    if status_code == 429:
+                        _RATE_LIMIT_COOLDOWN_UNTIL = time.time() + 30.0
                     raise EnvironmentDataUnavailable(
                         f"Open-Meteo rate limit backoff budget exceeded: {cumulative_sleep + sleep_s:.1f}s exceeds maximum cumulative budget ({MAX_CUMULATIVE_429_BACKOFF_SECONDS:.1f}s)"
                     )
 
                 cumulative_sleep += sleep_s
                 self._sleep(sleep_s)
+
+        if status_code == 429:
+            cooldown_s = retry_after if (retry_after is not None and retry_after > 0) else 30.0
+            _RATE_LIMIT_COOLDOWN_UNTIL = time.time() + min(cooldown_s, 60.0)
 
         raise EnvironmentDataUnavailable(
             f"Open-Meteo request to {clean_url} failed after {attempt + 1} attempt(s): {_sanitize_url(str(last_error))}"
