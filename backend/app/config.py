@@ -221,6 +221,9 @@ class Settings:
     open_meteo_weather_url: str
     open_meteo_archive_url: str
     open_meteo_api_key: str | None
+    met_norway_url: str
+    met_norway_user_agent: str
+    met_norway_enabled: bool
 
     # ---- Upload hardening (Section 9) ------------------------------------------
     max_image_dimension_px: int
@@ -347,6 +350,12 @@ def get_settings() -> Settings:
         open_meteo_weather_url=_env_str("OPEN_METEO_WEATHER_URL", "https://api.open-meteo.com/v1/forecast"),
         open_meteo_archive_url=_env_str("OPEN_METEO_ARCHIVE_URL", "https://archive-api.open-meteo.com/v1/archive"),
         open_meteo_api_key=_env_optional_str("OPEN_METEO_API_KEY"),
+        met_norway_url=_env_str("MET_NORWAY_URL", "https://api.met.no/weatherapi/locationforecast/2.0/compact"),
+        met_norway_user_agent=_env_str(
+            "MET_NORWAY_USER_AGENT",
+            "MarinePollutionIntelligence/0.1.0 (https://github.com/Subodh-17/Marine-Pollution-Intelligence-SIH; operational-metocean@marineintel.org)",
+        ),
+        met_norway_enabled=_env_bool("MET_NORWAY_ENABLED", True),
         max_image_dimension_px=_env_int("MAX_IMAGE_DIMENSION_PX", 8000),
         enable_zenodo_data=_env_bool("ENABLE_ZENODO_DATA", False),
         dataset_root=_resolve_default_dataset_root(),

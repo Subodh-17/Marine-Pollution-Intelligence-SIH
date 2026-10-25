@@ -113,16 +113,24 @@ def _step_position(
     env = resolve_environment_conditions(lat, lon, t, allow_synthetic=allow_synthetic, mode=mode)
 
     # current: "direction current flows TOWARD" -> vector components
-    cur_rad = math.radians(env.current_dir_deg)
-    cur_u = env.current_speed_ms * math.sin(cur_rad)
-    cur_v = env.current_speed_ms * math.cos(cur_rad)
+    cur_speed = env.current_speed_ms if env.current_speed_ms is not None else 0.0
+    cur_dir = env.current_dir_deg if env.current_dir_deg is not None else 0.0
+    cur_rad = math.radians(cur_dir)
+    cur_u = cur_speed * math.sin(cur_rad)
+    cur_v = cur_speed * math.cos(cur_rad)
 
     # wind: convention is "direction wind blows FROM" -> convert to blows-TOWARD, then deflect
-    wind_toward_deg = (env.wind_dir_deg + 180) % 360
+    wind_speed = env.wind_speed_ms if env.wind_speed_ms is not None else 0.0
+    wind_dir = env.wind_dir_deg if env.wind_dir_deg is not None else 0.0
+    wind_toward_deg = (wind_dir + 180) % 360
     deflected = (wind_toward_deg + WIND_DEFLECTION_DEG) % 360
     wind_rad = math.radians(deflected)
-    wind_u = WIND_DRIFT_FACTOR * env.wind_speed_ms * math.sin(wind_rad)
-    wind_v = WIND_DRIFT_FACTOR * env.wind_speed_ms * math.cos(wind_rad)
+    wind_u = WIND_DRIFT_FACTOR * wind_speed * math.sin(wind_rad)
+    wind_v = WIND_DRIFT_FACTOR * wind_speed * math.cos(wind_rad)
+
+    if env.wind_speed_ms is None and env.current_speed_ms is None:
+        from app.environment.adapters import EnvironmentDataUnavailable
+        raise EnvironmentDataUnavailable("No wind or ocean current velocity available for drift integration")
 
     u = cur_u + wind_u
     v = cur_v + wind_v
@@ -219,6 +227,16 @@ def run_drift(
         origin = observed_point
         origin_confidence = "low"
 
+    drift_status = "COMPLETED"
+    all_sources = set(sources) if "sources" in locals() else set()
+    if back_src:
+        all_sources.add(back_src)
+    if fwd_src:
+        all_sources.add(fwd_src)
+    if any("PARTIAL" in s or s == "REAL_MET_NORWAY" for s in all_sources):
+        drift_status = "DEGRADED_PARTIAL_WIND"
+        notes.append("Ocean surface currents were unavailable; drift trajectory is driven by atmospheric wind leeway.")
+
     return DriftResult(
         observed=observed_point,
         backward_track=backward_points,
@@ -226,5 +244,6 @@ def run_drift(
         probable_origin=origin,
         origin_confidence=origin_confidence,
         environment_source=back_src,
+        drift_status=drift_status,
         notes=notes,
     )

@@ -209,10 +209,13 @@ def generate_markdown_report(inv: Investigation) -> str:
 
     lines.append("\n## 6. Environmental Conditions")
     if env:
+        wind_str = f"{env['wind_speed_ms']} m/s from {env['wind_dir_deg']}°" if env.get('wind_speed_ms') is not None else "Unavailable / Not measured"
+        current_str = f"{env['current_speed_ms']} m/s toward {env['current_dir_deg']}°" if env.get('current_speed_ms') is not None else "Unavailable / Not measured"
+        wave_str = f"{env['wave_height_m']} m" if env.get('wave_height_m') is not None else "Unavailable / Not measured"
         lines.append(
-            f"- Wind: {env['wind_speed_ms']} m/s from {env['wind_dir_deg']}°\n"
-            f"- Current: {env['current_speed_ms']} m/s toward {env['current_dir_deg']}°\n"
-            f"- Wave height: {env['wave_height_m']} m\n"
+            f"- Wind: {wind_str}\n"
+            f"- Current: {current_str}\n"
+            f"- Wave height: {wave_str}\n"
             f"- Data source: **{env['source']}**"
             + (f" (retrieved: {env['retrieved_at']})" if env.get("retrieved_at") else "")
         )
@@ -228,7 +231,7 @@ def generate_markdown_report(inv: Investigation) -> str:
             lines.append(f"- {_fmt_pt(p)}")
         lines.append(f"- {_fmt_pt(drift['observed'])}")
     else:
-        lines.append("Not computed — no slick was detected to hindcast from.")
+        lines.append("Not computed — " + ("environmental data unavailable." if sat.get("geometry") else "no slick was detected to hindcast from."))
     for note in drift.get("notes", []):
         lines.append(f"\n> {note}")
 
@@ -242,7 +245,7 @@ def generate_markdown_report(inv: Investigation) -> str:
             f"**Environment data source used for drift:** {drift['environment_source']}"
         )
     else:
-        lines.append("Not available — no slick was detected in this scene.")
+        lines.append("Not available — " + ("environmental data unavailable for drift reconstruction." if sat.get("geometry") else "no slick was detected in this scene."))
 
     lines.append("\n## 9. Forward Forecast")
     if drift.get("forward_track"):

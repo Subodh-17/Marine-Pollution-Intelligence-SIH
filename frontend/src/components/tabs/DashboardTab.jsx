@@ -212,12 +212,34 @@ export default function DashboardTab({
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Ocean Current (CMEMS):</span>
-                <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
+                {investigation?.environment?.current_provider === 'COPERNICUS_CMEMS' ? (
+                  <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
+                ) : investigation?.environment?.source === 'SYNTHETIC_DEMO' ? (
+                  <span style={{ color: 'var(--signal-amber)', fontFamily: 'var(--font-mono)' }}>● DEMO SIM</span>
+                ) : (
+                  <span style={{ color: 'var(--signal-coral)', fontFamily: 'var(--font-mono)' }} title={investigation?.environment?.fallback_reason || 'Unavailable'}>● UNAVAILABLE</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Atmospheric Wind (ECMWF):</span>
-                <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
+                {investigation?.environment?.wind_provider && investigation?.environment?.wind_provider !== 'UNAVAILABLE' ? (
+                  <span style={{ color: 'var(--signal-green)', fontFamily: 'var(--font-mono)' }}>● ACTIVE</span>
+                ) : investigation?.environment?.source === 'SYNTHETIC_DEMO' ? (
+                  <span style={{ color: 'var(--signal-amber)', fontFamily: 'var(--font-mono)' }}>● DEMO SIM</span>
+                ) : (
+                  <span style={{ color: 'var(--signal-coral)', fontFamily: 'var(--font-mono)' }} title={investigation?.environment?.fallback_reason || 'Unavailable'}>● UNAVAILABLE</span>
+                )}
               </div>
+              {investigation?.environment?.fallback_reason && (
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', padding: '6px 8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', lineHeight: 1.4 }}>
+                  <strong style={{ color: investigation?.environment?.source === 'UNAVAILABLE' ? 'var(--signal-coral)' : 'var(--signal-amber)' }}>
+                    {investigation?.environment?.source === 'UNAVAILABLE' ? 'Metocean Notice: ' : 'Metocean Note: '}
+                  </strong>
+                  {investigation.environment.fallback_reason.length > 110
+                    ? investigation.environment.fallback_reason.slice(0, 110) + '…'
+                    : investigation.environment.fallback_reason}
+                </div>
+              )}
             </div>
           </div>
         </div>
