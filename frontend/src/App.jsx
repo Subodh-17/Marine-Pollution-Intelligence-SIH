@@ -30,7 +30,11 @@ function extractErrorDetail(e, fallback) {
   const message = e?.response?.data?.message
   if (typeof message === 'string' && message.trim()) return message
   if (e?.code === 'ECONNABORTED' || e?.message?.toLowerCase().includes('timeout')) {
-    return `${fallback} (Request timed out on the server - please retry or try a smaller image)`
+    const isImageUpload = fallback.toLowerCase().includes('satellite image') || fallback.toLowerCase().includes('image')
+    const tip = isImageUpload
+      ? 'please retry or try a smaller image'
+      : 'the backend may be waking up or retrieving live data — please retry'
+    return `${fallback} (Request timed out — ${tip})`
   }
   if (e?.response?.status === 502 || e?.response?.status === 504) {
     return `${fallback} (Backend gateway waking up - please retry in a few moments)`

@@ -44,4 +44,15 @@ describe('api.js uploadSatelliteImage timeout (Part 1 regression)', () => {
     expect(config.timeout).toBeGreaterThan(128000)
     expect(config.params).toEqual({ detector: 'ml', center_lat: 19.05, center_lon: 71.20 })
   })
+
+  it('sends /spill/detect (runInvestigation) with explicit 75000ms (75s) timeout to absorb PaaS cold starts', async () => {
+    const { default: api } = await import('../api')
+    await api.runInvestigation({ mode: 'demo' })
+
+    expect(mockPost).toHaveBeenCalledTimes(1)
+    const [url, , config] = mockPost.mock.calls[0]
+    expect(url).toBe('/spill/detect')
+    expect(config.timeout).toBe(75000)
+    expect(config.params).toEqual({ mode: 'demo', search_radius_km: 50, time_window_hours: 12 })
+  })
 })
