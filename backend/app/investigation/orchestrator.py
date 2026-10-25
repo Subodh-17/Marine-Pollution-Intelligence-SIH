@@ -499,7 +499,7 @@ def run_investigation(
 
         # ---- 6. Age estimate ----------------------------------------------------
         try:
-            age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms) if env else None
+            age = estimate_age(geometry.aspect_ratio, geometry.area_km2, env.wind_speed_ms) if (env and env.wind_speed_ms is not None) else None
         except Exception:
             age = None
 
@@ -752,11 +752,11 @@ def run_investigation(
         }
     else:
         environment_payload = {
-            "wind_speed_ms": 0.0,
-            "wind_dir_deg": 0.0,
-            "current_speed_ms": 0.0,
-            "current_dir_deg": 0.0,
-            "wave_height_m": 0.0,
+            "wind_speed_ms": None,
+            "wind_dir_deg": None,
+            "current_speed_ms": None,
+            "current_dir_deg": None,
+            "wave_height_m": None,
             "source": "UNAVAILABLE",
             "retrieved_at": datetime.now(timezone.utc).isoformat(),
             "fallback_reason": env_error_message or "Environmental data unavailable",
@@ -811,8 +811,12 @@ def run_investigation(
             ),
         }[detector_provenance],
         "drift_method": (
-            "Physics-based simplified advection (current + wind leeway)"
-            if (drift_dict.get("drift_status") != "UNAVAILABLE" and drift_dict.get("probable_origin"))
+            (
+                "Physics-based simplified advection (wind leeway only; ocean current unavailable)"
+                if drift_dict.get("drift_status") == "DEGRADED_PARTIAL_WIND"
+                else "Physics-based simplified advection (current + wind leeway)"
+            )
+            if (drift_dict.get("drift_status") not in (None, "UNAVAILABLE") and drift_dict.get("probable_origin"))
             else "NOT_RUN (environmental data unavailable)"
         ),
         "attribution_method": "Weighted spatio-temporal explainable scoring",

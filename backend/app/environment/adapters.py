@@ -45,12 +45,12 @@ class EnvironmentDataUnavailable(Exception):
 
 @dataclass
 class EnvironmentConditions:
-    wind_speed_ms: float
-    wind_dir_deg: float          # meteorological convention: direction wind blows FROM
-    current_speed_ms: float
-    current_dir_deg: float       # oceanographic convention: direction current flows TOWARD
-    wave_height_m: float
-    source: str                  # "REAL_OPEN_METEO" | "REAL" | "PARTIAL_REAL" | "CACHED" | "LOCAL_SAMPLE" | "SYNTHETIC_DEMO"
+    wind_speed_ms: float | None
+    wind_dir_deg: float | None          # meteorological convention: direction wind blows FROM
+    current_speed_ms: float | None
+    current_dir_deg: float | None       # oceanographic convention: direction current flows TOWARD
+    wave_height_m: float | None
+    source: str                  # "REAL_OPEN_METEO" | "REAL_MET_NORWAY" | "REAL" | "PARTIAL_REAL" | "CACHED" | "LOCAL_SAMPLE" | "SYNTHETIC_DEMO" | "UNAVAILABLE"
     retrieved_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     fallback_reason: str | None = None   # why a higher-priority source wasn't used, if any
     wind_provider: str | None = None
@@ -210,6 +210,19 @@ def resolve_environment_conditions(
             adapters.append(OpenMeteoOceanAdapter())
         except ImportError as e:
             reasons.append(f"OpenMeteoOceanAdapter import failed: {e}")
+        try:
+            if settings.met_norway_enabled:
+                from app.environment.met_norway import MetNorwayWeatherAdapter
+                adapters.append(MetNorwayWeatherAdapter())
+        except ImportError as e:
+            reasons.append(f"MetNorwayWeatherAdapter import failed: {e}")
+        adapters.append(CachedEnvironmentAdapter())
+    elif provider == "met_norway":
+        try:
+            from app.environment.met_norway import MetNorwayWeatherAdapter
+            adapters.append(MetNorwayWeatherAdapter())
+        except ImportError as e:
+            reasons.append(f"MetNorwayWeatherAdapter import failed: {e}")
         adapters.append(CachedEnvironmentAdapter())
     elif provider == "custom_live" or settings.env_live_provider_url:
         adapters.append(RealWeatherOceanAdapter())

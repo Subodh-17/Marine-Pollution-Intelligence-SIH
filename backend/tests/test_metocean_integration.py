@@ -1090,6 +1090,7 @@ class TestPhase4839MetoceanResilience:
     def test_real_satellite_mode_truthfully_refuses_synthetic_on_429_exhaustion(self, monkeypatch):
         """In real_satellite mode, exhausting 429 retries strictly refuses synthetic mock substitution."""
         monkeypatch.setenv("ENV_PROVIDER", "open_meteo")
+        monkeypatch.setenv("MET_NORWAY_ENABLED", "false")
         get_settings.cache_clear()
 
         adapter = OpenMeteoOceanAdapter()

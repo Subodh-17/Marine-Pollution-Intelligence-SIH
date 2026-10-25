@@ -29,6 +29,7 @@ const TAG_LABELS = {
   LIVE_AIS_UNAVAILABLE_FALLBACK_SYNTHETIC: 'Live Feed Unavailable — Demo Fleet Used',
   REAL: 'Live Feed',
   REAL_OPEN_METEO: 'Open-Meteo (Real CMEMS/GFS)',
+  REAL_MET_NORWAY: 'MET Norway (Real ECMWF Wind)',
   PARTIAL_REAL: 'Partial Real (Wind Only)',
   PARTIAL_WIND_ONLY: 'Partial Real (Wind Only)',
   CACHED: 'Cached Feed',
