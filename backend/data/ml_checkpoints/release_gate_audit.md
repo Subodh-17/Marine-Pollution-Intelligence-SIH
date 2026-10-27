@@ -1,9 +1,9 @@
 # Marine Pollution Intelligence — SIH-26143: Release-Gate Audit
 
-**Generated:** 2026-10-23T17:56:35Z  
-**Release Verdict:** `EXPERIMENTAL_CANDIDATE_FROZEN`  
-**Production Default:** `SINGLE_SCALE_BASELINE` (`ML_MULTISCALE_SEGMENTATION=false`)  
-**Independent Validation Status:** `BLOCKED_DATA_UNAVAILABLE`  
+**Generated:** 2026-10-27T20:17:27Z
+**Release Verdict:** `EXPERIMENTAL_CANDIDATE_FROZEN`
+**Production Default:** `SINGLE_SCALE_BASELINE` (`ML_MULTISCALE_SEGMENTATION=false`)
+**Independent Validation Status:** `BLOCKED_DATA_UNAVAILABLE`
 
 ---
 

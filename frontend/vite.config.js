@@ -18,6 +18,27 @@ const BACKEND_ORIGIN = 'http://127.0.0.1:8000'
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/recharts')) {
+            return 'vendor-charts'
+          }
+          if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet')) {
+            return 'vendor-leaflet'
+          }
+          if (id.includes('node_modules/marked')) {
+            return 'vendor-marked'
+          }
+          if (id.includes('node_modules/axios')) {
+            return 'vendor-axios'
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   server: {
     port: 5173,
     proxy: {

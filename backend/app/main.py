@@ -299,20 +299,21 @@ def get_public_config():
     """Non-secret, operationally-relevant configuration the frontend or an
     operator may want to introspect. Contains no credentials - this
     codebase has none (see app/config.py)."""
+    s = get_settings()
     return {
-        "app_version": settings.app_version,
-        "app_env": settings.app_env,
-        "max_upload_size_mb": settings.max_upload_size_mb,
-        "processing_timeout_seconds": settings.processing_timeout_seconds,
-        "ml_confidence_threshold": settings.ml_confidence_threshold,
-        "ais_search_radius_km_default": settings.ais_search_radius_km_default,
-        "ais_time_window_hours_default": settings.ais_time_window_hours_default,
-        "drift_backward_hours": list(settings.drift_backward_hours),
-        "drift_forward_hours": list(settings.drift_forward_hours),
-        "map_tile_provider": settings.map_tile_provider,
-        "auth_enabled": get_settings().auth_enabled,
-        "ml_multiscale_segmentation": settings.ml_multiscale_segmentation,
-        "ml_multiscale_fusion_strategy": settings.ml_multiscale_fusion_strategy,
+        "app_version": s.app_version,
+        "app_env": s.app_env,
+        "max_upload_size_mb": s.max_upload_size_mb,
+        "processing_timeout_seconds": s.processing_timeout_seconds,
+        "ml_confidence_threshold": s.ml_confidence_threshold,
+        "ais_search_radius_km_default": s.ais_search_radius_km_default,
+        "ais_time_window_hours_default": s.ais_time_window_hours_default,
+        "drift_backward_hours": list(s.drift_backward_hours),
+        "drift_forward_hours": list(s.drift_forward_hours),
+        "map_tile_provider": s.map_tile_provider,
+        "auth_enabled": s.auth_enabled,
+        "ml_multiscale_segmentation": s.ml_multiscale_segmentation,
+        "ml_multiscale_fusion_strategy": s.ml_multiscale_fusion_strategy,
     }
 
 

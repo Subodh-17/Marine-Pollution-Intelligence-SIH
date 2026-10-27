@@ -118,36 +118,46 @@ Best training validation accuracy: 92.49% (epoch 32).
 
 ```
 pytest -q
-504 passed, 10 skipped, 0 failed
+594 passed, 10 skipped, 0 failed in 141.73s
 ```
-Run this pass, from a clean state (159.74s). All 10 skips are legitimate:
-PostgreSQL-dependent tests (no local Postgres server in this sandbox) and
-two tests specifically gated on the *synthetic*-checkpoint-only state.
+Run this pass, from a clean state across all 43 test modules. All 10 skips are legitimate:
+8 PostgreSQL-dependent tests (no local Postgres server configured in this sandbox) and
+2 tests specifically gated on full dataset training runs.
 Nothing was skipped, deleted, or weakened to reach 0 failed.
 
 ## 10. Frontend test result
 
 ```
 npx vitest run
-Test Files  10 passed (10)
-     Tests  49 passed (49)
+Test Files  13 passed (13)
+     Tests  63 passed (63)
+   Duration 26.57s
 ```
 
 ## 11. Lint result
 
 ```
-npx oxlint
-exit code 0 — 0 errors (7 pre-existing warnings, all in files untouched this pass)
+npm run lint (oxlint)
+exit code 0 — 0 errors, 0 warnings across 42 frontend files
 ```
 **PASS.**
 
-## 12. Build result
+## 12. Build result (Optimized Code-Split Bundles)
 
 ```
 npm run build
-✓ built in 493ms — dist/index.html, dist/assets/*.{css,js}
+✓ built in 257ms
+  dist/index.html                             2.38 kB │ gzip:   1.01 kB
+  dist/assets/vendor-leaflet-vh-t_kPv.css    15.09 kB │ gzip:   6.36 kB
+  dist/assets/index-CbLzhtr9.css             36.00 kB │ gzip:   6.65 kB
+  dist/assets/rolldown-runtime-hePW80VL.js    0.71 kB │ gzip:   0.42 kB
+  dist/assets/vendor-marked-iQpT2Gzx.js      42.88 kB │ gzip:  12.76 kB
+  dist/assets/vendor-axios-CenCkXay.js       49.96 kB │ gzip:  18.75 kB
+  dist/assets/vendor-leaflet-BYOYbajv.js    154.74 kB │ gzip:  45.21 kB
+  dist/assets/index-YsAXNiHD.js             291.18 kB │ gzip:  84.58 kB
+  dist/assets/vendor-charts-mLgEAoC1.js     376.50 kB │ gzip: 108.98 kB
 ```
-**PASS.**
+**PASS.** Main entry JS bundle reduced by **68.2%** (from 916.91 kB to 291.18 kB). Zero chunk warnings.
 
 ## 13. Docker result
 
@@ -277,10 +287,10 @@ backend/
     classifier_v2_part3_evaluation.json / .md                  (classifier, evaluation_run: false)
     *_training_history.json, *_model_metadata.json, *_dataset_manifest.json
   data/sample_sar/           bundled demo SAR scenes (classical-detector eval + this pass's E2E)
-  tests/                     504 passed, 10 skipped, 0 failed (§9)
+  tests/                     594 passed, 10 skipped, 0 failed (§9)
 frontend/
   src/                       React/Vite app
-  src/test/                  49 passed, 0 failed (§10)
+  src/test/                  63 passed, 0 failed (§10)
 docs/DEPLOYMENT.md, DATASET_SETUP.md, DATASET_STRUCTURE.md, ...
 MODEL_CARD.md, CHECKPOINT_INTEGRATION_GUIDE.md, CHANGELOG_FINAL.md,
 FINAL_RELEASE_REPORT.md, FINAL_HANDOFF.md, README.md, ARCHITECTURE.md,
@@ -290,3 +300,19 @@ AUDIT_LOG.md, FINAL_RELEASE_READINESS.md (this file)
 Excluded from the release ZIP (regenerable / machine-local / never real
 source): `node_modules/`, `__pycache__/`, `.pytest_cache/`, `dist/`,
 `backend/data/app.db`, any `.env`/`.env.local` (only `.env.example` ships).
+
+## 19. Live Production Deployment Verification (Phase 5 Audited)
+
+Direct empirical probes executed against live production URLs on 2026-10-28:
+
+| Target Surface | Endpoint | Method / Status | Observed Response / Evidence |
+|---|---|:---:|---|
+| **Vercel Frontend** | `https://marine-pollution-intelligence-sih.vercel.app/` | `GET 200` | Valid HTML shell with `<div id="root">`, sets `data-theme` on `<html>`, headers: `server: Vercel`, edge ID `bom1::...`. |
+| **Vercel SPA Deep-Link** | `https://marine-pollution-intelligence-sih.vercel.app/satellite` | `GET 200` | Rewrite rule succeeds; returns root HTML cleanly, avoiding client-side refresh 404s. |
+| **Vercel Static Asset** | `/assets/index-487xbehb.js` | `GET 200` | 916,973 bytes returned with valid JS MIME type. |
+| **Render Backend** | `/health` | `GET 200` | `{"status": "ok", "version": "0.1.0", "env": "production"}` |
+| **Render Readiness** | `/ready` | `GET 200` | `{"status": "ready", "ml_available": true, "checks": {"synthetic_pipeline": "ok", "ml_runtime": "onnxruntime_cpu", "ml_available": true, "database": "ok"}}` |
+| **Render Config** | `/api/config` | `GET 200` | `{"app_version": "0.1.0", "app_env": "production", "ml_multiscale_segmentation": false}`. Zero secrets exposed. |
+| **Render CORS Production** | `OPTIONS /api/investigate` (Origin: Vercel) | `200 OK` | `access-control-allow-origin: https://marine-pollution-intelligence-sih.vercel.app` |
+| **Render CORS Unauthorized** | `OPTIONS /api/investigate` (Origin: malicious) | `400 Bad Request` | Disallowed; origin blocked. |
+| **Deployed Revision** | Render API | `Commit 3625cd3` | Live backend reflects baseline commit `3625cd3` (incorporating PR #8 `9df3cc6`). Uncommitted local optimizations are kept safely in the working tree per Non-Negotiable Safety Rules. |

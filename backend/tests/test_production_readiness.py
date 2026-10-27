@@ -136,6 +136,47 @@ def test_root_health_endpoint_dynamic_env(monkeypatch):
         get_settings.cache_clear()
 
 
+def test_env_provider_resolution_rules(monkeypatch):
+    """Stage 3 config audit: verify env_provider resolution hierarchy:
+    explicit override > production default ('auto') > local/test default ('synthetic')."""
+    # 1. Explicit override
+    monkeypatch.setenv("ENV_PROVIDER", "open_meteo")
+    get_settings.cache_clear()
+    assert get_settings().env_provider == "open_meteo"
+
+    # 2. Production fallback without explicit ENV_PROVIDER -> 'auto'
+    monkeypatch.delenv("ENV_PROVIDER", raising=False)
+    monkeypatch.setenv("APP_ENV", "production")
+    get_settings.cache_clear()
+    assert get_settings().env_provider == "auto"
+
+    # 3. Render cloud detection without explicit ENV_PROVIDER -> 'auto'
+    monkeypatch.delenv("APP_ENV", raising=False)
+    monkeypatch.setenv("RENDER", "true")
+    get_settings.cache_clear()
+    assert get_settings().env_provider == "auto"
+
+    # 4. Local development / test default -> 'synthetic'
+    monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.setenv("APP_ENV", "development")
+    get_settings.cache_clear()
+    assert get_settings().env_provider == "synthetic"
+    get_settings.cache_clear()
+
+
+def test_public_config_endpoint_dynamic_env(monkeypatch):
+    """Stage 3 config audit: /api/config dynamically reflects current settings
+    without exposing any credentials."""
+    monkeypatch.setenv("APP_ENV", "production")
+    get_settings.cache_clear()
+    try:
+        r = client.get("/api/config")
+        assert r.status_code == 200
+        assert r.json()["app_env"] == "production"
+    finally:
+        get_settings.cache_clear()
+
+
 def test_cors_restrictive_allowlist_enforcement():
     """Workstream A: Deployed Vercel origin and permitted local development
     origins are allowed; unauthorized origins are strictly denied."""

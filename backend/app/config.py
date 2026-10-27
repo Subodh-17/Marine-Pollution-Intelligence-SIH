@@ -117,6 +117,19 @@ def _resolve_default_app_env() -> str:
     return "development"
 
 
+def _resolve_default_env_provider() -> str:
+    """Resolves environmental provider default. Explicit ENV_PROVIDER always
+    wins; in production (or on Render) defaults to 'auto' to ensure live metocean
+    services (Open-Meteo with MET Norway fallback) are queried out of the box;
+    defaults to 'synthetic' locally for offline, deterministic testing."""
+    val = os.environ.get("ENV_PROVIDER")
+    if val not in (None, ""):
+        return val.strip().lower()
+    if _resolve_default_app_env() == "production":
+        return "auto"
+    return "synthetic"
+
+
 @dataclass(frozen=True)
 class Settings:
     """Snapshot of all configurable values, resolved once from the
@@ -343,7 +356,7 @@ def get_settings() -> Settings:
         env_live_timeout_seconds=_env_float("ENV_LIVE_TIMEOUT_SECONDS", 10.0),
         env_live_max_retries=_env_int("ENV_LIVE_MAX_RETRIES", 2),
         live_data_max_age_minutes=_env_float("LIVE_DATA_MAX_AGE_MINUTES", 180.0),
-        env_provider=_env_str("ENV_PROVIDER", "synthetic").lower(),
+        env_provider=_resolve_default_env_provider(),
         env_cache_ttl_seconds=_env_float("ENV_CACHE_TTL_SECONDS", 3600.0),
         env_max_data_age_hours=_env_float("ENV_MAX_DATA_AGE_HOURS", 24.0),
         open_meteo_marine_url=_env_str("OPEN_METEO_MARINE_URL", "https://marine-api.open-meteo.com/v1/marine"),
