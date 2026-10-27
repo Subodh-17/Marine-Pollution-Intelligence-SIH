@@ -81,6 +81,8 @@ export default function App() {
   const [showUpload, setShowUpload] = useState(false)
   const [showSatelliteUpload, setShowSatelliteUpload] = useState(false)
   const [error, setError] = useState(null)
+  const [canRetry, setCanRetry] = useState(false)
+  const retryRef = useRef(null)
   const [restoring, setRestoring] = useState(() => !!readStoredInvestigationId())
   const timerRef = useRef(null)
 
@@ -99,16 +101,9 @@ export default function App() {
       /* best-effort only */
     }
   }, [activeTab])
-  // Defense-in-depth re-entrancy guard for the real-satellite-upload
-  // pipeline, independent of UploadSatelliteModal's own guard (see that
-  // component's submittingRef comment). This one lives here, at the
-  // orchestration layer, so runRealSatellite itself can never kick off a
-  // second POST /api/satellite/upload while one is already in flight,
-  // regardless of what triggers the second call (a stale onSubmit
-  // reference, a remounted modal, a StrictMode-driven double invocation of
-  // some future caller, etc.) - "one deliberate click, exactly one
-  // request" is guaranteed here even if every other caller of this
-  // function were misbehaving.
+  // Defense-in-depth re-entrancy guards for pipeline invocations
+  const runDemoInFlightRef = useRef(false)
+  const runCustomAisInFlightRef = useRef(false)
   const satelliteUploadInFlightRef = useRef(false)
 
   // Restore-on-refresh: runs once on mount only. Deliberately silent on
@@ -169,8 +164,16 @@ export default function App() {
   }, [])
 
   const runDemo = useCallback(async () => {
+    if (runDemoInFlightRef.current) {
+      console.warn('runDemo: analysis already in flight, ignoring duplicate call')
+      return
+    }
+    runDemoInFlightRef.current = true
     setError(null)
+    setCanRetry(false)
     setRunning(true)
+    setProgressSteps([])
+    setRevealedCount(0)
     setSelectedMmsi(null)
     try {
       const inv = await api.runInvestigation({ mode: 'demo' })
@@ -179,14 +182,27 @@ export default function App() {
     } catch (e) {
       console.error(e)
       setError(extractErrorDetail(e, 'Investigation failed to run. Check that the backend API is reachable.'))
+      retryRef.current = { type: 'demo' }
+      setCanRetry(true)
       setRunning(false)
+      setProgressSteps([])
+    } finally {
+      runDemoInFlightRef.current = false
     }
   }, [stageProgress])
 
   const runCustomAis = useCallback(async (file) => {
+    if (runCustomAisInFlightRef.current) {
+      console.warn('runCustomAis: analysis already in flight, ignoring duplicate call')
+      return
+    }
+    runCustomAisInFlightRef.current = true
     setError(null)
+    setCanRetry(false)
     setShowUpload(false)
     setRunning(true)
+    setProgressSteps([])
+    setRevealedCount(0)
     setSelectedMmsi(null)
     try {
       await api.uploadAis(file)
@@ -196,7 +212,12 @@ export default function App() {
     } catch (e) {
       console.error(e)
       setError(extractErrorDetail(e, 'Investigation with custom AIS data failed. Check the CSV format and try again.'))
+      retryRef.current = { type: 'custom_ais', file }
+      setCanRetry(true)
       setRunning(false)
+      setProgressSteps([])
+    } finally {
+      runCustomAisInFlightRef.current = false
     }
   }, [stageProgress])
 
@@ -207,8 +228,11 @@ export default function App() {
     }
     satelliteUploadInFlightRef.current = true
     setError(null)
+    setCanRetry(false)
     setShowSatelliteUpload(false)
     setRunning(true)
+    setProgressSteps([])
+    setRevealedCount(0)
     setSelectedMmsi(null)
     try {
       let inv
@@ -234,11 +258,28 @@ export default function App() {
     } catch (e) {
       console.error(e)
       setError(extractErrorDetail(e, 'Investigation on the uploaded satellite image failed. Check the file format (GeoTIFF/PNG) and try again.'))
+      retryRef.current = { type: 'real_satellite', file, params: { detector, centerLat, centerLon, sampleName } }
+      setCanRetry(true)
       setRunning(false)
+      setProgressSteps([])
     } finally {
       satelliteUploadInFlightRef.current = false
     }
   }, [stageProgress])
+
+  const handleRetry = useCallback(() => {
+    const action = retryRef.current
+    if (!action) return
+    setError(null)
+    setCanRetry(false)
+    if (action.type === 'demo') {
+      runDemo()
+    } else if (action.type === 'custom_ais') {
+      runCustomAis(action.file)
+    } else if (action.type === 'real_satellite') {
+      runRealSatellite(action.file, action.params)
+    }
+  }, [runDemo, runCustomAis, runRealSatellite])
 
   const selectedRank = investigation && selectedMmsi
     ? investigation.candidates.findIndex(c => c.mmsi === selectedMmsi)
@@ -258,8 +299,17 @@ export default function App() {
       />
       <main className="app-main chart-grid-bg">
         {error && (
-          <div className="caveat-note" style={{ marginBottom: 'var(--sp-4)', borderLeftColor: 'var(--signal-coral)' }}>
-            {error}
+          <div className="caveat-note" style={{ marginBottom: 'var(--sp-4)', borderLeftColor: 'var(--signal-coral)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-3)' }}>
+            <span>{error}</span>
+            {canRetry && (
+              <button
+                className="btn-secondary"
+                style={{ padding: '4px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                onClick={handleRetry}
+              >
+                ↻ Retry
+              </button>
+            )}
           </div>
         )}
 

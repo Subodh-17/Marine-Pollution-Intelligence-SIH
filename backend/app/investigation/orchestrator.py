@@ -216,13 +216,31 @@ def run_investigation(
     total_timer = StageTimer()
     _stage_timer = StageTimer()
 
-    def log(step):
+    def log(step, stage: str | None = None, outcome: str = "ok", details: dict | None = None):
         nonlocal _stage_timer
-        progress.append({
+        duration = _stage_timer.elapsed_ms()
+        clean_stage = stage or step.lower().replace(" ", "_").replace("-", "_").replace("(", "").replace(")", "").strip("_")
+        entry = {
             "step": step,
+            "stage": clean_stage,
+            "duration_ms": duration,
             "ts": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
-            "duration_ms": _stage_timer.elapsed_ms(),
-        })
+            "outcome": outcome,
+        }
+        if details:
+            entry["details"] = details
+        progress.append(entry)
+        _log.info(
+            "pipeline_stage_completed",
+            extra={
+                "investigation_id": inv_id,
+                "step": step,
+                "stage": clean_stage,
+                "duration_ms": duration,
+                "outcome": outcome,
+                **(details or {}),
+            },
+        )
         _stage_timer = StageTimer()
 
     inv_id = str(uuid.uuid4())[:8]

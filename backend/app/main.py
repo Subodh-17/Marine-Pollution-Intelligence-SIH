@@ -508,7 +508,7 @@ def auth_me(current_user: str = Depends(get_current_user)):
 
 
 @app.post("/api/spill/detect")
-def spill_detect(
+async def spill_detect(
     mode: str = Query("demo", description="'demo' (synthetic offline scenario), 'custom_ais' (requires prior AIS upload), or 'live_ais' (attempts a configured live AIS provider, falls back to synthetic)"),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
     time_window_hours: float = Query(TIME_WINDOW_HOURS_DEFAULT),
@@ -522,7 +522,8 @@ def spill_detect(
     if mode == "custom_ais" and not ais_path:
         raise HTTPException(400, "mode=custom_ais requires an AIS CSV to be uploaded first via POST /api/ais/upload.")
     try:
-        inv = run_investigation(
+        inv = await asyncio.to_thread(
+            run_investigation,
             mode=mode, ais_csv_path=ais_path,
             search_radius_km=search_radius_km, time_window_hours=time_window_hours,
             owner=current_user,
@@ -748,7 +749,7 @@ def list_sample_satellite_scenes():
 
 
 @app.post("/api/satellite/sample")
-def analyze_sample_satellite(
+async def analyze_sample_satellite(
     sample_name: str = Query("demo_oil_scene_01.tif", description="Filename of the bundled sample SAR scene"),
     detector: str = Query("classical", pattern="^(classical|ml)$"),
     center_lat: float = Query(19.05),
@@ -768,7 +769,8 @@ def analyze_sample_satellite(
         file_sha256 = hashlib.sha256(f.read()).hexdigest()
 
     try:
-        inv = run_investigation(
+        inv = await asyncio.to_thread(
+            run_investigation,
             mode="real_satellite",
             image_path=sample_path,
             detector=detector,

@@ -93,14 +93,30 @@ class DetectionResult:
     scene_classification: dict | None = None
 
 
-def _texture_score(gray: np.ndarray, mask: np.ndarray) -> float:
+def _texture_score(gray: np.ndarray, mask: np.ndarray, tot_sum: float | None = None, tot_sq: float | None = None) -> float:
     """Low local variance inside the candidate supports 'smooth oil film'
     vs. natural look-alikes (which tend to be patchier)."""
-    if mask.sum() < 10:
+    m_count = int(mask.sum())
+    if m_count < 10:
         return 0.0
-    interior_std = float(np.std(gray[mask]))
-    exterior = gray[~mask]
-    exterior_std = float(np.std(exterior)) if exterior.size else 1e-6
+    interior_vals = gray[mask]
+    interior_std = float(np.std(interior_vals))
+
+    if tot_sum is not None and tot_sq is not None:
+        tot_n = gray.size
+        ext_n = tot_n - m_count
+        if ext_n > 0:
+            m_sum = float(interior_vals.sum())
+            m_sq = float((interior_vals ** 2).sum())
+            ext_mean = (tot_sum - m_sum) / ext_n
+            ext_var = max(0.0, ((tot_sq - m_sq) / ext_n) - ext_mean ** 2)
+            exterior_std = float(np.sqrt(ext_var))
+        else:
+            exterior_std = 1e-6
+    else:
+        exterior = gray[~mask]
+        exterior_std = float(np.std(exterior)) if exterior.size else 1e-6
+
     ratio = interior_std / max(exterior_std, 1e-6)
     # lower ratio (smoother interior relative to surrounding sea) -> higher score
     return float(np.clip(1.2 - ratio, 0, 1))
@@ -142,10 +158,13 @@ def detect_oil_slick(
     dark = gu.binary_closing(dark, gu.disk(3))
 
     labels = gu.label(dark, connectivity=2)
-    regions = gu.regionprops(labels)
+    regions = gu.regionprops(labels, min_area=min_region_px)
 
     h, w = image.shape
     max_area = max_region_frac * h * w
+
+    tot_sum = float(img.sum())
+    tot_sq = float((img ** 2).sum())
 
     candidates = []
     scored = []
@@ -161,7 +180,7 @@ def detect_oil_slick(
         else:
             elongation = 0
         region_mask = labels == r.label
-        tex = _texture_score(img, region_mask)
+        tex = _texture_score(img, region_mask, tot_sum=tot_sum, tot_sq=tot_sq)
         solidity = r.solidity  # area / convex_hull_area
 
         # heuristic plausibility score

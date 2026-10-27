@@ -109,10 +109,16 @@ def _step_position(
     allow_synthetic: bool = True,
     mode: str | None = None,
     fallback_env: Any = None,
+    anchor_lat: float | None = None,
+    anchor_lon: float | None = None,
 ) -> tuple[float, float, str]:
     """One Euler advection step. `direction` is +1 (forward in time) or -1 (backward)."""
+    # Use regional trajectory anchor (observed slick centroid) for environmental forcing lookups
+    # to reuse valid cached time-series across integration steps without redundant network roundtrips.
+    q_lat = anchor_lat if anchor_lat is not None else lat
+    q_lon = anchor_lon if anchor_lon is not None else lon
     try:
-        env = resolve_environment_conditions(lat, lon, t, allow_synthetic=allow_synthetic, mode=mode)
+        env = resolve_environment_conditions(q_lat, q_lon, t, allow_synthetic=allow_synthetic, mode=mode)
     except Exception:
         if fallback_env is not None and (getattr(fallback_env, "wind_speed_ms", None) is not None or getattr(fallback_env, "current_speed_ms", None) is not None):
             env = fallback_env
@@ -160,15 +166,25 @@ def run_drift(
     step_minutes: int = 30,
     allow_synthetic: bool = True,
     mode: str | None = None,
+    use_centroid_anchor: bool = True,
 ) -> DriftResult:
     """Integrate the drift model backward (hindcast) and forward (forecast)
     from the observed slick centroid, sampling checkpoints at the requested
-    hour offsets."""
+    hour offsets.
+
+    When `use_centroid_anchor=True` (default), environmental forcing is evaluated
+    at the regional centroid anchor, reusing valid cached daily time-series without
+    triggering remote API rate limits. Set `use_centroid_anchor=False` to evaluate
+    forcing at each advected step position."""
     dt = step_minutes * 60
     notes = [
         "Simplified advection model: current + 3% wind (15deg deflection). "
         "No spreading/diffusion term - centroid trajectory only.",
     ]
+    if use_centroid_anchor:
+        notes.append("Regional environmental forcing evaluated at observed slick centroid anchor.")
+    else:
+        notes.append("Environmental forcing evaluated with spatial variation across integration trajectory.")
 
     initial_env = resolve_environment_conditions(
         observed_lat, observed_lon, observed_time, allow_synthetic=allow_synthetic, mode=mode
@@ -185,7 +201,12 @@ def run_drift(
         total_steps = int((max_h * 3600) / dt)
         for i in range(1, total_steps + 1):
             lat, lon, src = _step_position(
-                lat, lon, t, dt, direction, allow_synthetic=allow_synthetic, mode=mode, fallback_env=initial_env
+                lat, lon, t, dt, direction,
+                allow_synthetic=allow_synthetic,
+                mode=mode,
+                fallback_env=initial_env,
+                anchor_lat=observed_lat if use_centroid_anchor else None,
+                anchor_lon=observed_lon if use_centroid_anchor else None,
             )
             sources.add(src)
             t = t + timedelta(seconds=direction * dt)

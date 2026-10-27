@@ -148,35 +148,48 @@ def _solidity(rows: np.ndarray, cols: np.ndarray, area: int) -> float:
         return 1.0  # degenerate (collinear) region - treat as fully solid
 
 
-def regionprops(labeled: np.ndarray) -> list:
+def regionprops(labeled: np.ndarray, min_area: int = 0) -> list:
     """Returns one RegionProps per non-zero label, ordered by label value
-    ascending (matches skimage.measure.regionprops iteration order)."""
-    labels_present = np.unique(labeled)
-    labels_present = labels_present[labels_present != 0]
+    ascending (matches skimage.measure.regionprops iteration order).
+
+    If min_area > 0, skips regions with area < min_area, avoiding expensive
+    ConvexHull, moment, and crack-perimeter calculations on tiny noise regions."""
+    if labeled.size == 0 or labeled.max() == 0:
+        return []
+
+    slices = ndi.find_objects(labeled)
+    counts = np.bincount(labeled.ravel())
 
     results = []
-    for lbl in labels_present:
-        region_mask = labeled == lbl
-        rows, cols = np.nonzero(region_mask)
-        area = int(rows.size)
-        if area == 0:
+    for lbl in range(1, len(counts)):
+        area = int(counts[lbl])
+        if area == 0 or area < min_area:
             continue
+        slc = slices[lbl - 1]
+        if slc is None:
+            continue
+
+        # Fast local bounding box extraction instead of O(image) full comparisons
+        sub = labeled[slc]
+        sub_mask = (sub == lbl)
+        sub_r, sub_c = np.nonzero(sub_mask)
+        if sub_r.size == 0:
+            continue
+
+        rows = sub_r + slc[0].start
+        cols = sub_c + slc[1].start
+
         centroid = (float(rows.mean()), float(cols.mean()))
-        min_r, min_c = int(rows.min()), int(cols.min())
-        max_r, max_c = int(rows.max()), int(cols.max())
+        min_r, min_c = slc[0].start, slc[1].start
+        max_r, max_c = slc[0].stop - 1, slc[1].stop - 1
         bbox = (min_r, min_c, max_r + 1, max_c + 1)
         major, minor, orientation = _inertia_axes_and_orientation(rows, cols)
 
         # Crop to the region's bounding box (+1px pad for correct erosion/
-        # convolution borders) before perimeter tracing, instead of running
-        # the crack-perimeter convolution over the *entire* image for every
-        # region - skimage's regionprops does the same crop internally via
-        # its `.image` property. For a scene with hundreds of small
-        # speckle-noise regions this is the difference between an O(full
-        # image area) and an O(region bbox area) cost per region.
+        # convolution borders) before perimeter tracing.
         r0, r1 = max(0, min_r - 1), min(labeled.shape[0], max_r + 2)
         c0, c1 = max(0, min_c - 1), min(labeled.shape[1], max_c + 2)
-        cropped = region_mask[r0:r1, c0:c1]
+        cropped = (labeled[r0:r1, c0:c1] == lbl)
         perimeter = _crack_perimeter(cropped)
         solidity = _solidity(rows, cols, area)
 
