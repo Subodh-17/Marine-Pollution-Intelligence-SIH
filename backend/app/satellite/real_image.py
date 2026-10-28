@@ -143,8 +143,9 @@ def load_real_scene(
     if ext in (".tif", ".tiff", ".geotiff"):
         if not TIFFFILE_AVAILABLE:
             raise UnsupportedImageFormat("tifffile is required to read GeoTIFF input but is not installed.")
-        arr = tifffile.imread(path)
-        real_geo = read_geotiff_metadata(path)
+        with tifffile.TiffFile(path) as tf:
+            arr = tf.asarray()
+            real_geo = read_geotiff_metadata(tf)
         geotiff_meta_dict = real_geo.to_dict()
         if real_geo.available:
             geolocation_is_assumed = False
@@ -209,7 +210,7 @@ def load_real_scene(
 
         single_band = _fast_resize(single_band, new_w, new_h)
         if is_dual_pol and vv is not None and vh is not None:
-            vv = _fast_resize(vv, new_w, new_h)
+            vv = single_band
             vh = _fast_resize(vh, new_w, new_h)
 
         pixel_size_m = pixel_size_m / scale

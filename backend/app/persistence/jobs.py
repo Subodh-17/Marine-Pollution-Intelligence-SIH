@@ -129,11 +129,21 @@ def _run(job_id: str, fn: Callable[[], Any]) -> None:
     _persist(job)
 
 
-def submit_job(job_type: str, fn: Callable[[], Any], owner: str = "anonymous") -> Job:
+def update_job_progress(job_id: str, stage: str) -> None:
+    """Updates the progress_stage of a running job and persists to DB."""
+    with _JOBS_LOCK:
+        job = _JOBS.get(job_id)
+        if job is not None and job.status == "running":
+            job.progress_stage = stage
+            _persist(job)
+
+
+def submit_job(job_type: str, fn: Callable[[], Any], owner: str = "anonymous", job_id: str | None = None) -> Job:
     """Submits `fn` (a zero-arg callable - callers close over their real
     arguments) to the shared background executor and returns immediately
     with a Job whose id can be polled via get_job()/GET /api/jobs/{id}."""
-    job_id = str(uuid.uuid4())
+    if job_id is None:
+        job_id = str(uuid.uuid4())
     job = Job(id=job_id, job_type=job_type, owner=owner)
     with _JOBS_LOCK:
         _JOBS[job_id] = job

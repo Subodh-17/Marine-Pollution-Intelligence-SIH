@@ -93,13 +93,13 @@ class DetectionResult:
     scene_classification: dict | None = None
 
 
-def _texture_score(gray: np.ndarray, mask: np.ndarray, tot_sum: float | None = None, tot_sq: float | None = None) -> float:
+def _texture_score(gray: np.ndarray, mask: np.ndarray, tot_sum: float | None = None, tot_sq: float | None = None, sub_gray: np.ndarray | None = None) -> float:
     """Low local variance inside the candidate supports 'smooth oil film'
     vs. natural look-alikes (which tend to be patchier)."""
     m_count = int(mask.sum())
     if m_count < 10:
         return 0.0
-    interior_vals = gray[mask]
+    interior_vals = sub_gray[mask] if sub_gray is not None else gray[mask]
     interior_std = float(np.std(interior_vals))
 
     if tot_sum is not None and tot_sq is not None:
@@ -179,8 +179,12 @@ def detect_oil_slick(
             elongation = r.axis_major_length / max(r.axis_minor_length, 1e-6)
         else:
             elongation = 0
-        region_mask = labels == r.label
-        tex = _texture_score(img, region_mask, tot_sum=tot_sum, tot_sq=tot_sq)
+        # Fast bounding-box evaluation instead of full O(image) array comparison
+        min_r, min_c, max_r, max_c = r.bbox
+        sub_labels = labels[min_r:max_r, min_c:max_c]
+        sub_mask = (sub_labels == r.label)
+        sub_gray = img[min_r:max_r, min_c:max_c]
+        tex = _texture_score(img, sub_mask, tot_sum=tot_sum, tot_sq=tot_sq, sub_gray=sub_gray)
         solidity = r.solidity  # area / convex_hull_area
 
         # heuristic plausibility score
@@ -190,23 +194,25 @@ def detect_oil_slick(
             + 0.15 * float(np.clip(solidity, 0, 1))
             + 0.15 * float(np.clip(r.area / min_region_px / 10, 0, 1))
         )
-        candidates.append(region_mask)
-        scored.append((plausibility, r, region_mask, elongation, tex))
+        scored.append((plausibility, r, elongation, tex))
 
     if not scored:
         return DetectionResult(
             mask=np.zeros_like(image, dtype=bool),
-            candidate_masks=candidates,
+            candidate_masks=[],
             confidence=0.0,
             notes=notes + ["No plausible oil-slick-like dark region found."],
             processing_time_ms=round((time.perf_counter() - _t0) * 1000, 2),
         )
 
     scored.sort(key=lambda t: t[0], reverse=True)
-    best_score, best_region, best_mask, elongation, tex = scored[0]
+    best_score, best_region, elongation, tex = scored[0]
 
+    # Full mask only created for winning candidate (saves gigabytes of RAM and allocations)
+    best_mask = (labels == best_region.label)
     # fill small interior holes for a clean polygon later
     best_mask = ndi.binary_fill_holes(best_mask)
+    candidates = [best_mask]
 
     confidence = float(np.clip(0.45 + 0.5 * best_score, 0.05, 0.98))
     notes.append(f"Selected region id={best_region.label}: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}")

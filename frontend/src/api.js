@@ -109,20 +109,31 @@ export const api = {
   // network error, a 4xx/5xx, or this same timeout if 5 minutes still isn't
   // enough) is still surfaced honestly. Every other endpoint keeps the
   // client's normal 30s timeout; only this long-running upload gets one.
-  uploadSatelliteImage: (file, { detector = 'classical', centerLat = 19.05, centerLon = 71.20 } = {}) => {
+  uploadSatelliteImage: (file, { detector = 'classical', centerLat = 19.05, centerLon = 71.20, asyncJob = false } = {}) => {
     const form = new FormData()
     form.append('file', file)
+    const params = { detector, center_lat: centerLat, center_lon: centerLon }
+    if (asyncJob) {
+      params.async_job = true
+    }
     return client.post('/satellite/upload', form, {
-      params: { detector, center_lat: centerLat, center_lon: centerLon },
+      params,
       timeout: 300000,
     }).then(r => r.data)
   },
 
-  runSampleSatellite: ({ sampleName = 'demo_oil_scene_01.tif', detector = 'classical', centerLat = 19.05, centerLon = 71.20 } = {}) =>
-    client.post('/satellite/sample', null, {
-      params: { sample_name: sampleName, detector, center_lat: centerLat, center_lon: centerLon },
+  runSampleSatellite: ({ sampleName = 'demo_oil_scene_01.tif', detector = 'classical', centerLat = 19.05, centerLon = 71.20, asyncJob = false } = {}) => {
+    const params = { sample_name: sampleName, detector, center_lat: centerLat, center_lon: centerLon }
+    if (asyncJob) {
+      params.async_job = true
+    }
+    return client.post('/satellite/sample', null, {
+      params,
       timeout: 120000,
-    }).then(r => r.data),
+    }).then(r => r.data)
+  },
+
+  getJobStatus: (id) => client.get('/jobs/' + id).then(r => r.data),
 
   getSampleScenes: () => client.get('/satellite/samples').then(r => r.data),
 

@@ -19,6 +19,7 @@ import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Callable
 
 import numpy as np
 
@@ -193,6 +194,7 @@ def run_investigation(
     observed_time_override: datetime | None = None,
     owner: str = "anonymous",
     input_file_sha256: str | None = None,
+    progress_callback: Callable[[str], None] | None = None,
 ) -> Investigation:
     """
     mode: "demo" (synthetic offline scenario) | "custom_ais" (demo scene +
@@ -230,6 +232,11 @@ def run_investigation(
         if details:
             entry["details"] = details
         progress.append(entry)
+        if progress_callback:
+            try:
+                progress_callback(clean_stage)
+            except Exception:
+                pass
         _log.info(
             "pipeline_stage_completed",
             extra={

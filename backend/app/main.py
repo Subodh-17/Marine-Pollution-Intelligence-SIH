@@ -634,6 +634,7 @@ async def upload_satellite_image(
     center_lon: float = Query(71.20, description="Approximate scene-center longitude - used only if the file has no usable embedded geolocation."),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
     time_window_hours: float = Query(TIME_WINDOW_HOURS_DEFAULT),
+    async_job: bool = Query(False, description="When True, runs investigation as an asynchronous background job, returning HTTP 202 with job status."),
     current_user: str = Depends(get_current_user),
 ):
     """
@@ -662,8 +663,36 @@ async def upload_satellite_image(
             f"Unsupported file type '{ext}'. Supported: {', '.join(settings.allowed_satellite_extensions)}",
         )
     tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, settings.max_upload_size_bytes)
+    handed_off_to_job = False
     try:
         _check_image_dimensions(tmp_path, ext)
+        if async_job:
+            job_id = str(uuid.uuid4())
+
+            def _work():
+                try:
+                    return run_investigation(
+                        mode="real_satellite",
+                        image_path=tmp_path,
+                        detector=detector,
+                        center_lat=center_lat,
+                        center_lon=center_lon,
+                        search_radius_km=search_radius_km,
+                        time_window_hours=time_window_hours,
+                        owner=current_user,
+                        input_file_sha256=upload_sha256,
+                        progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
+                    )
+                finally:
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError:
+                        pass
+
+            job = jobs_module.submit_job("satellite_upload", _work, owner=current_user, job_id=job_id)
+            handed_off_to_job = True
+            return JSONResponse(status_code=202, content=job.to_dict())
+
         inv = await asyncio.to_thread(
             run_investigation,
             mode="real_satellite",
@@ -710,10 +739,11 @@ async def upload_satellite_image(
         _log.warning("satellite_upload_processing_failed", extra={"uploaded_filename": file.filename, "error": str(e)})
         raise HTTPException(422, f"Could not process uploaded image: {safe_detail}")
     finally:
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
+        if not handed_off_to_job:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
     return inv.to_dict()
 
 
@@ -756,6 +786,7 @@ async def analyze_sample_satellite(
     center_lon: float = Query(71.20),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
     time_window_hours: float = Query(TIME_WINDOW_HOURS_DEFAULT),
+    async_job: bool = Query(False, description="When True, runs investigation as an asynchronous background job, returning HTTP 202 with job status."),
     current_user: str = Depends(get_current_user),
 ):
     """Runs the full real-satellite investigation pipeline on a bundled sample GeoTIFF scene."""
@@ -769,6 +800,26 @@ async def analyze_sample_satellite(
         file_sha256 = hashlib.sha256(f.read()).hexdigest()
 
     try:
+        if async_job:
+            job_id = str(uuid.uuid4())
+
+            def _sample_work():
+                return run_investigation(
+                    mode="real_satellite",
+                    image_path=sample_path,
+                    detector=detector,
+                    center_lat=center_lat,
+                    center_lon=center_lon,
+                    search_radius_km=search_radius_km,
+                    time_window_hours=time_window_hours,
+                    owner=current_user,
+                    input_file_sha256=file_sha256,
+                    progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
+                )
+
+            job = jobs_module.submit_job("satellite_sample", _sample_work, owner=current_user, job_id=job_id)
+            return JSONResponse(status_code=202, content=job.to_dict())
+
         inv = await asyncio.to_thread(
             run_investigation,
             mode="real_satellite",
@@ -846,14 +897,17 @@ def create_investigation_job(
     if mode == "custom_ais" and not ais_path:
         raise HTTPException(400, "mode=custom_ais requires an AIS CSV to be uploaded first via POST /api/ais/upload.")
 
+    job_id = str(uuid.uuid4())
+
     def _work():
         return run_investigation(
             mode=mode, ais_csv_path=ais_path,
             search_radius_km=search_radius_km, time_window_hours=time_window_hours,
             owner=current_user,
+            progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
         )
 
-    job = jobs_module.submit_job("investigation", _work, owner=current_user)
+    job = jobs_module.submit_job("investigation", _work, owner=current_user, job_id=job_id)
     return job.to_dict()
 
 

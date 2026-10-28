@@ -237,9 +237,73 @@ export default function App() {
     try {
       let inv
       if (sampleName) {
-        inv = await api.runSampleSatellite({ sampleName, detector, centerLat, centerLon })
+        inv = await api.runSampleSatellite({ sampleName, detector, centerLat, centerLon, asyncJob: true })
       } else {
-        inv = await api.uploadSatelliteImage(file, { detector, centerLat, centerLon })
+        inv = await api.uploadSatelliteImage(file, { detector, centerLat, centerLon, asyncJob: true })
+      }
+
+      // Check if backend returned an async background job handle
+      if (inv && inv.job_type && (inv.status === 'queued' || inv.status === 'running')) {
+        const jobId = inv.id
+        const startTime = Date.now()
+        const maxWaitMs = 300000 // 5 minutes max wait
+        let job = inv
+        const seenStages = new Set()
+        const liveSteps = []
+
+        const stageDescriptions = {
+          real_satellite_scene_loaded: 'Load real satellite SAR scene',
+          sar_preprocessing_completed: 'Preprocessing (Lee speckle filter & normalization)',
+          oil_slick_detected: 'Dark-spot detection & morphological segmentation',
+          slick_geometry_calculated: 'Slick geometry & physical dimensions derived',
+          environmental_conditions_loaded: 'Metocean conditions fetched (wind & current vectors)',
+          hindcast_completed: 'Lagrangian drift hindcast calculated',
+          forecast_completed: 'Forward drift forecast calculated',
+          ais_fleet_filtered: 'AIS vessel fleet spatiotemporal filtering',
+          candidates_ranked: 'Attribution scoring & candidate ranking',
+        }
+
+        let consecutiveNetworkErrors = 0
+        const MAX_CONSECUTIVE_ERRORS = 5
+
+        while (job.status === 'queued' || job.status === 'running') {
+          if (Date.now() - startTime > maxWaitMs) {
+            throw new Error('Satellite processing timed out after 5 minutes.')
+          }
+          await new Promise(res => setTimeout(res, 800))
+          try {
+            job = await api.getJobStatus(jobId)
+            consecutiveNetworkErrors = 0
+          } catch (pollErr) {
+            consecutiveNetworkErrors += 1
+            if (consecutiveNetworkErrors >= MAX_CONSECUTIVE_ERRORS) {
+              throw pollErr
+            }
+            console.warn('Transient polling error (' + consecutiveNetworkErrors + '/' + MAX_CONSECUTIVE_ERRORS + '), retrying...', pollErr)
+            await new Promise(res => setTimeout(res, Math.min(1000 * consecutiveNetworkErrors, 4000)))
+            continue
+          }
+
+          if (job.progress_stage && !seenStages.has(job.progress_stage)) {
+            seenStages.add(job.progress_stage)
+            const desc = stageDescriptions[job.progress_stage] || job.progress_stage.replace(/_/g, ' ')
+            liveSteps.push(desc)
+            setProgressSteps([...liveSteps])
+            setRevealedCount(liveSteps.length)
+          }
+        }
+
+        if (job.status === 'completed' && job.result_investigation_id) {
+          inv = await api.getInvestigation(job.result_investigation_id)
+        } else if (job.status === 'failed') {
+          throw { response: { data: { detail: job.error || 'Background satellite analysis failed.' } } }
+        } else if (job.status === 'interrupted') {
+          throw { response: { data: { detail: 'Analysis was interrupted by a server restart. Please retry your investigation.' } } }
+        } else if (job.status === 'cancelled') {
+          throw { response: { data: { detail: 'Investigation job was cancelled.' } } }
+        } else {
+          throw { response: { data: { detail: 'Unexpected job status: ' + job.status } } }
+        }
       }
       // A late-but-genuine success always wins over anything shown earlier
       // for this same attempt: error was already cleared above, and this

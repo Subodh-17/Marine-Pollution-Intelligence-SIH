@@ -24,12 +24,14 @@ vi.mock('react-leaflet', () => {
 vi.mock('leaflet', () => ({ default: { divIcon: vi.fn(() => ({})) } }))
 
 const uploadSatelliteImage = vi.fn()
+const getJobStatus = vi.fn()
 vi.mock('../api', () => ({
   default: {
     runInvestigation: vi.fn(() => Promise.resolve(investigationFixture)),
     uploadAis: vi.fn(() => Promise.resolve({ status: 'uploaded' })),
     getInvestigation: vi.fn(() => Promise.resolve(investigationFixture)),
     uploadSatelliteImage: (...args) => uploadSatelliteImage(...args),
+    getJobStatus: (...args) => getJobStatus(...args),
     reanalyzeAis: vi.fn(),
     getReportMarkdown: vi.fn(() => Promise.resolve('# report')),
     reportPdfUrl: (id) => `/api/report/${id}?fmt=pdf`,
@@ -158,5 +160,72 @@ describe('Real satellite upload: duplicate-request prevention and error/success 
     // And once the real success lands, the failure banner is still gone -
     // no stale-error-next-to-fresh-success state exists at any point.
     expect(screen.queryByText('Unsupported file type.')).not.toBeInTheDocument()
+  })
+
+  it('polls background job status and transitions to dashboard upon completion', async () => {
+    uploadSatelliteImage.mockImplementation(() => Promise.resolve({
+      id: 'job-phase12-test',
+      job_type: 'satellite_upload',
+      status: 'running',
+      progress_stage: 'oil_slick_detected',
+    }))
+    getJobStatus
+      .mockImplementationOnce(() => Promise.resolve({
+        id: 'job-phase12-test',
+        status: 'running',
+        progress_stage: 'hindcast_completed',
+      }))
+      .mockImplementationOnce(() => Promise.resolve({
+        id: 'job-phase12-test',
+        status: 'completed',
+        progress_stage: 'completed',
+        result_investigation_id: 'inv-test-id',
+      }))
+
+    renderApp(<App />)
+    fireEvent.click(openModalAndSelectFile())
+
+    await waitFor(() => expect(screen.getByText(/Lagrangian drift hindcast calculated/i)).toBeInTheDocument(), { timeout: 5000 })
+    await waitFor(() => expect(screen.getByText(/Spill detected/i)).toBeInTheDocument(), { timeout: 8000 })
+  })
+
+  it('handles background job failure by displaying the server error message', async () => {
+    uploadSatelliteImage.mockImplementation(() => Promise.resolve({
+      id: 'job-failed-test',
+      job_type: 'satellite_upload',
+      status: 'running',
+      progress_stage: 'sar_preprocessing_completed',
+    }))
+    getJobStatus.mockImplementationOnce(() => Promise.resolve({
+      id: 'job-failed-test',
+      status: 'failed',
+      progress_stage: 'failed',
+      error: 'Corrupt GeoTIFF tile offset header.',
+    }))
+
+    renderApp(<App />)
+    fireEvent.click(openModalAndSelectFile())
+
+    await waitFor(() => expect(screen.getByText(/Corrupt GeoTIFF tile offset header/i)).toBeInTheDocument(), { timeout: 5000 })
+    expect(screen.queryByText(/Spill detected/i)).not.toBeInTheDocument()
+  })
+
+  it('handles server restart during job polling with an actionable message', async () => {
+    uploadSatelliteImage.mockImplementation(() => Promise.resolve({
+      id: 'job-interrupted-test',
+      job_type: 'satellite_upload',
+      status: 'running',
+      progress_stage: 'sar_preprocessing_completed',
+    }))
+    getJobStatus.mockImplementationOnce(() => Promise.resolve({
+      id: 'job-interrupted-test',
+      status: 'interrupted',
+      progress_stage: 'interrupted',
+    }))
+
+    renderApp(<App />)
+    fireEvent.click(openModalAndSelectFile())
+
+    await waitFor(() => expect(screen.getByText(/Analysis was interrupted by a server restart/i)).toBeInTheDocument(), { timeout: 5000 })
   })
 })
