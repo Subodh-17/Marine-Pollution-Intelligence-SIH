@@ -52,6 +52,8 @@ from typing import Any, Optional
 
 import numpy as np
 
+from app.ml.calibration import ClassifierCalibrator
+
 try:
     import onnxruntime as ort
     ONNX_AVAILABLE = True
@@ -132,6 +134,7 @@ class OnnxBackend:
         self._seg_session = None
         self._clf_input_name = None
         self._seg_input_name = None
+        self.calibrator = ClassifierCalibrator(os.path.join(self.checkpoint_dir, "classifier_calibration.json"))
 
         if not ONNX_AVAILABLE:
             self.load_errors.append(
@@ -313,6 +316,19 @@ class OnnxBackend:
 
     # -- inference --------------------------------------------------------
 
+    def run_classifier_with_calibration(
+        self, stacked: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool, float]:
+        """(2, H, W) float32 -> (raw_probs, calibrated_probs, is_calibrated, effective_temperature)."""
+        x = stacked[np.newaxis, ...]
+        logits = self._clf_session.run(None, {self._clf_input_name: x})[0][0].astype(np.float64)
+        clf_sha256 = self.checkpoint_checksums.get("classifier", "")
+        return self.calibrator.calibrate_logits(
+            logits,
+            current_model_sha256=clf_sha256,
+            current_class_labels=self.class_labels or [],
+        )
+
     def run_classifier(self, stacked: np.ndarray) -> np.ndarray:
         """stacked: (2, H, W) float32 -> per-class probability vector (numpy).
 
@@ -350,10 +366,19 @@ class OnnxBackend:
                 "outputs": [{"name": o.name, "shape": list(o.shape)} for o in session.get_outputs()],
             }
 
+        clf_sha256 = self.checkpoint_checksums.get("classifier", "")
+        is_cal = self.calibrator.is_compatible(clf_sha256, self.class_labels or [])
+
         return {
             "runtime": RUNTIME_ONNX_CPU,
             "onnxruntime_version": self.onnxruntime_version,
             "providers": ["CPUExecutionProvider"],
             "classifier_io": io_of(self._clf_session),
             "segmenter_io": io_of(self._seg_session),
+            "calibration": {
+                "available": is_cal,
+                "temperature": self.calibrator.temperature if is_cal else 1.0,
+                "method": "temperature_scaling" if is_cal else None,
+                "provenance": self.calibrator.provenance if is_cal else None,
+            },
         }

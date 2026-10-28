@@ -112,6 +112,7 @@ from app.ml.tiling import (
     stitch_multiscale_segmentation,
     downsample_mean,
 )
+from app.ml.calibration import ClassifierCalibrator
 
 CHECKPOINT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "ml_checkpoints")
 
@@ -578,6 +579,12 @@ class MLDetectorEngine:
 
         self.available = self.classifier_loaded or self.segmenter_loaded
 
+        cal_path = os.path.join(checkpoint_dir, "classifier_calibration.json")
+        if self._onnx and getattr(self._onnx, "calibrator", None):
+            self.calibrator = self._onnx.calibrator
+        else:
+            self.calibrator = ClassifierCalibrator(cal_path)
+
         # Overall provenance for THIS engine's detections is driven by the
         # SEGMENTER, because the segmentation mask (not the scene label) is
         # what the API/UI actually reports as "the detection" - a real-data
@@ -648,6 +655,10 @@ class MLDetectorEngine:
         seg_path = getattr(self, "segmenter_checkpoint_path", None)
         clf_path = getattr(self, "classifier_checkpoint_path", None)
 
+        clf_sha256 = self.checkpoint_checksums.get("classifier", "")
+        calibrator = getattr(self, "calibrator", None)
+        is_cal = bool(calibrator and calibrator.is_compatible(clf_sha256, self.class_labels))
+
         return {
             "model_name": model_name,
             "model_version": seg_meta.get("epoch") or (sidecar.get("best_epoch") if is_real else None) or ("prototype_v1" if not is_real else None),
@@ -656,6 +667,13 @@ class MLDetectorEngine:
             "inference_runtime": self.runtime,
             "multiscale_enabled": self.multiscale_enabled,
             "multiscale_fusion_strategy": self.multiscale_fusion_strategy,
+            "calibration": {
+                "is_calibrated": is_cal,
+                "temperature": calibrator.temperature if is_cal else 1.0,
+                "method": "temperature_scaling" if is_cal else None,
+                "provenance": getattr(calibrator, "provenance", None) if is_cal else None,
+                "validation_metrics": getattr(calibrator, "validation_metrics", None) if is_cal else None,
+            },
             "segmentation_threshold": self.segmentation_threshold,
             "dataset_used_for_training": dataset_used,
             # "real_sentinel1_sar_geotiff" / "synthetic_generated" - a plain-
@@ -1197,23 +1215,43 @@ class MLDetectorEngine:
                         f"on a {clf_input.shape[1]}x{clf_input.shape[2]} block-mean-downsampled view "
                         "of the whole scene, not the full-resolution data."
                     )
-                probs = self._forward_classifier(clf_input)
-                if probs.ndim != 1 or probs.shape[0] != len(self.class_labels) or not np.all(np.isfinite(probs)):
+                raw_probs = self._forward_classifier(clf_input)
+                if not isinstance(raw_probs, np.ndarray) or raw_probs.ndim != 1 or raw_probs.shape[0] != len(self.class_labels) or not np.all(np.isfinite(raw_probs)):
                     return _invalid_result(
-                        f"Classifier produced an invalid output (shape={probs.shape}, "
-                        f"finite={bool(np.all(np.isfinite(probs))) if probs.size else 'n/a'}) - "
+                        f"Classifier produced an invalid output (shape={getattr(raw_probs, 'shape', None)}, "
+                        f"finite={bool(np.all(np.isfinite(raw_probs))) if isinstance(raw_probs, np.ndarray) and raw_probs.size else 'n/a'}) - "
                         "discarding rather than trusting a malformed or NaN/Inf confidence."
                     )
+
+                calibrator = getattr(self, "calibrator", None)
+                clf_sha256 = getattr(self, "checkpoint_checksums", {}).get("classifier", "")
+                if calibrator and calibrator.is_compatible(clf_sha256, self.class_labels):
+                    _, probs, is_calibrated, eff_temp = calibrator.calibrate_probabilities(
+                        raw_probs, clf_sha256, self.class_labels
+                    )
+                else:
+                    probs = raw_probs
+                    is_calibrated = False
+                    eff_temp = 1.0
+
                 idx = int(np.argmax(probs))
                 label = self.class_labels[idx]
                 confidence = float(probs[idx])
-                if not np.isfinite(confidence):
+                raw_confidence = float(raw_probs[idx])
+                if not np.isfinite(confidence) or not np.isfinite(raw_confidence):
                     return _invalid_result(
                         f"Classifier confidence was not finite ({confidence!r}) - discarding rather than "
                         "reporting a NaN/Inf confidence as if it were a real result."
                     )
                 probabilities = {self.class_labels[i]: round(float(probs[i]), 4) for i in range(len(self.class_labels))}
-                notes.append(f"Classifier prediction: {label} ({confidence*100:.1f}%). Probabilities: {probabilities}.")
+                raw_probabilities = {self.class_labels[i]: round(float(raw_probs[i]), 4) for i in range(len(self.class_labels))}
+                if is_calibrated:
+                    notes.append(
+                        f"Classifier prediction: {label} ({confidence*100:.1f}% calibrated, raw: {raw_confidence*100:.1f}%, T={eff_temp:.4f}). "
+                        f"Probabilities: {probabilities}."
+                    )
+                else:
+                    notes.append(f"Classifier prediction: {label} ({confidence*100:.1f}%). Probabilities: {probabilities}.")
 
                 # See app/satellite/detection.py's scene_classification
                 # docstring for why this exists and the exact state meanings.
@@ -1244,11 +1282,22 @@ class MLDetectorEngine:
                 scene_classification = {
                     "label": label,
                     "confidence": round(confidence, 4),
+                    "raw_confidence": round(raw_confidence, 4),
+                    "calibrated_confidence": round(confidence, 4) if is_calibrated else None,
+                    "is_calibrated": is_calibrated,
+                    "calibration_method": "temperature_scaling" if is_calibrated else None,
+                    "calibration_temperature": eff_temp if is_calibrated else 1.0,
                     "probabilities": probabilities,
+                    "raw_probabilities": raw_probabilities,
                     "scores": {
                         "Oil": probabilities.get("Oil", 0.0),
                         "Lookalike": probabilities.get("Lookalike", 0.0),
                         "No Oil": probabilities.get("No-Oil", 0.0),
+                    },
+                    "raw_scores": {
+                        "Oil": raw_probabilities.get("Oil", 0.0),
+                        "Lookalike": raw_probabilities.get("Lookalike", 0.0),
+                        "No Oil": raw_probabilities.get("No-Oil", 0.0),
                     },
                     "oil_status": oil_status,
                     "score_type": "probability",

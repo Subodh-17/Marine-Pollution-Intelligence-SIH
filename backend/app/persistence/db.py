@@ -93,12 +93,18 @@ CREATE TABLE IF NOT EXISTS jobs (
     status TEXT NOT NULL,
     owner TEXT,
     created_at TEXT NOT NULL,
+    updated_at TEXT,
     started_at TEXT,
     finished_at TEXT,
     progress_stage TEXT,
     result_investigation_id TEXT,
-    error TEXT
+    error TEXT,
+    retry_count INTEGER DEFAULT 0,
+    max_retries INTEGER DEFAULT 0,
+    payload_json TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
 """
 
 
@@ -160,6 +166,20 @@ def _ensure_schema_sqlite(conn: sqlite3.Connection, path: str) -> None:
         except Exception:
             pass
     conn.executescript(_SCHEMA)
+    try:
+        cur = conn.execute("PRAGMA table_info(jobs);")
+        existing_cols = {row["name"] for row in cur.fetchall()}
+        if existing_cols:
+            if "updated_at" not in existing_cols:
+                conn.execute("ALTER TABLE jobs ADD COLUMN updated_at TEXT;")
+            if "retry_count" not in existing_cols:
+                conn.execute("ALTER TABLE jobs ADD COLUMN retry_count INTEGER DEFAULT 0;")
+            if "max_retries" not in existing_cols:
+                conn.execute("ALTER TABLE jobs ADD COLUMN max_retries INTEGER DEFAULT 0;")
+            if "payload_json" not in existing_cols:
+                conn.execute("ALTER TABLE jobs ADD COLUMN payload_json TEXT;")
+    except Exception:
+        pass
     _initialized_paths.add(path)
 
 
@@ -167,6 +187,13 @@ def _ensure_schema_postgres(cur: _DictRowCursor, url: str) -> None:
     if url in _initialized_paths:
         return
     cur.executescript(_SCHEMA)
+    try:
+        cur.execute("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS updated_at TEXT;")
+        cur.execute("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0;")
+        cur.execute("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS max_retries INTEGER DEFAULT 0;")
+        cur.execute("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS payload_json TEXT;")
+    except Exception:
+        pass
     _initialized_paths.add(url)
 
 

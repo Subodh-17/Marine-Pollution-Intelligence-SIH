@@ -63,6 +63,9 @@ async def _lifespan(app: FastAPI):
         try:
             _persistence_db.init_db()
             _log.info("database_ready", extra={"backend": "postgresql" if live_settings.database_url else "sqlite"})
+            recovery_summary = jobs_module.recover_interrupted_jobs()
+            if recovery_summary["recovered_retried"] or recovery_summary["marked_interrupted"]:
+                _log.info("jobs_startup_recovery", extra=recovery_summary)
         except _persistence_db.PersistenceError as e:
             _log.error(
                 "database_unavailable_at_startup",
@@ -934,6 +937,25 @@ def _check_image_dimensions(path: str, ext: str) -> None:
 # Section 8: background job processing (additive - the synchronous routes
 # above are unchanged and remain the primary/demo path)
 # =============================================================================
+def _handle_investigation_job(payload: dict) -> Any:
+    mode = payload.get("mode", "demo")
+    detector = payload.get("detector", "classical")
+    search_radius_km = float(payload.get("search_radius_km", SEARCH_RADIUS_KM_DEFAULT))
+    time_window_hours = float(payload.get("time_window_hours", TIME_WINDOW_HOURS_DEFAULT))
+    owner = payload.get("owner", "anonymous")
+    ais_path = _get_user_ais_path(owner) if mode == "custom_ais" else None
+    return run_investigation(
+        mode=mode,
+        ais_csv_path=ais_path,
+        detector=detector,
+        search_radius_km=search_radius_km,
+        time_window_hours=time_window_hours,
+        owner=owner,
+    )
+
+jobs_module.register_job_handler("investigation", _handle_investigation_job)
+
+
 @app.post("/api/jobs/investigation")
 def create_investigation_job(
     mode: str = Query("demo"),
@@ -962,8 +984,20 @@ def create_investigation_job(
             progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
         )
 
+    payload = {
+        "mode": mode,
+        "detector": detector,
+        "search_radius_km": search_radius_km,
+        "time_window_hours": time_window_hours,
+        "owner": current_user,
+    }
+    max_retries = 1 if mode == "demo" else 0
+
     try:
-        job = jobs_module.submit_job("investigation", _work, owner=current_user, job_id=job_id)
+        job = jobs_module.submit_job(
+            "investigation", _work, owner=current_user, job_id=job_id,
+            payload=payload, max_retries=max_retries,
+        )
     except jobs_module.JobQueueCapacityExceeded as e:
         raise HTTPException(429, str(e), headers={"Retry-After": "5"})
     return job.to_dict()

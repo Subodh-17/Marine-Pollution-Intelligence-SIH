@@ -1,0 +1,278 @@
+{
+  "calibrated_at": "2026-10-28T14:28:49.886352+00:00",
+  "method": "temperature_scaling",
+  "temperature": 1.0879,
+  "model_sha256": "sha256:dc68400ca1b54116e75dc900afb63ac5f0cb48db452892c0ac8e401c44fdf6b7",
+  "onnx_filename": "classifier_real_best.onnx",
+  "class_labels": [
+    "Oil",
+    "No-Oil",
+    "Lookalike"
+  ],
+  "training_split_protection": "Fitted strictly on validation split; test split kept held-out.",
+  "validation_dataset": {
+    "manifest": "D:\\zenodo_sar\\manifests\\val_manifest.json",
+    "num_scenes": 386,
+    "uncalibrated_metrics": {
+      "nll": 0.2194,
+      "brier_score": 0.1216,
+      "ece": 0.0206,
+      "mce": 0.1751,
+      "mean_confidence": 0.9279,
+      "accuracy": 0.9223
+    },
+    "calibrated_metrics": {
+      "nll": 0.2184,
+      "brier_score": 0.1215,
+      "ece": 0.0184,
+      "mce": 0.1147,
+      "mean_confidence": 0.9198,
+      "accuracy": 0.9223
+    },
+    "reliability_bins": [
+      {
+        "bin_idx": 0,
+        "range": [
+          0.0,
+          0.1
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 1,
+        "range": [
+          0.1,
+          0.2
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 2,
+        "range": [
+          0.2,
+          0.3
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 3,
+        "range": [
+          0.3,
+          0.4
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 4,
+        "range": [
+          0.4,
+          0.5
+        ],
+        "count": 3,
+        "accuracy": 0.3333,
+        "confidence": 0.448,
+        "calibration_gap": 0.1147
+      },
+      {
+        "bin_idx": 5,
+        "range": [
+          0.5,
+          0.6
+        ],
+        "count": 20,
+        "accuracy": 0.65,
+        "confidence": 0.5604,
+        "calibration_gap": 0.0896
+      },
+      {
+        "bin_idx": 6,
+        "range": [
+          0.6,
+          0.7
+        ],
+        "count": 13,
+        "accuracy": 0.6923,
+        "confidence": 0.6586,
+        "calibration_gap": 0.0337
+      },
+      {
+        "bin_idx": 7,
+        "range": [
+          0.7,
+          0.8
+        ],
+        "count": 21,
+        "accuracy": 0.6667,
+        "confidence": 0.7532,
+        "calibration_gap": 0.0865
+      },
+      {
+        "bin_idx": 8,
+        "range": [
+          0.8,
+          0.9
+        ],
+        "count": 34,
+        "accuracy": 0.9118,
+        "confidence": 0.8584,
+        "calibration_gap": 0.0533
+      },
+      {
+        "bin_idx": 9,
+        "range": [
+          0.9,
+          1.0
+        ],
+        "count": 295,
+        "accuracy": 0.9763,
+        "confidence": 0.9794,
+        "calibration_gap": 0.0031
+      }
+    ]
+  },
+  "held_out_test_evaluation": {
+    "manifest": "D:\\zenodo_sar\\manifests\\test_manifest.json",
+    "num_scenes": 450,
+    "uncalibrated_metrics": {
+      "nll": 0.5274,
+      "brier_score": 0.3071,
+      "ece": 0.0866,
+      "mce": 0.2082,
+      "mean_confidence": 0.8799,
+      "accuracy": 0.7933
+    },
+    "calibrated_metrics": {
+      "nll": 0.5102,
+      "brier_score": 0.3028,
+      "ece": 0.0757,
+      "mce": 0.1679,
+      "mean_confidence": 0.869,
+      "accuracy": 0.7933
+    },
+    "reliability_bins": [
+      {
+        "bin_idx": 0,
+        "range": [
+          0.0,
+          0.1
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 1,
+        "range": [
+          0.1,
+          0.2
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 2,
+        "range": [
+          0.2,
+          0.3
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 3,
+        "range": [
+          0.3,
+          0.4
+        ],
+        "count": 0,
+        "accuracy": 0.0,
+        "confidence": 0.0,
+        "calibration_gap": 0.0
+      },
+      {
+        "bin_idx": 4,
+        "range": [
+          0.4,
+          0.5
+        ],
+        "count": 10,
+        "accuracy": 0.3,
+        "confidence": 0.4679,
+        "calibration_gap": 0.1679
+      },
+      {
+        "bin_idx": 5,
+        "range": [
+          0.5,
+          0.6
+        ],
+        "count": 36,
+        "accuracy": 0.5,
+        "confidence": 0.5482,
+        "calibration_gap": 0.0482
+      },
+      {
+        "bin_idx": 6,
+        "range": [
+          0.6,
+          0.7
+        ],
+        "count": 37,
+        "accuracy": 0.6216,
+        "confidence": 0.6547,
+        "calibration_gap": 0.0331
+      },
+      {
+        "bin_idx": 7,
+        "range": [
+          0.7,
+          0.8
+        ],
+        "count": 36,
+        "accuracy": 0.75,
+        "confidence": 0.7531,
+        "calibration_gap": 0.0031
+      },
+      {
+        "bin_idx": 8,
+        "range": [
+          0.8,
+          0.9
+        ],
+        "count": 55,
+        "accuracy": 0.6909,
+        "confidence": 0.8519,
+        "calibration_gap": 0.161
+      },
+      {
+        "bin_idx": 9,
+        "range": [
+          0.9,
+          1.0
+        ],
+        "count": 276,
+        "accuracy": 0.8986,
+        "confidence": 0.9726,
+        "calibration_gap": 0.0741
+      }
+    ]
+  },
+  "provenance": "TEMPERATURE_SCALED_VALIDATION_SPLIT"
+}
