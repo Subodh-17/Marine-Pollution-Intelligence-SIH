@@ -39,6 +39,9 @@ function extractErrorDetail(e, fallback) {
   if (e?.response?.status === 502 || e?.response?.status === 504) {
     return `${fallback} (Backend gateway waking up - please retry in a few moments)`
   }
+  if (e?.message && (e.message === 'Network Error' || e.code === 'ERR_NETWORK')) {
+    return `${fallback} (Could not reach backend server — connection failed)`
+  }
   return fallback
 }
 

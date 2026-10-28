@@ -139,38 +139,127 @@ def load_real_scene(
     geotiff_meta_dict: dict | None = None
     real_geo = None
     arr = None
+    max_target_dim = 1024
+    scale = 1.0
 
     if ext in (".tif", ".tiff", ".geotiff"):
         if not TIFFFILE_AVAILABLE:
             raise UnsupportedImageFormat("tifffile is required to read GeoTIFF input but is not installed.")
         with tifffile.TiffFile(path) as tf:
-            arr = tf.asarray()
+            if not tf.pages:
+                raise UnsupportedImageFormat("Uploaded TIFF file is empty or contains no image pages.")
             real_geo = read_geotiff_metadata(tf)
-        geotiff_meta_dict = real_geo.to_dict()
-        if real_geo.available:
-            geolocation_is_assumed = False
+            geotiff_meta_dict = real_geo.to_dict()
+            if real_geo.available:
+                geolocation_is_assumed = False
+
+            nodata_val = None
+            tag = tf.pages[0].tags.get(42113) or tf.pages[0].tags.get("GDAL_NODATA")
+            if tag is not None:
+                try:
+                    nodata_val = float(tag.value)
+                except (ValueError, TypeError):
+                    pass
+
+            try:
+                arr = tf.asarray()
+            except Exception as e:
+                raise UnsupportedImageFormat(f"Failed to decode TIFF raster data: {e}")
+
+        if arr is None or arr.size == 0:
+            raise UnsupportedImageFormat("Uploaded image file is empty or unreadable.")
+
+        arr = np.squeeze(arr)
+        if arr.ndim == 3:
+            if arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
+                arr = np.transpose(arr, (1, 2, 0))
+        elif arr.ndim > 3:
+            while arr.ndim > 3 and arr.shape[0] == 1:
+                arr = arr[0]
+            if arr.ndim == 3 and arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
+                arr = np.transpose(arr, (1, 2, 0))
+
+        if arr.ndim not in (2, 3):
+            raise UnsupportedImageFormat(f"Unsupported image array shape {arr.shape}; expected 2D or 3D array.")
+
+        if arr.ndim == 3 and arr.shape[-1] > 4:
+            raise UnsupportedImageFormat(
+                f"Unsupported raster band count ({arr.shape[-1]}). Expected single-band (SAR amplitude), "
+                f"2-band dual-polarization (VV+VH), or standard 3/4-band RGB(A)."
+            )
+
+        original_shape = arr.shape
+        h, w = arr.shape[:2]
+
+        if nodata_val is not None:
+            import math
+            if math.isnan(nodata_val):
+                arr = np.nan_to_num(arr, nan=0.0)
+            elif math.isfinite(nodata_val):
+                arr = np.where(np.isclose(arr, nodata_val), 0, arr)
+
+        if np.iscomplexobj(arr):
+            arr = np.abs(arr).astype(np.float32)
+
+        if max(h, w) > max_target_dim:
+            scale = max_target_dim / float(max(h, w))
+            new_w = max(16, int(round(w * scale)))
+            new_h = max(16, int(round(h * scale)))
+
+            if arr.ndim == 2:
+                if arr.dtype == np.float64:
+                    arr = arr.astype(np.float32)
+                try:
+                    im = Image.fromarray(arr)
+                except Exception:
+                    im = Image.fromarray(arr.astype(np.float32))
+                arr = np.array(im.resize((new_w, new_h), resample=Image.Resampling.BILINEAR))
+            elif arr.ndim == 3:
+                channels = []
+                for c in range(arr.shape[-1]):
+                    band = arr[..., c]
+                    if band.dtype == np.float64:
+                        band = band.astype(np.float32)
+                    try:
+                        im = Image.fromarray(band)
+                    except Exception:
+                        im = Image.fromarray(band.astype(np.float32))
+                    channels.append(np.array(im.resize((new_w, new_h), resample=Image.Resampling.BILINEAR)))
+                arr = np.stack(channels, axis=-1)
+
+        arr = np.nan_to_num(arr.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+
     elif ext in (".png", ".jpg", ".jpeg", ".webp"):
-        arr = np.array(Image.open(path).convert("F"))
+        try:
+            with Image.open(path) as img:
+                orig_w, orig_h = img.size
+                if img.mode in ("L", "I", "I;16", "F"):
+                    original_shape = (orig_h, orig_w)
+                else:
+                    original_shape = (orig_h, orig_w, len(img.getbands()))
+
+                if max(orig_h, orig_w) > max_target_dim:
+                    scale = max_target_dim / float(max(orig_h, orig_w))
+                    new_w = max(16, int(round(orig_w * scale)))
+                    new_h = max(16, int(round(orig_h * scale)))
+                    img = img.resize((new_w, new_h), resample=Image.Resampling.BILINEAR)
+
+                if img.mode in ("L", "I", "I;16", "F"):
+                    arr = np.array(img, dtype=np.float32)
+                elif img.mode in ("RGB", "RGBA"):
+                    raw_arr = np.array(img, dtype=np.float32)
+                    arr = raw_arr[..., :3]
+                else:
+                    arr = np.array(img.convert("F"), dtype=np.float32)
+        except Exception as e:
+            raise UnsupportedImageFormat(f"Failed to read image file: {e}")
+
+        if arr is None or arr.size == 0:
+            raise UnsupportedImageFormat("Uploaded image file is empty or unreadable.")
+        arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
+
     else:
         raise UnsupportedImageFormat(f"Unsupported file extension '{ext}'. Supported: .tif, .tiff, .geotiff, .png, .jpg, .jpeg, .webp")
-
-    if arr is None or arr.size == 0:
-        raise UnsupportedImageFormat("Uploaded image file is empty or unreadable.")
-
-    arr = np.squeeze(arr)
-    original_shape = arr.shape
-
-    # Normalize dimensions: handle channels-first (e.g. 2, H, W or 3, H, W) vs channels-last (H, W, C)
-    if arr.ndim == 3:
-        if arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
-            arr = np.transpose(arr, (1, 2, 0))
-    elif arr.ndim > 3:
-        while arr.ndim > 3 and arr.shape[0] == 1:
-            arr = arr[0]
-        if arr.ndim == 3 and arr.shape[0] <= 4 and arr.shape[1] > 4 and arr.shape[2] > 4:
-            arr = np.transpose(arr, (1, 2, 0))
-
-    arr = np.nan_to_num(arr.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
 
     is_dual_pol = False
     vv = vh = None
@@ -184,42 +273,22 @@ def load_real_scene(
             vh = _normalize_band(vh_raw)
             single_band = vv
         elif channels in (3, 4):
-            # RGB or RGBA (strip alpha)
             single_band = _normalize_band(arr[..., :3].mean(axis=-1))
         else:
-            single_band = _normalize_band(arr[..., 0])
+            raise UnsupportedImageFormat(f"Unsupported raster band count ({channels}). Expected single-band, 2-band dual-pol, or 3/4-band RGB(A).")
     elif arr.ndim == 2:
         single_band = _normalize_band(arr)
     else:
         raise UnsupportedImageFormat(f"Unsupported image array shape {arr.shape}; expected 2D or 3D array.")
 
     height, width = single_band.shape[:2]
-
-    # Adaptive downsampling for memory safety and fast sub-second analysis:
-    # Caps processing resolution at 1024px while scaling physical pixel size proportionally
-    max_target_dim = 1024
-    if max(height, width) > max_target_dim:
-        scale = max_target_dim / float(max(height, width))
-        new_w = max(16, int(round(width * scale)))
-        new_h = max(16, int(round(height * scale)))
-
-        def _fast_resize(b: np.ndarray, nw: int, nh: int) -> np.ndarray:
-            pil = Image.fromarray((np.clip(b, 0.0, 1.0) * 255.0).astype(np.uint8))
-            res = pil.resize((nw, nh), resample=Image.Resampling.BILINEAR)
-            return (np.array(res).astype(np.float32) / 255.0)
-
-        single_band = _fast_resize(single_band, new_w, new_h)
-        if is_dual_pol and vv is not None and vh is not None:
-            vv = single_band
-            vh = _fast_resize(vh, new_w, new_h)
-
-        pixel_size_m = pixel_size_m / scale
-        if real_geo is not None and real_geo.available:
-            real_geo.pixel_size_deg_lat = real_geo.pixel_size_deg_lat / scale
-            real_geo.pixel_size_deg_lon = real_geo.pixel_size_deg_lon / scale
-        height, width = new_h, new_w
+    orig_h, orig_w = original_shape[:2]
+    scale_y = height / float(orig_h)
+    scale_x = width / float(orig_w)
 
     if real_geo is not None and real_geo.available:
+        real_geo.pixel_size_deg_lat = real_geo.pixel_size_deg_lat / scale_y
+        real_geo.pixel_size_deg_lon = real_geo.pixel_size_deg_lon / scale_x
         gt = SceneGeoTransform(
             origin_lat=real_geo.origin_lat,
             origin_lon=real_geo.origin_lon,
@@ -228,11 +297,13 @@ def load_real_scene(
         )
         geolocation_source = "embedded_geotiff_metadata"
     else:
+        deg_lat_per_px = (-pixel_size_m / 111_320.0) / scale_y
+        deg_lon_per_px = (pixel_size_m / (111_320.0 * np.cos(np.deg2rad(center_lat)))) / scale_x
         gt = SceneGeoTransform(
-            origin_lat=center_lat + (height / 2) * (pixel_size_m / 111_320.0),
-            origin_lon=center_lon - (width / 2) * (pixel_size_m / (111_320.0 * np.cos(np.deg2rad(center_lat)))),
-            pixel_size_deg_lat=-pixel_size_m / 111_320.0,
-            pixel_size_deg_lon=pixel_size_m / (111_320.0 * np.cos(np.deg2rad(center_lat))),
+            origin_lat=center_lat - (height / 2.0) * deg_lat_per_px,
+            origin_lon=center_lon - (width / 2.0) * deg_lon_per_px,
+            pixel_size_deg_lat=deg_lat_per_px,
+            pixel_size_deg_lon=deg_lon_per_px,
         )
         geolocation_source = "assumed_center_coordinates"
 

@@ -599,13 +599,14 @@ def _save_upload_with_size_limit(file, suffix: str, max_bytes: int) -> tuple[str
 async def upload_ais(file: UploadFile = File(...), current_user: str = Depends(get_current_user)):
     """Accepts a MarineCadastre-format (or generically-headered) AIS CSV for
     use in a subsequent /api/spill/detect?mode=custom_ais call."""
+    s = get_settings()
     ext = os.path.splitext(file.filename or "")[1].lower() or ".csv"
-    if ext not in settings.allowed_ais_extensions:
+    if ext not in s.allowed_ais_extensions:
         raise HTTPException(
             400,
-            f"Unsupported AIS file type '{ext}'. Supported: {', '.join(settings.allowed_ais_extensions)}",
+            f"Unsupported AIS file type '{ext}'. Supported: {', '.join(s.allowed_ais_extensions)}",
         )
-    tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, settings.max_upload_size_bytes)
+    tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, s.max_upload_size_bytes)
     # Section 9 fix: a previous upload's temp file was silently orphaned on
     # disk every time a new one replaced it - clean it up now that it's about
     # to be superseded, scoped per user to prevent cross-user races.
@@ -656,18 +657,20 @@ async def upload_satellite_image(
     `satellite.detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"` -
     never silently, and never as if the ML model had produced the result.
     """
+    s = get_settings()
     ext = os.path.splitext(file.filename or "")[1].lower()
-    if ext not in settings.allowed_satellite_extensions:
+    if ext not in s.allowed_satellite_extensions:
         raise HTTPException(
             400,
-            f"Unsupported file type '{ext}'. Supported: {', '.join(settings.allowed_satellite_extensions)}",
+            f"Unsupported file type '{ext}'. Supported: {', '.join(s.allowed_satellite_extensions)}",
         )
-    tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, settings.max_upload_size_bytes)
+    tmp_path, upload_sha256 = _save_upload_with_size_limit(file, ext, s.max_upload_size_bytes)
     handed_off_to_job = False
     try:
         _check_image_dimensions(tmp_path, ext)
         if async_job:
             job_id = str(uuid.uuid4())
+            _user_name = file.filename or "the uploaded file"
 
             def _work():
                 try:
@@ -683,6 +686,13 @@ async def upload_satellite_image(
                         input_file_sha256=upload_sha256,
                         progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
                     )
+                except Exception as ex:
+                    import re as _re
+                    raw_msg = str(ex)
+                    safe_msg = _re.sub(r"'[^']*[/\\][^']*'", f"'{_user_name}'", raw_msg)
+                    if safe_msg == raw_msg:
+                        safe_msg = raw_msg.replace(tmp_path, _user_name)
+                    raise RuntimeError(safe_msg) from None
                 finally:
                     try:
                         os.unlink(tmp_path)
@@ -854,29 +864,57 @@ def _check_image_dimensions(path: str, ext: str) -> None:
         if ext in (".tif", ".tiff", ".geotiff"):
             import tifffile
             with tifffile.TiffFile(path) as tf:
+                if not tf.pages:
+                    raise HTTPException(422, "Uploaded TIFF file is empty or contains no image pages.")
                 page = tf.pages[0]
                 shape = page.shape
+                dtype = page.dtype
                 if len(shape) == 2:
+                    channels = 1
                     height, width = shape[0], shape[1]
                 elif len(shape) == 3:
                     if shape[0] <= 4:
+                        channels = shape[0]
                         height, width = shape[1], shape[2]
                     else:
                         height, width = shape[0], shape[1]
+                        channels = shape[2]
                 else:
+                    import math
                     height, width = shape[-2], shape[-1]
+                    channels = math.prod(shape[:-2])
+                if channels > 4:
+                    raise HTTPException(
+                        422,
+                        f"Unsupported raster band count ({channels}). Expected single-band, 2-band dual-polarization, or 3/4-band RGB(A).",
+                    )
+                itemsize = max(1, getattr(dtype, "itemsize", 1))
+                est_bytes = height * width * channels * itemsize
         else:
             from PIL import Image
             with Image.open(path) as img:
                 width, height = img.size
+                channels = len(img.getbands())
+                if channels > 4:
+                    raise HTTPException(
+                        422,
+                        f"Unsupported raster band count ({channels}). Expected single-band, 2-band dual-polarization, or 3/4-band RGB(A).",
+                    )
+                bytes_per_sample = 2 if "16" in img.mode else 4 if "F" in img.mode else 1
+                est_bytes = height * width * channels * bytes_per_sample
     except HTTPException:
         raise
     except Exception:
-        return  # let the real loader in real_image.py raise a proper 422 with its own message
+        return
     if height > max_dim or width > max_dim:
         raise HTTPException(
             422,
             f"Image dimensions {width}x{height}px exceed the maximum allowed {max_dim}x{max_dim}px.",
+        )
+    if est_bytes > 150 * 1024 * 1024:
+        raise HTTPException(
+            422,
+            f"Uncompressed image memory ({est_bytes // (1024 * 1024)}MB) exceeds maximum safe limit of 150MB.",
         )
 
 
