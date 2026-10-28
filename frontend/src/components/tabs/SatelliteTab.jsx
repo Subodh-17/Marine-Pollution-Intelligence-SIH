@@ -93,17 +93,23 @@ export default function SatelliteTab({ investigation }) {
             </span>
           </div>
         </div>
-      )}
-
-      {/* Model Provenance Banner */}
-      <div className={`provenance-banner provenance-banner--${isMlReal ? 'ml-real' : isMl ? 'ml' : isFallback ? 'fallback' : 'classical'}`}>
+      )}      <div className={`provenance-banner provenance-banner--${isMlReal ? 'ml-real' : isMl ? 'ml' : isFallback ? 'fallback' : 'classical'}`}>
         <span className="provenance-banner__badge">{provenanceInfo.badge}</span>
+        {isClassical && (
+          <>
+            <span className="provenance-banner__type-tag">HEURISTIC SCORE</span>
+            <span className="provenance-banner__note">
+              Classical SAR morphological and backscatter heuristics produced this candidate evaluation. Values are heuristic plausibility scores (0–100%), not calibrated statistical probabilities.
+            </span>
+          </>
+        )}
         {isFallback && (
-          <span className="provenance-banner__note">
-            ML detection was requested but did not produce a usable result — this is the
-            classical detector's output, shown in its place. It is not, and must not be read
-            as, an ML result.
-          </span>
+          <>
+            <span className="provenance-banner__type-tag">HEURISTIC SCORE</span>
+            <span className="provenance-banner__note">
+              ML detection was requested but fell back to classical SAR heuristics — this is the classical detector's output, shown in its place (HEURISTIC SCORE). It is not, and must not be read as, an ML result.
+            </span>
+          </>
         )}
         {isMl && (
           <span className="provenance-banner__note">
@@ -129,10 +135,10 @@ export default function SatelliteTab({ investigation }) {
       )}
 
       {/* Interactive Imagery Viewer & Opacity Controls */}
-      <div className="bento-card bento-card--glass" style={{ marginBottom: 'var(--sp-5)', padding: '16px' }}>
-        <div className="bento-card__header">
+      <div className="sat-gallery-container" style={{ marginBottom: 'var(--sp-5)' }}>
+        <div className="sat-gallery-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h3 className="bento-card__title">
+            <h3 className="sat-gallery-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--signal-cyan)" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -142,15 +148,13 @@ export default function SatelliteTab({ investigation }) {
             </h3>
             <div className="view-mode-toggle" style={{ display: 'flex', gap: '4px' }}>
               <button
-                className={`bento-action-btn ${viewMode === 'gallery' ? 'bento-action-btn--primary' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
+                className={`sat-toggle-btn ${viewMode === 'gallery' ? 'sat-toggle-btn--active' : ''}`}
                 onClick={() => setViewMode('gallery')}
               >
                 Gallery (3-Step)
               </button>
               <button
-                className={`bento-action-btn ${viewMode === 'overlay' ? 'bento-action-btn--primary' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
+                className={`sat-toggle-btn ${viewMode === 'overlay' ? 'sat-toggle-btn--active' : ''}`}
                 onClick={() => setViewMode('overlay')}
               >
                 Adjustable Opacity Overlay
