@@ -100,7 +100,7 @@ async def _lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Marine Pollution Intelligence & Vessel Attribution Platform",
-    description="SIH prototype: Sentinel-1 SAR oil-spill detection + drift hindcasting + AIS-based vessel attribution.",
+    description="Marine Pollution Intelligence: Sentinel-1 SAR oil-spill detection + drift hindcasting + AIS-based vessel attribution.",
     version=settings.app_version,
     lifespan=_lifespan,
 )

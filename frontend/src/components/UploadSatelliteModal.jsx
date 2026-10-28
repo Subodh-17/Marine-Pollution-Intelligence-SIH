@@ -54,7 +54,7 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
           style={{ margin: '10px 0', fontSize: 12.5, color: 'var(--text-secondary)' }}
         />
 
-        <div style={{ margin: '10px 0 14px', padding: '10px 12px', background: 'var(--bg-subtle, rgba(255,255,255,0.03))', borderRadius: 6, border: '1px solid var(--border-subtle, #333)' }}>
+        <div style={{ margin: '10px 0 14px', padding: '10px 12px', background: 'var(--bg-inset)', borderRadius: 6, border: '1px solid var(--border-hairline)' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Or analyze a bundled benchmark SAR scene:
           </div>

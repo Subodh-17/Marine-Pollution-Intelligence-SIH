@@ -113,8 +113,7 @@ export default function SatelliteTab({ investigation }) {
         )}
         {isMl && (
           <span className="provenance-banner__note">
-            Genuine PyTorch inference produced this result. The model is a prototype, trained
-            on synthetic data — see the Model Card before treating this as validated.
+            Genuine PyTorch inference produced this result. The model is an early synthetic-trained benchmark model — see the Model Card before treating this as validated.
           </span>
         )}
         {isMlReal && (

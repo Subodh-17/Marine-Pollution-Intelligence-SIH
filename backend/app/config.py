@@ -366,7 +366,7 @@ def get_settings() -> Settings:
         met_norway_url=_env_str("MET_NORWAY_URL", "https://api.met.no/weatherapi/locationforecast/2.0/compact"),
         met_norway_user_agent=_env_str(
             "MET_NORWAY_USER_AGENT",
-            "MarinePollutionIntelligence/0.1.0 (https://github.com/Subodh-17/Marine-Pollution-Intelligence-SIH; operational-metocean@marineintel.org)",
+            "MarinePollutionIntelligence/0.1.0 (https://github.com/Subodh-17/marine-pollution-intelligence; operational-metocean@marineintel.org)",
         ),
         met_norway_enabled=_env_bool("MET_NORWAY_ENABLED", True),
         max_image_dimension_px=_env_int("MAX_IMAGE_DIMENSION_PX", 8000),

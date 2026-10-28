@@ -91,7 +91,7 @@ function deriveTrainingStatus(status) {
   return {
     key: 'synthetic',
     label: 'Synthetic-trained',
-    detail: 'Synthetic-trained prototype model. Real Zenodo-trained model has not been trained or verified yet.',
+    detail: 'Synthetic-trained development model. Real Zenodo-trained model has not been trained or verified yet.',
   }
 }
 

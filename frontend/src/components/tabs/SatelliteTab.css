@@ -224,6 +224,26 @@
   background: var(--bg-inset, #071119);
 }
 
+[data-theme='dark'] .provenance-banner--ml-real .provenance-banner__badge {
+  border-color: rgba(107, 230, 117, 0.45);
+  color: var(--signal-green);
+}
+
+[data-theme='dark'] .provenance-banner--ml .provenance-banner__badge {
+  border-color: rgba(156, 139, 255, 0.45);
+  color: var(--signal-violet);
+}
+
+[data-theme='dark'] .provenance-banner--classical .provenance-banner__badge {
+  border-color: rgba(63, 216, 196, 0.45);
+  color: var(--signal-cyan);
+}
+
+[data-theme='dark'] .provenance-banner--fallback .provenance-banner__badge {
+  border-color: rgba(255, 184, 77, 0.45);
+  color: var(--signal-amber);
+}
+
 .provenance-banner__type-tag {
   font-family: var(--font-mono, monospace);
   font-size: 10px;
@@ -332,6 +352,26 @@
 }
 [data-theme='dark'] .scene-classification-banner__badge {
   background: var(--bg-inset, #071119);
+}
+
+[data-theme='dark'] .scene-classification-banner--oil .scene-classification-banner__badge {
+  border-color: rgba(255, 107, 92, 0.45);
+  color: var(--signal-coral);
+}
+
+[data-theme='dark'] .scene-classification-banner--lookalike .scene-classification-banner__badge {
+  border-color: rgba(255, 184, 77, 0.45);
+  color: var(--signal-amber);
+}
+
+[data-theme='dark'] .scene-classification-banner--no-oil .scene-classification-banner__badge {
+  border-color: rgba(107, 230, 117, 0.45);
+  color: var(--signal-green);
+}
+
+[data-theme='dark'] .scene-classification-banner--uncertain .scene-classification-banner__badge {
+  border-color: rgba(156, 163, 175, 0.45);
+  color: var(--text-secondary);
 }
 
 .scene-classification-banner__confidence {

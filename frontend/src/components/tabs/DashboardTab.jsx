@@ -50,7 +50,7 @@ export default function DashboardTab({
       {/* Workspace Header */}
       <div className="section-head">
         <div>
-          <span className="eyebrow">SIH-26143 · Coastal Surveillance & Environmental Protection</span>
+          <span className="eyebrow">Coastal Surveillance & Environmental Protection</span>
           <h2>Maritime Pollution Intelligence Command Center</h2>
         </div>
         <div className="header-status-strip" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

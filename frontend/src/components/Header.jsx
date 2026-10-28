@@ -19,7 +19,7 @@ export default function Header({ investigationId, onRunDemo, running, onUploadCl
         <RadarMark />
         <div className="header__title">
           MARINE POLLUTION INTELLIGENCE
-          <small>VESSEL ATTRIBUTION PLATFORM · SIH PROTOTYPE</small>
+          <small>SATELLITE-BASED MARINE POLLUTION DETECTION & VESSEL ATTRIBUTION</small>
         </div>
         {investigationId && (
           <div className="header__inv-id">INV&nbsp;#{investigationId}</div>

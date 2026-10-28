@@ -74,6 +74,9 @@
   --glass-border: rgba(63, 216, 196, 0.16);
   --glass-border-strong: rgba(63, 216, 196, 0.32);
   --shadow-bento: 0 4px 20px -2px rgba(2, 8, 16, 0.5);
+
+  --bg-subtle: rgba(255, 255, 255, 0.04);
+  --border-subtle: #16324a;
 }
 
 [data-theme='light'] {
@@ -119,6 +122,9 @@
   --glass-border: rgba(10, 125, 112, 0.18);
   --glass-border-strong: rgba(10, 125, 112, 0.35);
   --shadow-bento: 0 4px 20px -2px rgba(16, 34, 46, 0.08);
+
+  --bg-subtle: rgba(0, 0, 0, 0.03);
+  --border-subtle: #d7e0e7;
 }
 
 /* --- type --- */
@@ -126,6 +132,13 @@
   --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
   --font-body: 'Inter', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12.5px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 26px;
 
   /* --- spacing scale --- */
   --sp-1: 4px;
@@ -154,6 +167,7 @@ body {
   background: var(--bg-void);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
