@@ -48,6 +48,12 @@ _JOBS: dict[str, "Job"] = {}
 _JOBS_LOCK = threading.Lock()
 
 VALID_STATUSES = ("queued", "running", "completed", "failed", "cancelled")
+MAX_CONCURRENT_ACTIVE_JOBS = 20
+
+
+class JobQueueCapacityExceeded(Exception):
+    """Raised when the background job runner is at capacity with active queued/running jobs."""
+    pass
 
 
 def _get_executor() -> ThreadPoolExecutor:
@@ -142,14 +148,24 @@ def submit_job(job_type: str, fn: Callable[[], Any], owner: str = "anonymous", j
     """Submits `fn` (a zero-arg callable - callers close over their real
     arguments) to the shared background executor and returns immediately
     with a Job whose id can be polled via get_job()/GET /api/jobs/{id}."""
-    if job_id is None:
-        job_id = str(uuid.uuid4())
-    job = Job(id=job_id, job_type=job_type, owner=owner)
     with _JOBS_LOCK:
+        active_count = sum(1 for j in _JOBS.values() if j.status in ("queued", "running"))
+        if active_count >= MAX_CONCURRENT_ACTIVE_JOBS:
+            raise JobQueueCapacityExceeded(
+                f"Background investigation queue is at capacity ({active_count} active jobs). Please retry shortly."
+            )
+        if job_id is None:
+            job_id = str(uuid.uuid4())
+        job = Job(id=job_id, job_type=job_type, owner=owner)
         _JOBS[job_id] = job
     _persist(job)
-    future = _get_executor().submit(_run, job_id, fn)
-    job._future = future
+    try:
+        future = _get_executor().submit(_run, job_id, fn)
+        job._future = future
+    except Exception:
+        with _JOBS_LOCK:
+            _JOBS.pop(job_id, None)
+        raise
     return job
 
 

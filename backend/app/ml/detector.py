@@ -1231,11 +1231,34 @@ class MLDetectorEngine:
                     oil_status = "LOOKALIKE"
                 else:
                     oil_status = "UNCERTAIN"  # defensive: an unrecognized label is never treated as confirmed oil
+
+                if oil_status == "LIKELY_OIL":
+                    ml_reasoning = f"Deep learning SAR scene classifier predicts {label} with {confidence*100:.1f}% probability based on dual-pol backscatter features."
+                elif oil_status == "LOOKALIKE":
+                    ml_reasoning = f"Deep learning SAR scene classifier predicts Lookalike with {confidence*100:.1f}% probability (anomalous backscatter matching natural lookalike phenomena)."
+                elif oil_status == "NO_OIL":
+                    ml_reasoning = f"Deep learning SAR scene classifier predicts No-Oil with {confidence*100:.1f}% probability (clean sea surface backscatter)."
+                else:
+                    ml_reasoning = f"Classifier top prediction ({label}, {confidence*100:.1f}%) fell below reliable classification threshold ({ML_FALLBACK_CONFIDENCE_THRESHOLD*100:.0f}%)."
+
                 scene_classification = {
                     "label": label,
                     "confidence": round(confidence, 4),
                     "probabilities": probabilities,
+                    "scores": {
+                        "Oil": probabilities.get("Oil", 0.0),
+                        "Lookalike": probabilities.get("Lookalike", 0.0),
+                        "No Oil": probabilities.get("No-Oil", 0.0),
+                    },
                     "oil_status": oil_status,
+                    "score_type": "probability",
+                    "score_type_label": "Model probability",
+                    "detector_name": (
+                        "ML Detector (Zenodo-Trained)"
+                        if prov_tag == PROVENANCE_ML_REAL
+                        else "ML Detector (Prototype)"
+                    ),
+                    "reasoning": ml_reasoning,
                 }
             else:
                 notes.append("Classifier checkpoint not loaded: " + "; ".join(e for e in self.load_errors if "classifier" in e))

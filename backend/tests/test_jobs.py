@@ -136,3 +136,49 @@ def test_cleanup_abandoned_jobs_does_not_crash():
     from app.persistence import jobs as jobs_module
     removed = jobs_module.cleanup_abandoned_jobs(max_age_hours=0.0000001)
     assert isinstance(removed, int)
+
+
+def test_job_capacity_exceeded_returns_429():
+    from app.persistence import jobs as jobs_module
+    saved_max = jobs_module.MAX_CONCURRENT_ACTIVE_JOBS
+    jobs_module.MAX_CONCURRENT_ACTIVE_JOBS = 1
+    c = client()
+    blocker_started = False
+
+    def blocking_work():
+        nonlocal blocker_started
+        blocker_started = True
+        time.sleep(1.0)
+        class Fake:
+            id = "blocking-inv"
+        return Fake()
+
+    try:
+        # Fill capacity with 1 active job
+        job = jobs_module.submit_job("capacity_test", blocking_work)
+        # Attempting another job should hit capacity limit and return 429
+        r = c.post("/api/jobs/investigation", params={"mode": "demo"})
+        assert r.status_code == 429
+        assert "Retry-After" in r.headers
+        assert "capacity" in r.json()["detail"].lower()
+    finally:
+        jobs_module.MAX_CONCURRENT_ACTIVE_JOBS = saved_max
+
+
+def test_create_investigation_job_supports_classical_and_ml_detector():
+    c = client()
+    # Test classical detector parameter
+    r = c.post("/api/jobs/investigation", params={"mode": "demo", "detector": "classical"})
+    assert r.status_code == 200
+    res = _wait_until_done(c, r.json()["id"])
+    assert res["status"] == "completed"
+    inv_r = c.get(f"/api/spill/{res['result_investigation_id']}")
+    sc = inv_r.json()["satellite"]["scene_classification"]
+    assert sc["detector_name"] == "Classical Detector"
+    assert sc["score_type"] == "heuristic_score"
+
+
+def test_create_investigation_job_rejects_invalid_detector():
+    c = client()
+    r = c.post("/api/jobs/investigation", params={"mode": "demo", "detector": "unknown_ai_detector"})
+    assert r.status_code == 422

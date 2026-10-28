@@ -329,6 +329,8 @@ def run_investigation(
             det = detect_oil_slick(norm, sea_mask)
             det.method = "classical_dark_spot_ml_fallback"
             detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+            if det.scene_classification:
+                det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
             ml_notes.append(
                 "ML detector was requested but the uploaded image is not dual-polarization "
                 "(VV+VH) - the ML models require a genuine 2-channel input. Classical SAR "
@@ -402,6 +404,8 @@ def run_investigation(
                 det = detect_oil_slick(norm, sea_mask)
                 det.method = "classical_dark_spot_ml_fallback"
                 detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                if det.scene_classification:
+                    det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
                 ml_notes.append(
                     f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: " + fallback_reason + " Classical SAR "
                     "Detection / Fallback was run instead and is what actually produced this "

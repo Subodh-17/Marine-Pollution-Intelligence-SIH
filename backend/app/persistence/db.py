@@ -154,6 +154,11 @@ class _DictRowCursor:
 def _ensure_schema_sqlite(conn: sqlite3.Connection, path: str) -> None:
     if path in _initialized_paths:
         return
+    if path != ":memory:":
+        try:
+            conn.execute("PRAGMA journal_mode = WAL;")
+        except Exception:
+            pass
     conn.executescript(_SCHEMA)
     _initialized_paths.add(path)
 
@@ -172,8 +177,14 @@ def _connect_sqlite() -> Iterator[sqlite3.Connection]:
         parent = os.path.dirname(path)
         if parent:
             os.makedirs(parent, exist_ok=True)
-    conn = sqlite3.connect(path, timeout=10.0)
+    conn = sqlite3.connect(path, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    if path != ":memory:":
+        try:
+            conn.execute("PRAGMA synchronous = NORMAL;")
+            conn.execute("PRAGMA busy_timeout = 30000;")
+        except Exception:
+            pass
     try:
         _ensure_schema_sqlite(conn, path)
         yield conn

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './SatelliteTab.css'
 import { getProvenanceInfo, DETECTOR_PROVENANCE } from '../../lib/detectorProvenance'
 import { formatSourceLabel, formatMethodLabel } from '../../lib/formatters'
+import ClassificationScorecard from '../ClassificationScorecard.jsx'
 
 export default function SatelliteTab({ investigation }) {
   const sat = investigation.satellite
@@ -38,7 +39,29 @@ export default function SatelliteTab({ investigation }) {
       note: `The classifier\u2019s top prediction fell below the confidence threshold required to call it Oil, No-Oil, or Lookalike (see the probabilities below). Treat this scene\u2019s oil status as unresolved rather than assuming either outcome.`,
     },
   }
-  const sceneCopy = sceneClassification ? SCENE_CLASSIFICATION_COPY[sceneClassification.oil_status] : null
+  const CLASSICAL_SCENE_CLASSIFICATION_COPY = {
+    LIKELY_OIL: {
+      badge: 'Oil', modifier: 'oil',
+      note: 'Classical SAR analysis identified an elongated, low-backscatter candidate with high capillary wave damping (oil slick).',
+    },
+    NO_OIL: {
+      badge: 'No-Oil', modifier: 'no-oil',
+      note: 'Classical SAR analysis detected no anomalous dark spots exceeding slick plausibility thresholds; scene matches normal sea surface.',
+    },
+    LOOKALIKE: {
+      badge: 'Lookalike', modifier: 'lookalike',
+      note: 'Classical SAR analysis flagged low-wind area or non-oil dark feature (insufficient elongation, rough internal texture, or excessive area). This must not be read as a confirmed spill.',
+    },
+    UNCERTAIN: {
+      badge: 'Uncertain', modifier: 'uncertain',
+      note: 'Classical detector features are ambiguous between lookalike and oil film. Treat status as unresolved rather than assuming either outcome.',
+    },
+  }
+  const isClassical = !isMl && !isMlReal && !isFallback
+  const copyTable = (isClassical || sceneClassification?.score_type === 'heuristic_score')
+    ? CLASSICAL_SCENE_CLASSIFICATION_COPY
+    : SCENE_CLASSIFICATION_COPY
+  const sceneCopy = sceneClassification ? (copyTable[sceneClassification.oil_status] || SCENE_CLASSIFICATION_COPY[sceneClassification.oil_status]) : null
 
   return (
     <div className="satellite-workspace">
@@ -96,22 +119,13 @@ export default function SatelliteTab({ investigation }) {
         )}
       </div>
 
-      {/* Scene Classification Banner */}
-      {sceneClassification && sceneCopy && (
-        <div className={`scene-classification-banner scene-classification-banner--${sceneCopy.modifier}`}>
-          <span className="scene-classification-banner__badge">{sceneCopy.badge}</span>
-          <span className="scene-classification-banner__confidence">
-            {(sceneClassification.confidence * 100).toFixed(1)}% confidence
-          </span>
-          <span className="scene-classification-banner__note">{sceneCopy.note}</span>
-          <div className="scene-classification-banner__probs">
-            {Object.entries(sceneClassification.probabilities).map(([cls, p]) => (
-              <span key={cls} className="scene-classification-banner__prob">
-                {cls}: {(p * 100).toFixed(1)}%
-              </span>
-            ))}
-          </div>
-        </div>
+      {/* Scene Classification Banner & Scorecard */}
+      {Boolean(sceneClassification) && (
+        <ClassificationScorecard
+          sceneClassification={sceneClassification}
+          sceneCopy={sceneCopy}
+          detectorProvenance={provenance}
+        />
       )}
 
       {/* Interactive Imagery Viewer & Opacity Controls */}

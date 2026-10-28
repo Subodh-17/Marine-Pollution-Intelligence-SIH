@@ -689,7 +689,10 @@ async def upload_satellite_image(
                     except OSError:
                         pass
 
-            job = jobs_module.submit_job("satellite_upload", _work, owner=current_user, job_id=job_id)
+            try:
+                job = jobs_module.submit_job("satellite_upload", _work, owner=current_user, job_id=job_id)
+            except jobs_module.JobQueueCapacityExceeded as e:
+                raise HTTPException(429, str(e), headers={"Retry-After": "5"})
             handed_off_to_job = True
             return JSONResponse(status_code=202, content=job.to_dict())
 
@@ -884,6 +887,7 @@ def _check_image_dimensions(path: str, ext: str) -> None:
 @app.post("/api/jobs/investigation")
 def create_investigation_job(
     mode: str = Query("demo"),
+    detector: str = Query("classical", pattern="^(classical|ml)$"),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
     time_window_hours: float = Query(TIME_WINDOW_HOURS_DEFAULT),
     current_user: str = Depends(get_current_user),
@@ -902,12 +906,16 @@ def create_investigation_job(
     def _work():
         return run_investigation(
             mode=mode, ais_csv_path=ais_path,
+            detector=detector,
             search_radius_km=search_radius_km, time_window_hours=time_window_hours,
             owner=current_user,
             progress_callback=lambda st: jobs_module.update_job_progress(job_id, st),
         )
 
-    job = jobs_module.submit_job("investigation", _work, owner=current_user, job_id=job_id)
+    try:
+        job = jobs_module.submit_job("investigation", _work, owner=current_user, job_id=job_id)
+    except jobs_module.JobQueueCapacityExceeded as e:
+        raise HTTPException(429, str(e), headers={"Retry-After": "5"})
     return job.to_dict()
 
 
