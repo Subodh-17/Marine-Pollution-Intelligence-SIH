@@ -195,6 +195,7 @@ def run_investigation(
     owner: str = "anonymous",
     input_file_sha256: str | None = None,
     progress_callback: Callable[[str], None] | None = None,
+    allow_fallback: bool = True,
 ) -> Investigation:
     """
     mode: "demo" (synthetic offline scenario) | "custom_ais" (demo scene +
@@ -324,144 +325,198 @@ def run_investigation(
     #                                      final result - never silently, and
     #                                      never presented as if the ML model
     #                                      had produced it.
-    if mode == "real_satellite" and detector == "ml":
-        if not scene.is_dual_pol:
-            det = detect_oil_slick(norm, sea_mask)
-            det.method = "classical_dark_spot_ml_fallback"
-            detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
-            if det.scene_classification:
-                det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
-            ml_notes.append(
-                "ML detector was requested but the uploaded image is not dual-polarization "
-                "(VV+VH) - the ML models require a genuine 2-channel input. Classical SAR "
-                "Detection / Fallback was run instead; this is NOT an ML result."
-            )
-        else:
-            from app.ml.detector import get_ml_engine, ML_FALLBACK_CONFIDENCE_THRESHOLD
+    fallback_used = False
+    fallback_reason = None
+
+    if detector == "auto":
+        if mode == "real_satellite" and scene.is_dual_pol:
+            from app.ml.detector import get_ml_engine
             engine = get_ml_engine()
-            try:
-                # `MLDetectorEngine.detect()` documents a "never raise"
-                # contract (see app/ml/detector.py), but this call is still
-                # wrapped here as a defense-in-depth safety net - e.g. for
-                # test doubles or future engine implementations that don't
-                # honor that contract - so a bug in the ML path can never
-                # crash the whole investigation; it always degrades to the
-                # classical fallback instead.
-                ml_det = engine.detect(scene.vv, scene.vh)
-            except Exception as e:
-                from app.satellite.detection import DetectionResult
+            if engine.available:
                 try:
-                    fallback_mask = np.zeros_like(scene.vv, dtype=bool)
-                except Exception:
-                    fallback_mask = np.zeros((0, 0), dtype=bool)
-                ml_det = DetectionResult(
-                    mask=fallback_mask,
-                    candidate_masks=[],
-                    confidence=0.0,
-                    method="ml_prototype_inference_error",
-                    notes=[
-                        f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: the ML engine raised an unexpected "
-                        f"exception outside its own safety wrapper ({type(e).__name__}: {e}). "
-                        "Treated as a failed ML result, never a crash."
-                    ],
-                )
-
-            ml_model_info = ml_det.model_provenance_info
-
-            fallback_reason = None
-            if not engine.available:
-                fallback_reason = (
-                    "ML engine unavailable in this environment (" + "; ".join(engine.load_errors) + ")."
-                )
-            elif ml_det.method in ("ml_prototype_inference_error", "ml_prototype_invalid_output"):
-                fallback_reason = (
-                    "ML inference raised a runtime exception, or produced an invalid/malformed "
-                    "output (unsupported input, unexpected tensor shape, NaN/Inf confidence, "
-                    "empty/invalid model output) - see detection_notes for the ML engine's own "
-                    "error detail."
-                )
-            elif ml_det.mask is None or ml_det.mask.sum() == 0:
-                fallback_reason = "ML segmenter produced an empty/invalid mask (no region above its detection threshold)."
-            elif not math.isfinite(ml_det.confidence):
-                # Defense in depth: app/ml/detector.py already rejects
-                # NaN/Inf confidence internally (never returns it as
-                # `ml_prototype_pytorch_cnn_unet`), but a NaN comparison
-                # against ML_FALLBACK_CONFIDENCE_THRESHOLD below would
-                # silently evaluate to False either way (NaN < x is always
-                # False in Python), so this module never trusts a non-finite
-                # confidence either, regardless of which engine produced it.
-                fallback_reason = (
-                    f"ML confidence value was not finite ({ml_det.confidence!r}) - treated as an "
-                    "invalid result rather than trusted."
-                )
-            elif ml_det.confidence < ML_FALLBACK_CONFIDENCE_THRESHOLD:
-                fallback_reason = (
-                    f"ML confidence ({ml_det.confidence:.2f}) is below the configured, heuristic "
-                    f"fallback threshold ({ML_FALLBACK_CONFIDENCE_THRESHOLD:.2f} - see README_ML_STATUS.md)."
-                )
-
-            if fallback_reason is not None:
+                    ml_det = engine.detect(scene.vv, scene.vh)
+                    if ml_det.success and ml_det.method not in ("ml_prototype_inference_error", "ml_prototype_invalid_output") and math.isfinite(ml_det.confidence):
+                        det = ml_det
+                        detector_provenance = ml_det.provenance
+                        ml_model_info = ml_det.model_provenance_info
+                    else:
+                        det = detect_oil_slick(norm, sea_mask)
+                        det.method = "classical_dark_spot_ml_fallback"
+                        detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                        fallback_used = True
+                        fallback_reason = "; ".join(ml_det.warnings or ml_det.notes) or "ML inference returned an invalid result."
+                        if det.scene_classification:
+                            det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
+                        ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
+                except Exception as e:
+                    det = detect_oil_slick(norm, sea_mask)
+                    det.method = "classical_dark_spot_ml_fallback"
+                    detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                    fallback_used = True
+                    fallback_reason = f"ML engine exception ({type(e).__name__}: {e})"
+                    if det.scene_classification:
+                        det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
+                    ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
+            else:
                 det = detect_oil_slick(norm, sea_mask)
                 det.method = "classical_dark_spot_ml_fallback"
                 detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                fallback_used = True
+                fallback_reason = "ML engine unavailable in this environment (" + "; ".join(engine.load_errors) + ")."
+                if det.scene_classification:
+                    det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
+                ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
+        else:
+            det = detect_oil_slick(norm, sea_mask)
+            detector_provenance = "CLASSICAL_DARK_SPOT"
+            ml_notes.append(
+                "Auto mode selected Classical SAR Detector: the image is single-band (1 channel). "
+                "The deep learning ML models require dual-polarization (VV+VH) SAR imagery."
+            )
+    elif detector == "ml":
+        if mode == "real_satellite":
+            if not scene.is_dual_pol:
+                if not allow_fallback:
+                    raise ValueError(
+                        "ML detector requires a dual-polarization (VV+VH) SAR image (2 channels: VV, VH). "
+                        "The uploaded image is single-band. Select 'Auto' or 'Classical' detector mode."
+                    )
+                det = detect_oil_slick(norm, sea_mask)
+                det.method = "classical_dark_spot_ml_fallback"
+                detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                fallback_used = True
+                fallback_reason = "Uploaded image is not dual-polarization (VV+VH) - the ML models require a genuine 2-channel input."
                 if det.scene_classification:
                     det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
                 ml_notes.append(
-                    f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: " + fallback_reason + " Classical SAR "
-                    "Detection / Fallback was run instead and is what actually produced this "
-                    "result. This fallback does NOT indicate the ML model worked - it indicates "
-                    "the ML path did not produce a usable result and the classical baseline was "
-                    "used in its place."
+                    "ML detector was requested but the uploaded image is not dual-polarization "
+                    "(VV+VH) - the ML models require a genuine 2-channel input. Classical SAR "
+                    "Detection / Fallback was run instead; this is NOT an ML result."
                 )
-                # Keep the ML engine's own notes too (why it didn't qualify),
-                # so the "not usable" reasoning is fully auditable, not just
-                # asserted.
-                ml_notes.extend(ml_det.notes)
             else:
-                det = ml_det
-                detector_provenance = ml_det.provenance
-                # SAFETY FIX (see work/UPGRADE_AUDIT.md "Lookalike safety"):
-                # the classifier and segmenter are independent sub-models -
-                # a scene the classifier confidently calls Lookalike or
-                # No-Oil can still produce a non-empty segmenter mask. That
-                # mask is preserved below (real evidence, not discarded),
-                # but it must never reach an investigator looking
-                # indistinguishable from a confirmed oil detection just
-                # because it wasn't low-confidence enough to trigger the
-                # existing classical-fallback path above (which only checks
-                # confidence, never which label won).
-                if ml_det.scene_classification and ml_det.scene_classification.get("oil_status") != "LIKELY_OIL":
-                    status = ml_det.scene_classification["oil_status"]
-                    label = ml_det.scene_classification["label"]
-                    conf_pct = ml_det.scene_classification["confidence"] * 100
-                    if status == "NO_OIL":
-                        ml_notes.append(
-                            f"ML scene classifier predicts No-Oil ({conf_pct:.1f}% confidence). Despite a "
-                            "segmentation mask being present below, this scene is NOT classified as containing "
-                            "oil - do not present this as a confirmed or likely spill."
-                        )
-                    elif status == "LOOKALIKE":
-                        ml_notes.append(
-                            f"ML scene classifier predicts Lookalike ({conf_pct:.1f}% confidence) - a SAR dark "
-                            "region resembling oil but attributable to another cause (e.g. low-wind area, ship "
-                            "wake, natural slick, rain). Despite a segmentation mask being present below, this "
-                            "is NOT a confirmed or likely oil detection - it is an uncertain SAR anomaly."
-                        )
-                    else:  # UNCERTAIN
-                        ml_notes.append(
-                            f"ML classifier confidence ({conf_pct:.1f}%, predicted {label}) is below the "
-                            "configured fallback threshold for treating any class prediction as reliable - "
-                            "insufficient confidence to classify this scene as oil, no-oil, or lookalike."
-                        )
+                from app.ml.detector import get_ml_engine, ML_FALLBACK_CONFIDENCE_THRESHOLD
+                engine = get_ml_engine()
+                if not engine.available and not allow_fallback:
+                    raise RuntimeError(
+                        f"ML detector is unavailable in this environment ({'; '.join(engine.load_errors)}). "
+                        "Select 'Classical' or 'Auto' detector mode."
+                    )
+                try:
+                    ml_det = engine.detect(scene.vv, scene.vh)
+                except Exception as e:
+                    if not allow_fallback:
+                        raise RuntimeError(f"ML engine raised an unexpected exception: {type(e).__name__}: {e}")
+                    from app.satellite.detection import DetectionResult
+                    try:
+                        fallback_mask = np.zeros_like(scene.vv, dtype=bool)
+                    except Exception:
+                        fallback_mask = np.zeros((0, 0), dtype=bool)
+                    ml_det = DetectionResult(
+                        mask=fallback_mask,
+                        candidate_masks=[],
+                        confidence=0.0,
+                        method="ml_prototype_inference_error",
+                        notes=[
+                            f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: the ML engine raised an unexpected "
+                            f"exception outside its own safety wrapper ({type(e).__name__}: {e}). "
+                            "Treated as a failed ML result, never a crash."
+                        ],
+                    )
+
+                ml_model_info = ml_det.model_provenance_info
+                eval_fallback_reason = None
+                if not engine.available:
+                    eval_fallback_reason = (
+                        "ML engine unavailable in this environment (" + "; ".join(engine.load_errors) + ")."
+                    )
+                elif ml_det.method in ("ml_prototype_inference_error", "ml_prototype_invalid_output") or not ml_det.success:
+                    eval_fallback_reason = (
+                        "ML inference raised a runtime exception, or produced an invalid/malformed "
+                        "output (unsupported input, unexpected tensor shape, NaN/Inf confidence, "
+                        "empty/invalid model output) - see detection_notes for the ML engine's own "
+                        "error detail."
+                    )
+                elif ml_det.mask is None or ml_det.mask.sum() == 0:
+                    eval_fallback_reason = "ML segmenter produced an empty/invalid mask (no region above its detection threshold)."
+                elif not math.isfinite(ml_det.confidence):
+                    eval_fallback_reason = (
+                        f"ML confidence value was not finite ({ml_det.confidence!r}) - treated as an "
+                        "invalid result rather than trusted."
+                    )
+                elif ml_det.scene_classification is None and ml_det.confidence < ML_FALLBACK_CONFIDENCE_THRESHOLD:
+                    eval_fallback_reason = (
+                        f"ML confidence ({ml_det.confidence:.2f}) is below the configured, heuristic "
+                        f"fallback threshold ({ML_FALLBACK_CONFIDENCE_THRESHOLD:.2f} - see README_ML_STATUS.md)."
+                    )
+
+                if eval_fallback_reason is not None:
+                    if not allow_fallback:
+                        raise RuntimeError(f"ML detection failed: {eval_fallback_reason}")
+                    det = detect_oil_slick(norm, sea_mask)
+                    det.method = "classical_dark_spot_ml_fallback"
+                    detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+                    fallback_used = True
+                    fallback_reason = eval_fallback_reason
+                    if det.scene_classification:
+                        det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
+                    ml_notes.append(
+                        f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: " + eval_fallback_reason + " Classical SAR "
+                        "Detection / Fallback was run instead and is what actually produced this "
+                        "result. This fallback does NOT indicate the ML model worked - it indicates "
+                        "the ML path did not produce a usable result and the classical baseline was "
+                        "used in its place."
+                    )
+                    ml_notes.extend(ml_det.notes)
+                else:
+                    det = ml_det
+                    detector_provenance = ml_det.provenance
+                    if ml_det.scene_classification and ml_det.scene_classification.get("oil_status") != "LIKELY_OIL":
+                        status = ml_det.scene_classification["oil_status"]
+                        label = ml_det.scene_classification["label"]
+                        conf_pct = ml_det.scene_classification["confidence"] * 100
+                        if status == "NO_OIL":
+                            ml_notes.append(
+                                f"ML scene classifier predicts No-Oil ({conf_pct:.1f}% confidence). Despite a "
+                                "segmentation mask being present below, this scene is NOT classified as containing "
+                                "oil - do not present this as a confirmed or likely spill."
+                            )
+                        elif status == "LOOKALIKE":
+                            ml_notes.append(
+                                f"ML scene classifier predicts Lookalike ({conf_pct:.1f}% confidence) - a SAR dark "
+                                "region resembling oil but attributable to another cause (e.g. low-wind area, ship "
+                                "wake, natural slick, rain). Despite a segmentation mask being present below, this "
+                                "is NOT a confirmed or likely oil detection - it is an uncertain SAR anomaly."
+                            )
+                        else:
+                            ml_notes.append(
+                                f"ML classifier confidence ({conf_pct:.1f}%, predicted {label}) is below the "
+                                "configured fallback threshold for treating any class prediction as reliable - "
+                                "insufficient confidence to classify this scene as oil, no-oil, or lookalike."
+                            )
+        else:
+            if not allow_fallback:
+                raise ValueError("ML detector requires a dual-polarization (VV+VH) SAR image. The synthetic demo scene is single-band. Select 'Auto' or 'Classical' detector mode.")
+            det = detect_oil_slick(norm, sea_mask)
+            det.method = "classical_dark_spot_ml_fallback"
+            detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
+            fallback_used = True
+            fallback_reason = "Synthetic demo scene is single-band (ML requires dual-pol VV+VH)."
+            if det.scene_classification:
+                det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
+            ml_notes.append(
+                "ML detector was requested on synthetic demo scene which is not dual-polarization "
+                "(VV+VH). Classical SAR Detection / Fallback was run instead."
+            )
     else:
         det = detect_oil_slick(norm, sea_mask)
+        detector_provenance = "CLASSICAL_DARK_SPOT"
     log("Oil slick detected" if det.mask.sum() > 0 else "No oil slick detected")
     _log.info(
         "detection_completed",
         extra={
             "investigation_id": inv_id,
             "detector_provenance": detector_provenance,
-            "fallback_occurred": bool(ml_notes),
+            "fallback_occurred": fallback_used,
             "detection_confidence": det.confidence,
         },
     )
@@ -491,6 +546,17 @@ def run_investigation(
             "wind_deflection_deg": None,
             "notes": ["No oil slick was detected in this scene; hindcast/forecast requires a detected slick location and time, so it was not computed."],
         }
+        from app.investigation.policy import evaluate_attribution_eligibility
+        policy_eval = evaluate_attribution_eligibility(
+            scene_classification=det.scene_classification,
+            mask=det.mask,
+            observed_time=observed_time,
+            min_mask_area_px=settings.min_attribution_mask_px,
+            ais_records=[],
+        )
+        attribution_gated = not policy_eval.eligible
+        attribution_status = policy_eval.status
+        attribution_decision_reason = policy_eval.reason
         ais_summary = {
             "total_raw_records": 0, "cleaned_records": 0, "within_spatial_filter": 0,
             "within_final_filter": 0, "unique_vessels_in_window": 0,
@@ -498,6 +564,10 @@ def run_investigation(
             "window_start": None, "window_end": None, "ais_source": "NOT_RUN",
             "reference_dataset": "AIS analysis was not run because no oil slick was detected to anchor a search location/time around.",
             "excluded_vessels": [],
+            "attribution_status": attribution_status,
+            "attribution_gated": attribution_gated,
+            "attribution_decision_reason": attribution_decision_reason,
+            "evidence_provenance": policy_eval.evidence_provenance,
         }
         candidates = []
         log("Investigation ready (no detection)")
@@ -740,8 +810,12 @@ def run_investigation(
         "detection_overlay": render_detection_overlay(norm, det.mask),
         "method": det.method,
         "source": scene_source,
+        "detector_mode": detector,
         "detector_provenance": detector_provenance,
         "detector_version": det.detector_version,
+        "actual_detector": getattr(det, "detector_name", "classical_dark_spot"),
+        "fallback_used": fallback_used,
+        "fallback_reason": fallback_reason,
         "geolocation_is_assumed": geolocation_is_assumed,
         "geolocation_source": geolocation_source,
         "geotiff_metadata": geotiff_metadata_info,

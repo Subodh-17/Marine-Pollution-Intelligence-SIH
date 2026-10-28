@@ -630,7 +630,8 @@ async def upload_ais(file: UploadFile = File(...), current_user: str = Depends(g
 @app.post("/api/satellite/upload")
 async def upload_satellite_image(
     file: UploadFile = File(...),
-    detector: str = Query("classical", pattern="^(classical|ml)$"),
+    detector: str = Query("auto", pattern="^(classical|ml|auto)$"),
+    allow_fallback: bool = Query(True, description="When True, falls back to classical detector if ML fails or input is unsupported. When False, fails explicitly with an error."),
     center_lat: float = Query(19.05, description="Approximate scene-center latitude - used only if the file has no usable embedded geolocation."),
     center_lon: float = Query(71.20, description="Approximate scene-center longitude - used only if the file has no usable embedded geolocation."),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
@@ -678,6 +679,7 @@ async def upload_satellite_image(
                         mode="real_satellite",
                         image_path=tmp_path,
                         detector=detector,
+                        allow_fallback=allow_fallback,
                         center_lat=center_lat,
                         center_lon=center_lon,
                         search_radius_km=search_radius_km,
@@ -711,6 +713,7 @@ async def upload_satellite_image(
             mode="real_satellite",
             image_path=tmp_path,
             detector=detector,
+            allow_fallback=allow_fallback,
             center_lat=center_lat,
             center_lon=center_lon,
             search_radius_km=search_radius_km,
@@ -765,14 +768,20 @@ def list_sample_satellite_scenes():
     """Returns bundled real SAR GeoTIFF scenes available for instant analysis."""
     return [
         {
+            "id": "demo_oil_scene_03.tif",
+            "name": "Oil Spill Scene 1 (Zenodo Sentinel-1 Dual-Pol)",
+            "description": "Real Sentinel-1 SAR dual-polarization (VV/VH) oil slick from Zenodo dataset with genuine radar speckle.",
+            "type": "oil",
+        },
+        {
             "id": "demo_oil_scene_01.tif",
-            "name": "Oil Spill Scene 1 (Dual-Pol SAR)",
-            "description": "Confirmed dual-pol VV/VH oil slick from Zenodo Sentinel-1 SAR dataset.",
+            "name": "Oil Spill Scene 2 (Dual-Pol SAR Benchmark)",
+            "description": "Benchmark dual-pol VV/VH oil slick candidate for classical and ML evaluation.",
             "type": "oil",
         },
         {
             "id": "demo_oil_scene_02.tif",
-            "name": "Oil Spill Scene 2 (Dual-Pol SAR)",
+            "name": "Oil Spill Scene 3 (Dual-Pol SAR)",
             "description": "High-contrast dual-pol VV/VH slick candidate with active advection.",
             "type": "oil",
         },
@@ -793,8 +802,9 @@ def list_sample_satellite_scenes():
 
 @app.post("/api/satellite/sample")
 async def analyze_sample_satellite(
-    sample_name: str = Query("demo_oil_scene_01.tif", description="Filename of the bundled sample SAR scene"),
-    detector: str = Query("classical", pattern="^(classical|ml)$"),
+    sample_name: str = Query("demo_oil_scene_03.tif", description="Filename of the bundled sample SAR scene"),
+    detector: str = Query("auto", pattern="^(classical|ml|auto)$"),
+    allow_fallback: bool = Query(True),
     center_lat: float = Query(19.05),
     center_lon: float = Query(71.20),
     search_radius_km: float = Query(SEARCH_RADIUS_KM_DEFAULT),
@@ -821,6 +831,7 @@ async def analyze_sample_satellite(
                     mode="real_satellite",
                     image_path=sample_path,
                     detector=detector,
+                    allow_fallback=allow_fallback,
                     center_lat=center_lat,
                     center_lon=center_lon,
                     search_radius_km=search_radius_km,
@@ -838,6 +849,7 @@ async def analyze_sample_satellite(
             mode="real_satellite",
             image_path=sample_path,
             detector=detector,
+            allow_fallback=allow_fallback,
             center_lat=center_lat,
             center_lon=center_lon,
             search_radius_km=search_radius_km,

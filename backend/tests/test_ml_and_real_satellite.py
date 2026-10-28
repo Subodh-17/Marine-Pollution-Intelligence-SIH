@@ -61,13 +61,17 @@ class TestRealSatelliteUpload:
         )
         assert r.status_code == 400
 
-    def test_upload_ml_detector_on_dual_pol_image_without_torch_falls_back_to_classical(self):
+    def test_upload_ml_detector_on_dual_pol_image_without_torch_falls_back_to_classical(self, monkeypatch):
         """In this (supported, documented) torch-not-installed environment,
         requesting detector=ml on a genuinely dual-pol image must NOT produce
         an empty "no detection" result mislabelled as ML - it must
         automatically fall back to a full, working Classical SAR Detection
         run, clearly labelled as a fallback, never as if the ML model had
         produced it."""
+        from app.ml import detector
+        engine = detector.get_ml_engine()
+        monkeypatch.setattr(engine, "available", False)
+        monkeypatch.setattr(engine, "load_errors", ["Torch not installed in this environment"])
         with open(OIL_SCENE, "rb") as f:
             r = client.post(
                 "/api/satellite/upload?detector=ml&center_lat=18.92&center_lon=72.825",

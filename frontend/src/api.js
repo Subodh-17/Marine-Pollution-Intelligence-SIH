@@ -109,10 +109,13 @@ export const api = {
   // network error, a 4xx/5xx, or this same timeout if 5 minutes still isn't
   // enough) is still surfaced honestly. Every other endpoint keeps the
   // client's normal 30s timeout; only this long-running upload gets one.
-  uploadSatelliteImage: (file, { detector = 'classical', centerLat = 19.05, centerLon = 71.20, asyncJob = false } = {}) => {
+  uploadSatelliteImage: (file, { detector = 'auto', centerLat = 19.05, centerLon = 71.20, asyncJob = false, allowFallback } = {}) => {
     const form = new FormData()
     form.append('file', file)
     const params = { detector, center_lat: centerLat, center_lon: centerLon }
+    if (allowFallback !== undefined) {
+      params.allow_fallback = allowFallback
+    }
     if (asyncJob) {
       params.async_job = true
     }
@@ -122,8 +125,11 @@ export const api = {
     }).then(r => r.data)
   },
 
-  runSampleSatellite: ({ sampleName = 'demo_oil_scene_01.tif', detector = 'classical', centerLat = 19.05, centerLon = 71.20, asyncJob = false } = {}) => {
+  runSampleSatellite: ({ sampleName = 'demo_oil_scene_03.tif', detector = 'auto', centerLat = 19.05, centerLon = 71.20, asyncJob = false, allowFallback } = {}) => {
     const params = { sample_name: sampleName, detector, center_lat: centerLat, center_lon: centerLon }
+    if (allowFallback !== undefined) {
+      params.allow_fallback = allowFallback
+    }
     if (asyncJob) {
       params.async_job = true
     }

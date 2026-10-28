@@ -318,13 +318,12 @@ class TestContractConsistency:
 
 
 class TestMLFallbackClassification:
-    def test_single_pol_real_satellite_ml_request_falls_back_with_accurate_provenance(self):
-        oil_tif = os.path.join(SAMPLE_DIR, "demo_oil_scene_01.tif")
-        if not os.path.exists(oil_tif):
-            pytest.skip("Sample file demo_oil_scene_01.tif not available")
-
-        # demo_oil_scene_01.tif is single-polarization, triggering dual-pol requirement fallback
-        inv = run_investigation(mode="real_satellite", image_path=oil_tif, detector="ml")
+    def test_single_pol_real_satellite_ml_request_falls_back_with_accurate_provenance(self, tmp_path):
+        import numpy as np
+        from PIL import Image
+        single_pol = tmp_path / "single_pol.png"
+        Image.fromarray((np.random.rand(128, 128) * 255).astype("uint8")).save(single_pol)
+        inv = run_investigation(mode="real_satellite", image_path=str(single_pol), detector="ml")
         sat = inv.satellite
         sc = sat["scene_classification"]
 

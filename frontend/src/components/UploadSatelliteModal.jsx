@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 export default function UploadSatelliteModal({ onClose, onSubmit }) {
   const fileRef = useRef(null)
   const [fileName, setFileName] = useState(null)
-  const [detector, setDetector] = useState('ml')
+  const [detector, setDetector] = useState('auto')
   const [centerLat, setCenterLat] = useState(19.05)
   const [centerLon, setCenterLon] = useState(71.20)
   const [busy, setBusy] = useState(false)
@@ -68,14 +68,14 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
                 if (submittingRef.current) return
                 submittingRef.current = true
                 setBusy(true)
-                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_01.tif' })
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_03.tif' })
                   .finally(() => {
                     submittingRef.current = false
                     setBusy(false)
                   })
               }}
             >
-              🛢️ Oil Slick Scene 1
+              🛢️ Oil Spill (Zenodo SAR)
             </button>
             <button
               type="button"
@@ -86,14 +86,14 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
                 if (submittingRef.current) return
                 submittingRef.current = true
                 setBusy(true)
-                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_02.tif' })
+                onSubmit(null, { detector, centerLat, centerLon, sampleName: 'demo_oil_scene_01.tif' })
                   .finally(() => {
                     submittingRef.current = false
                     setBusy(false)
                   })
               }}
             >
-              🛢️ Oil Slick Scene 2
+              🛢️ Oil Benchmark Scene
             </button>
             <button
               type="button"
@@ -134,23 +134,33 @@ export default function UploadSatelliteModal({ onClose, onSubmit }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 16, margin: '10px 0', fontSize: 12.5 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <input type="radio" name="detector" checked={detector === 'ml'} onChange={() => setDetector('ml')} />
-            Real ML detector — dual-pol VV/VH
+        <div style={{ display: 'flex', gap: 14, margin: '10px 0', fontSize: 12 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input type="radio" name="detector" checked={detector === 'auto'} onChange={() => setDetector('auto')} />
+            Auto (Recommended)
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input type="radio" name="detector" checked={detector === 'ml'} onChange={() => setDetector('ml')} />
+            Real ML (Dual-Pol VV/VH)
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
             <input type="radio" name="detector" checked={detector === 'classical'} onChange={() => setDetector('classical')} />
-            Classical SAR detector
+            Classical SAR
           </label>
         </div>
+        {detector === 'auto' && (
+          <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '4px 0 10px' }}>
+            Auto Mode: Inspects input and executes deep learning ML on dual-polarization (VV+VH) images, or Classical SAR detection for single-band images.
+          </p>
+        )}
         {detector === 'ml' && (
           <p style={{ fontSize: 11.5, color: 'var(--signal-amber)', lineHeight: 1.5, margin: '4px 0 10px' }}>
-            Uses the real trained ML checkpoint (provenance: ML_REAL_ZENODO_TRAINED) on a
-            dual-polarization (VV+VH) GeoTIFF. Automatically falls back to Classical SAR
-            Detection if the image is not dual-polarization, the ML engine is unavailable,
-            or its result does not clear the minimum confidence threshold — the response
-            always states which detector actually ran.
+            Strict ML Mode: Runs trained deep learning models (SpillUNet + SceneClassifierV2; provenance: ML_REAL_ZENODO_TRAINED). Requires dual-polarization (VV+VH) SAR input.
+          </p>
+        )}
+        {detector === 'classical' && (
+          <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '4px 0 10px' }}>
+            Classical SAR Mode: Literature-standard dark-spot adaptive thresholding, morphological filtering, and texture analysis (heuristic scores).
           </p>
         )}
 

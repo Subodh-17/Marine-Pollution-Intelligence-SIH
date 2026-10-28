@@ -107,7 +107,7 @@ export default function SatelliteTab({ investigation }) {
           <>
             <span className="provenance-banner__type-tag">HEURISTIC SCORE</span>
             <span className="provenance-banner__note">
-              ML detection was requested but fell back to classical SAR heuristics — this is the classical detector's output, shown in its place (HEURISTIC SCORE). It is not, and must not be read as, an ML result.
+              ML detection was requested but fell back to classical SAR heuristics{sat.fallback_reason ? ` (${sat.fallback_reason})` : ''} — this is the classical detector's output, shown in its place (HEURISTIC SCORE). It is not, and must not be read as, an ML result.
             </span>
           </>
         )}
