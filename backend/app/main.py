@@ -14,6 +14,7 @@ import hashlib
 import numpy as np
 from contextlib import asynccontextmanager
 
+from typing import Optional
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -1118,13 +1119,13 @@ def get_ml_status():
 
 
 @app.get("/api/ml/training-history")
-def get_ml_training_history():
+def get_ml_training_history(component: Optional[str] = Query(None)):
     """Real training history for the ML Training page's chart - see
     `MLDetectorEngine.get_training_history_summary()` for the full honesty
     contract (never fabricates an epoch/loss/metric; reads the relevant
-    file fresh off disk on every call). Mirrors `/api/ml/status`'s
-    torch-unavailable handling above rather than duplicating a different
-    shape for that case."""
+    file fresh off disk on every call). Supports optional `?component=classifier`
+    or `?component=segmenter`. Mirrors `/api/ml/status`'s torch-unavailable
+    handling above rather than duplicating a different shape for that case."""
     from app.ml.detector import get_ml_engine
     engine = get_ml_engine()
     if not engine.available:
@@ -1143,7 +1144,7 @@ def get_ml_training_history():
                 "be attributed to an active model."
             ),
         }
-    return engine.get_training_history_summary()
+    return engine.get_training_history_summary(component=component)
 
 
 @app.get("/api/ml/metrics")

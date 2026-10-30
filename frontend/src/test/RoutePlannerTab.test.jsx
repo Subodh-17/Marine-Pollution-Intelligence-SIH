@@ -221,6 +221,34 @@ describe('RoutePlannerTab Component', () => {
       expect(screen.getByText(/COLLISION HAZARD/i)).toBeInTheDocument()
       expect(screen.getByText(/Buffer Enforced/i)).toBeInTheDocument()
       expect(screen.getByText(/SOLAS & IMO REGULATORY ADVISORY NOTICE/i)).toBeInTheDocument()
+      expect(screen.getByText(/Spill-Avoiding Detour Recommended/i)).toBeInTheDocument()
+    })
+  })
+
+  it('renders direct baseline recommended banner when baseline is clear of spills', async () => {
+    const clearPlanResponse = {
+      ...mockPlanResponse,
+      recommended_route_type: 'baseline_safe',
+      spill_avoiding_route: null,
+      comparison: {
+        ...mockPlanResponse.comparison,
+        extra_distance_nm: 0.0,
+        extra_distance_pct: 0.0,
+        safety_buffer_maintained_nm: 12.4,
+      },
+      baseline_route: {
+        ...mockPlanResponse.baseline_route,
+        intersects_spill: false,
+        closest_spill_distance_nm: 12.4,
+      },
+    }
+    api.planRoute.mockResolvedValue(clearPlanResponse)
+
+    render(<RoutePlannerTab />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/Direct Baseline Recommended/i)).toBeInTheDocument()
+      expect(screen.getByText(/The direct sea path is already safe/i)).toBeInTheDocument()
     })
   })
 })

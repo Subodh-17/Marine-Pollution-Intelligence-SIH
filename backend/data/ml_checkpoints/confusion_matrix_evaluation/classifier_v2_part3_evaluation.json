@@ -1,0 +1,5505 @@
+{
+  "evaluation_run": true,
+  "evaluated_at": "2026-10-30T17:05:43.338061",
+  "checkpoint_path": "backend/data/ml_checkpoints/classifier_real_best.pth",
+  "checkpoint_sha256": "sha256:409109a444196aafb5fc12aedb095bdde4e9062b0911373510535dabb052a75e",
+  "architecture": "SceneClassifier",
+  "checkpoint_epoch": 17,
+  "checkpoint_trained_on": "REAL_ZENODO_SENTINEL1_SAR_OIL_SPILL_DATASET",
+  "dataset_root": "D:\\zenodo_sar",
+  "test_manifest": "D:\\zenodo_sar\\manifests\\test_manifest.json",
+  "num_test_scenes": 450,
+  "class_mapping": {
+    "0": "Oil",
+    "1": "No-Oil",
+    "2": "Lookalike"
+  },
+  "preprocessing_version": "sar_percentile_1_99_minmax_v1",
+  "image_size": 256,
+  "overall": {
+    "accuracy": 0.4889,
+    "macro_precision": 0.5064,
+    "macro_recall": 0.4889,
+    "macro_f1": 0.4682,
+    "weighted_precision": 0.5064,
+    "weighted_recall": 0.4889,
+    "weighted_f1": 0.4682
+  },
+  "per_class": {
+    "Oil": {
+      "precision": 0.6173,
+      "recall": 0.3333,
+      "f1": 0.4329,
+      "support": 150
+    },
+    "No-Oil": {
+      "precision": 0.4781,
+      "recall": 0.8,
+      "f1": 0.5985,
+      "support": 150
+    },
+    "Lookalike": {
+      "precision": 0.4237,
+      "recall": 0.3333,
+      "f1": 0.3731,
+      "support": 150
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "Oil",
+      "No-Oil",
+      "Lookalike"
+    ],
+    "rows_are": "actual",
+    "columns_are": "predicted",
+    "matrix": [
+      [
+        50,
+        40,
+        60
+      ],
+      [
+        22,
+        120,
+        8
+      ],
+      [
+        9,
+        91,
+        50
+      ]
+    ]
+  },
+  "directional_confusion": {
+    "Oil_to_No_Oil": 40,
+    "Oil_to_Lookalike": 60,
+    "No_Oil_to_Oil": 22,
+    "No_Oil_to_Lookalike": 8,
+    "Lookalike_to_Oil": 9,
+    "Lookalike_to_No_Oil": 91
+  },
+  "confidence_summary": {
+    "mean": 0.6262,
+    "median": 0.5984,
+    "min": 0.343,
+    "max": 0.9735,
+    "mean_when_correct": 0.6346,
+    "mean_when_incorrect": 0.6182
+  },
+  "per_scene": [
+    {
+      "id": "part3_Lookalike_00000",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4694,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2714,
+        "No-Oil": 0.4694,
+        "Lookalike": 0.2592
+      }
+    },
+    {
+      "id": "part3_Lookalike_00001",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7877,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0443,
+        "No-Oil": 0.7877,
+        "Lookalike": 0.168
+      }
+    },
+    {
+      "id": "part3_Lookalike_00002",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7527,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1337,
+        "No-Oil": 0.7527,
+        "Lookalike": 0.1136
+      }
+    },
+    {
+      "id": "part3_Lookalike_00003",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6501,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3269,
+        "No-Oil": 0.6501,
+        "Lookalike": 0.023
+      }
+    },
+    {
+      "id": "part3_Lookalike_00004",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4989,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1193,
+        "No-Oil": 0.4989,
+        "Lookalike": 0.3818
+      }
+    },
+    {
+      "id": "part3_Lookalike_00005",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8834,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0005,
+        "No-Oil": 0.8834,
+        "Lookalike": 0.1161
+      }
+    },
+    {
+      "id": "part3_Lookalike_00006",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8836,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.8836,
+        "Lookalike": 0.1164
+      }
+    },
+    {
+      "id": "part3_Lookalike_00007",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6937,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0276,
+        "No-Oil": 0.6937,
+        "Lookalike": 0.2788
+      }
+    },
+    {
+      "id": "part3_Lookalike_00008",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8611,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0001,
+        "No-Oil": 0.8611,
+        "Lookalike": 0.1389
+      }
+    },
+    {
+      "id": "part3_Lookalike_00009",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4678,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2616,
+        "No-Oil": 0.4678,
+        "Lookalike": 0.2706
+      }
+    },
+    {
+      "id": "part3_Lookalike_00010",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7988,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1507,
+        "No-Oil": 0.0505,
+        "Lookalike": 0.7988
+      }
+    },
+    {
+      "id": "part3_Lookalike_00011",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6404,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.154,
+        "No-Oil": 0.2056,
+        "Lookalike": 0.6404
+      }
+    },
+    {
+      "id": "part3_Lookalike_00012",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8092,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0747,
+        "No-Oil": 0.1161,
+        "Lookalike": 0.8092
+      }
+    },
+    {
+      "id": "part3_Lookalike_00013",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9575,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.001,
+        "No-Oil": 0.9575,
+        "Lookalike": 0.0415
+      }
+    },
+    {
+      "id": "part3_Lookalike_00014",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9475,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0001,
+        "No-Oil": 0.9475,
+        "Lookalike": 0.0524
+      }
+    },
+    {
+      "id": "part3_Lookalike_00015",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7934,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0047,
+        "No-Oil": 0.7934,
+        "Lookalike": 0.2019
+      }
+    },
+    {
+      "id": "part3_Lookalike_00016",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8153,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0052,
+        "No-Oil": 0.8153,
+        "Lookalike": 0.1795
+      }
+    },
+    {
+      "id": "part3_Lookalike_00017",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5436,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0052,
+        "No-Oil": 0.5436,
+        "Lookalike": 0.4512
+      }
+    },
+    {
+      "id": "part3_Lookalike_00018",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4573,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2927,
+        "No-Oil": 0.2501,
+        "Lookalike": 0.4573
+      }
+    },
+    {
+      "id": "part3_Lookalike_00019",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4896,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1661,
+        "No-Oil": 0.4896,
+        "Lookalike": 0.3443
+      }
+    },
+    {
+      "id": "part3_Lookalike_00020",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7584,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.059,
+        "No-Oil": 0.1826,
+        "Lookalike": 0.7584
+      }
+    },
+    {
+      "id": "part3_Lookalike_00021",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.556,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.556,
+        "No-Oil": 0.4247,
+        "Lookalike": 0.0193
+      }
+    },
+    {
+      "id": "part3_Lookalike_00022",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8393,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0048,
+        "No-Oil": 0.8393,
+        "Lookalike": 0.1559
+      }
+    },
+    {
+      "id": "part3_Lookalike_00023",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6251,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1104,
+        "No-Oil": 0.2645,
+        "Lookalike": 0.6251
+      }
+    },
+    {
+      "id": "part3_Lookalike_00024",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7549,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0568,
+        "No-Oil": 0.1883,
+        "Lookalike": 0.7549
+      }
+    },
+    {
+      "id": "part3_Lookalike_00025",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4165,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3196,
+        "No-Oil": 0.4165,
+        "Lookalike": 0.2639
+      }
+    },
+    {
+      "id": "part3_Lookalike_00026",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5233,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.024,
+        "No-Oil": 0.4527,
+        "Lookalike": 0.5233
+      }
+    },
+    {
+      "id": "part3_Lookalike_00027",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4617,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3538,
+        "No-Oil": 0.1845,
+        "Lookalike": 0.4617
+      }
+    },
+    {
+      "id": "part3_Lookalike_00028",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4562,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1484,
+        "No-Oil": 0.3954,
+        "Lookalike": 0.4562
+      }
+    },
+    {
+      "id": "part3_Lookalike_00029",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7711,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1232,
+        "No-Oil": 0.1057,
+        "Lookalike": 0.7711
+      }
+    },
+    {
+      "id": "part3_Lookalike_00030",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6838,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1944,
+        "No-Oil": 0.1218,
+        "Lookalike": 0.6838
+      }
+    },
+    {
+      "id": "part3_Lookalike_00031",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7303,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.185,
+        "No-Oil": 0.0847,
+        "Lookalike": 0.7303
+      }
+    },
+    {
+      "id": "part3_Lookalike_00032",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6571,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0382,
+        "No-Oil": 0.6571,
+        "Lookalike": 0.3047
+      }
+    },
+    {
+      "id": "part3_Lookalike_00033",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7714,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1816,
+        "No-Oil": 0.047,
+        "Lookalike": 0.7714
+      }
+    },
+    {
+      "id": "part3_Lookalike_00034",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.4995,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4995,
+        "No-Oil": 0.1474,
+        "Lookalike": 0.353
+      }
+    },
+    {
+      "id": "part3_Lookalike_00035",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8906,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0723,
+        "No-Oil": 0.0371,
+        "Lookalike": 0.8906
+      }
+    },
+    {
+      "id": "part3_Lookalike_00036",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5138,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1669,
+        "No-Oil": 0.5138,
+        "Lookalike": 0.3193
+      }
+    },
+    {
+      "id": "part3_Lookalike_00037",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9542,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0002,
+        "No-Oil": 0.9542,
+        "Lookalike": 0.0456
+      }
+    },
+    {
+      "id": "part3_Lookalike_00038",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6576,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2435,
+        "No-Oil": 0.0989,
+        "Lookalike": 0.6576
+      }
+    },
+    {
+      "id": "part3_Lookalike_00039",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9723,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0002,
+        "No-Oil": 0.9723,
+        "Lookalike": 0.0276
+      }
+    },
+    {
+      "id": "part3_Lookalike_00040",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7454,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1021,
+        "No-Oil": 0.1525,
+        "Lookalike": 0.7454
+      }
+    },
+    {
+      "id": "part3_Lookalike_00041",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6252,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1303,
+        "No-Oil": 0.6252,
+        "Lookalike": 0.2444
+      }
+    },
+    {
+      "id": "part3_Lookalike_00042",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.442,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1584,
+        "No-Oil": 0.3996,
+        "Lookalike": 0.442
+      }
+    },
+    {
+      "id": "part3_Lookalike_00043",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4954,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0232,
+        "No-Oil": 0.4813,
+        "Lookalike": 0.4954
+      }
+    },
+    {
+      "id": "part3_Lookalike_00044",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6296,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2947,
+        "No-Oil": 0.6296,
+        "Lookalike": 0.0757
+      }
+    },
+    {
+      "id": "part3_Lookalike_00045",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5676,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0613,
+        "No-Oil": 0.3711,
+        "Lookalike": 0.5676
+      }
+    },
+    {
+      "id": "part3_Lookalike_00046",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5472,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0012,
+        "No-Oil": 0.4516,
+        "Lookalike": 0.5472
+      }
+    },
+    {
+      "id": "part3_Lookalike_00047",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.523,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1708,
+        "No-Oil": 0.523,
+        "Lookalike": 0.3063
+      }
+    },
+    {
+      "id": "part3_Lookalike_00048",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9486,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0005,
+        "No-Oil": 0.9486,
+        "Lookalike": 0.051
+      }
+    },
+    {
+      "id": "part3_Lookalike_00049",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6621,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2883,
+        "No-Oil": 0.0495,
+        "Lookalike": 0.6621
+      }
+    },
+    {
+      "id": "part3_Lookalike_00050",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9735,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.9735,
+        "Lookalike": 0.0265
+      }
+    },
+    {
+      "id": "part3_Lookalike_00051",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9625,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.9625,
+        "Lookalike": 0.0375
+      }
+    },
+    {
+      "id": "part3_Lookalike_00052",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8838,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0001,
+        "No-Oil": 0.8838,
+        "Lookalike": 0.1162
+      }
+    },
+    {
+      "id": "part3_Lookalike_00053",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4424,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2006,
+        "No-Oil": 0.4424,
+        "Lookalike": 0.357
+      }
+    },
+    {
+      "id": "part3_Lookalike_00054",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5293,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.017,
+        "No-Oil": 0.5293,
+        "Lookalike": 0.4537
+      }
+    },
+    {
+      "id": "part3_Lookalike_00055",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5302,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0155,
+        "No-Oil": 0.4543,
+        "Lookalike": 0.5302
+      }
+    },
+    {
+      "id": "part3_Lookalike_00056",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5759,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2704,
+        "No-Oil": 0.1537,
+        "Lookalike": 0.5759
+      }
+    },
+    {
+      "id": "part3_Lookalike_00057",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.684,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0246,
+        "No-Oil": 0.2914,
+        "Lookalike": 0.684
+      }
+    },
+    {
+      "id": "part3_Lookalike_00058",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4486,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3393,
+        "No-Oil": 0.4486,
+        "Lookalike": 0.2121
+      }
+    },
+    {
+      "id": "part3_Lookalike_00059",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4842,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4187,
+        "No-Oil": 0.4842,
+        "Lookalike": 0.0971
+      }
+    },
+    {
+      "id": "part3_Lookalike_00060",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.824,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1304,
+        "No-Oil": 0.0456,
+        "Lookalike": 0.824
+      }
+    },
+    {
+      "id": "part3_Lookalike_00061",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8032,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0808,
+        "No-Oil": 0.8032,
+        "Lookalike": 0.1159
+      }
+    },
+    {
+      "id": "part3_Lookalike_00062",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9687,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0003,
+        "No-Oil": 0.9687,
+        "Lookalike": 0.031
+      }
+    },
+    {
+      "id": "part3_Lookalike_00063",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9064,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0137,
+        "No-Oil": 0.9064,
+        "Lookalike": 0.0799
+      }
+    },
+    {
+      "id": "part3_Lookalike_00064",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9116,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0001,
+        "No-Oil": 0.9116,
+        "Lookalike": 0.0883
+      }
+    },
+    {
+      "id": "part3_Lookalike_00065",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6119,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0062,
+        "No-Oil": 0.6119,
+        "Lookalike": 0.382
+      }
+    },
+    {
+      "id": "part3_Lookalike_00066",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4142,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3407,
+        "No-Oil": 0.4142,
+        "Lookalike": 0.2451
+      }
+    },
+    {
+      "id": "part3_Lookalike_00067",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8227,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0544,
+        "No-Oil": 0.1229,
+        "Lookalike": 0.8227
+      }
+    },
+    {
+      "id": "part3_Lookalike_00068",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5264,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0912,
+        "No-Oil": 0.5264,
+        "Lookalike": 0.3824
+      }
+    },
+    {
+      "id": "part3_Lookalike_00069",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.5177,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5177,
+        "No-Oil": 0.3024,
+        "Lookalike": 0.1799
+      }
+    },
+    {
+      "id": "part3_Lookalike_00070",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.838,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1176,
+        "No-Oil": 0.838,
+        "Lookalike": 0.0444
+      }
+    },
+    {
+      "id": "part3_Lookalike_00071",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6401,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1642,
+        "No-Oil": 0.6401,
+        "Lookalike": 0.1957
+      }
+    },
+    {
+      "id": "part3_Lookalike_00072",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7344,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1456,
+        "No-Oil": 0.7344,
+        "Lookalike": 0.12
+      }
+    },
+    {
+      "id": "part3_Lookalike_00073",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5247,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2233,
+        "No-Oil": 0.5247,
+        "Lookalike": 0.252
+      }
+    },
+    {
+      "id": "part3_Lookalike_00074",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6947,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0786,
+        "No-Oil": 0.6947,
+        "Lookalike": 0.2266
+      }
+    },
+    {
+      "id": "part3_Lookalike_00075",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6821,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0834,
+        "No-Oil": 0.6821,
+        "Lookalike": 0.2344
+      }
+    },
+    {
+      "id": "part3_Lookalike_00076",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5137,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1075,
+        "No-Oil": 0.5137,
+        "Lookalike": 0.3788
+      }
+    },
+    {
+      "id": "part3_Lookalike_00077",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7755,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.009,
+        "No-Oil": 0.7755,
+        "Lookalike": 0.2155
+      }
+    },
+    {
+      "id": "part3_Lookalike_00078",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.712,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2412,
+        "No-Oil": 0.0468,
+        "Lookalike": 0.712
+      }
+    },
+    {
+      "id": "part3_Lookalike_00079",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.392,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2927,
+        "No-Oil": 0.3153,
+        "Lookalike": 0.392
+      }
+    },
+    {
+      "id": "part3_Lookalike_00080",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4109,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2198,
+        "No-Oil": 0.4109,
+        "Lookalike": 0.3694
+      }
+    },
+    {
+      "id": "part3_Lookalike_00081",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4188,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2559,
+        "No-Oil": 0.4188,
+        "Lookalike": 0.3252
+      }
+    },
+    {
+      "id": "part3_Lookalike_00082",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3941,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3208,
+        "No-Oil": 0.3941,
+        "Lookalike": 0.2851
+      }
+    },
+    {
+      "id": "part3_Lookalike_00083",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.414,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.414,
+        "No-Oil": 0.3431,
+        "Lookalike": 0.2429
+      }
+    },
+    {
+      "id": "part3_Lookalike_00084",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5301,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.111,
+        "No-Oil": 0.5301,
+        "Lookalike": 0.359
+      }
+    },
+    {
+      "id": "part3_Lookalike_00085",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7838,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0515,
+        "No-Oil": 0.7838,
+        "Lookalike": 0.1648
+      }
+    },
+    {
+      "id": "part3_Lookalike_00086",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.4695,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4695,
+        "No-Oil": 0.3285,
+        "Lookalike": 0.2019
+      }
+    },
+    {
+      "id": "part3_Lookalike_00087",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7916,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1032,
+        "No-Oil": 0.7916,
+        "Lookalike": 0.1053
+      }
+    },
+    {
+      "id": "part3_Lookalike_00088",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8347,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0065,
+        "No-Oil": 0.8347,
+        "Lookalike": 0.1588
+      }
+    },
+    {
+      "id": "part3_Lookalike_00089",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9434,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0071,
+        "No-Oil": 0.9434,
+        "Lookalike": 0.0495
+      }
+    },
+    {
+      "id": "part3_Lookalike_00090",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4507,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1627,
+        "No-Oil": 0.3866,
+        "Lookalike": 0.4507
+      }
+    },
+    {
+      "id": "part3_Lookalike_00091",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6714,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0253,
+        "No-Oil": 0.6714,
+        "Lookalike": 0.3033
+      }
+    },
+    {
+      "id": "part3_Lookalike_00092",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4916,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2048,
+        "No-Oil": 0.3036,
+        "Lookalike": 0.4916
+      }
+    },
+    {
+      "id": "part3_Lookalike_00093",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4968,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0777,
+        "No-Oil": 0.4968,
+        "Lookalike": 0.4256
+      }
+    },
+    {
+      "id": "part3_Lookalike_00094",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7085,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0134,
+        "No-Oil": 0.7085,
+        "Lookalike": 0.2781
+      }
+    },
+    {
+      "id": "part3_Lookalike_00095",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.769,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0174,
+        "No-Oil": 0.769,
+        "Lookalike": 0.2136
+      }
+    },
+    {
+      "id": "part3_Lookalike_00096",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.3845,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3845,
+        "No-Oil": 0.2916,
+        "Lookalike": 0.3239
+      }
+    },
+    {
+      "id": "part3_Lookalike_00097",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6047,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1399,
+        "No-Oil": 0.2554,
+        "Lookalike": 0.6047
+      }
+    },
+    {
+      "id": "part3_Lookalike_00098",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5481,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0068,
+        "No-Oil": 0.5481,
+        "Lookalike": 0.4451
+      }
+    },
+    {
+      "id": "part3_Lookalike_00099",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5747,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0546,
+        "No-Oil": 0.5747,
+        "Lookalike": 0.3708
+      }
+    },
+    {
+      "id": "part3_Lookalike_00100",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4738,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0748,
+        "No-Oil": 0.4514,
+        "Lookalike": 0.4738
+      }
+    },
+    {
+      "id": "part3_Lookalike_00101",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8165,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.099,
+        "No-Oil": 0.8165,
+        "Lookalike": 0.0845
+      }
+    },
+    {
+      "id": "part3_Lookalike_00102",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7072,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0469,
+        "No-Oil": 0.7072,
+        "Lookalike": 0.2458
+      }
+    },
+    {
+      "id": "part3_Lookalike_00103",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.798,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.053,
+        "No-Oil": 0.798,
+        "Lookalike": 0.1491
+      }
+    },
+    {
+      "id": "part3_Lookalike_00104",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4049,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3294,
+        "No-Oil": 0.4049,
+        "Lookalike": 0.2657
+      }
+    },
+    {
+      "id": "part3_Lookalike_00105",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.561,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3896,
+        "No-Oil": 0.0493,
+        "Lookalike": 0.561
+      }
+    },
+    {
+      "id": "part3_Lookalike_00106",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6541,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.164,
+        "No-Oil": 0.6541,
+        "Lookalike": 0.1819
+      }
+    },
+    {
+      "id": "part3_Lookalike_00107",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4508,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3992,
+        "No-Oil": 0.15,
+        "Lookalike": 0.4508
+      }
+    },
+    {
+      "id": "part3_Lookalike_00108",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4865,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3386,
+        "No-Oil": 0.1749,
+        "Lookalike": 0.4865
+      }
+    },
+    {
+      "id": "part3_Lookalike_00109",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6904,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1292,
+        "No-Oil": 0.1805,
+        "Lookalike": 0.6904
+      }
+    },
+    {
+      "id": "part3_Lookalike_00110",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6417,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1008,
+        "No-Oil": 0.2575,
+        "Lookalike": 0.6417
+      }
+    },
+    {
+      "id": "part3_Lookalike_00111",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6948,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0892,
+        "No-Oil": 0.2161,
+        "Lookalike": 0.6948
+      }
+    },
+    {
+      "id": "part3_Lookalike_00112",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6279,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0899,
+        "No-Oil": 0.2822,
+        "Lookalike": 0.6279
+      }
+    },
+    {
+      "id": "part3_Lookalike_00113",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5922,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0473,
+        "No-Oil": 0.5922,
+        "Lookalike": 0.3605
+      }
+    },
+    {
+      "id": "part3_Lookalike_00114",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7122,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1507,
+        "No-Oil": 0.7122,
+        "Lookalike": 0.1371
+      }
+    },
+    {
+      "id": "part3_Lookalike_00115",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3731,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3055,
+        "No-Oil": 0.3731,
+        "Lookalike": 0.3214
+      }
+    },
+    {
+      "id": "part3_Lookalike_00116",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8455,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0469,
+        "No-Oil": 0.8455,
+        "Lookalike": 0.1076
+      }
+    },
+    {
+      "id": "part3_Lookalike_00117",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5426,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1368,
+        "No-Oil": 0.3206,
+        "Lookalike": 0.5426
+      }
+    },
+    {
+      "id": "part3_Lookalike_00118",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6851,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1627,
+        "No-Oil": 0.1522,
+        "Lookalike": 0.6851
+      }
+    },
+    {
+      "id": "part3_Lookalike_00119",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7463,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1058,
+        "No-Oil": 0.1479,
+        "Lookalike": 0.7463
+      }
+    },
+    {
+      "id": "part3_Lookalike_00120",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.5693,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5693,
+        "No-Oil": 0.4267,
+        "Lookalike": 0.004
+      }
+    },
+    {
+      "id": "part3_Lookalike_00121",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.5082,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5082,
+        "No-Oil": 0.4887,
+        "Lookalike": 0.0031
+      }
+    },
+    {
+      "id": "part3_Lookalike_00122",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5393,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.457,
+        "No-Oil": 0.5393,
+        "Lookalike": 0.0037
+      }
+    },
+    {
+      "id": "part3_Lookalike_00123",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.767,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2204,
+        "No-Oil": 0.767,
+        "Lookalike": 0.0125
+      }
+    },
+    {
+      "id": "part3_Lookalike_00124",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9572,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0059,
+        "No-Oil": 0.9572,
+        "Lookalike": 0.0368
+      }
+    },
+    {
+      "id": "part3_Lookalike_00125",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7877,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1365,
+        "No-Oil": 0.0758,
+        "Lookalike": 0.7877
+      }
+    },
+    {
+      "id": "part3_Lookalike_00126",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6103,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0895,
+        "No-Oil": 0.3002,
+        "Lookalike": 0.6103
+      }
+    },
+    {
+      "id": "part3_Lookalike_00127",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6468,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0083,
+        "No-Oil": 0.345,
+        "Lookalike": 0.6468
+      }
+    },
+    {
+      "id": "part3_Lookalike_00128",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.819,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.819,
+        "Lookalike": 0.181
+      }
+    },
+    {
+      "id": "part3_Lookalike_00129",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8063,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.8063,
+        "Lookalike": 0.1937
+      }
+    },
+    {
+      "id": "part3_Lookalike_00130",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7955,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0363,
+        "No-Oil": 0.7955,
+        "Lookalike": 0.1683
+      }
+    },
+    {
+      "id": "part3_Lookalike_00131",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9546,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0002,
+        "No-Oil": 0.9546,
+        "Lookalike": 0.0452
+      }
+    },
+    {
+      "id": "part3_Lookalike_00132",
+      "true_label": "Lookalike",
+      "predicted_label": "Oil",
+      "confidence": 0.3672,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3672,
+        "No-Oil": 0.3111,
+        "Lookalike": 0.3217
+      }
+    },
+    {
+      "id": "part3_Lookalike_00133",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4699,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1822,
+        "No-Oil": 0.3479,
+        "Lookalike": 0.4699
+      }
+    },
+    {
+      "id": "part3_Lookalike_00134",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7779,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1213,
+        "No-Oil": 0.1009,
+        "Lookalike": 0.7779
+      }
+    },
+    {
+      "id": "part3_Lookalike_00135",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5702,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0959,
+        "No-Oil": 0.334,
+        "Lookalike": 0.5702
+      }
+    },
+    {
+      "id": "part3_Lookalike_00136",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7237,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0534,
+        "No-Oil": 0.7237,
+        "Lookalike": 0.2229
+      }
+    },
+    {
+      "id": "part3_Lookalike_00137",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5621,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0005,
+        "No-Oil": 0.5621,
+        "Lookalike": 0.4374
+      }
+    },
+    {
+      "id": "part3_Lookalike_00138",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8686,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0002,
+        "No-Oil": 0.8686,
+        "Lookalike": 0.1312
+      }
+    },
+    {
+      "id": "part3_Lookalike_00139",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7855,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0403,
+        "No-Oil": 0.7855,
+        "Lookalike": 0.1742
+      }
+    },
+    {
+      "id": "part3_Lookalike_00140",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3736,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3345,
+        "No-Oil": 0.3736,
+        "Lookalike": 0.2919
+      }
+    },
+    {
+      "id": "part3_Lookalike_00141",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3703,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3502,
+        "No-Oil": 0.3703,
+        "Lookalike": 0.2796
+      }
+    },
+    {
+      "id": "part3_Lookalike_00142",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4972,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1684,
+        "No-Oil": 0.4972,
+        "Lookalike": 0.3345
+      }
+    },
+    {
+      "id": "part3_Lookalike_00143",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9261,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0233,
+        "No-Oil": 0.9261,
+        "Lookalike": 0.0506
+      }
+    },
+    {
+      "id": "part3_Lookalike_00144",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4984,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3001,
+        "No-Oil": 0.4984,
+        "Lookalike": 0.2016
+      }
+    },
+    {
+      "id": "part3_Lookalike_00145",
+      "true_label": "Lookalike",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7579,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1854,
+        "No-Oil": 0.0568,
+        "Lookalike": 0.7579
+      }
+    },
+    {
+      "id": "part3_Lookalike_00146",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7171,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0004,
+        "No-Oil": 0.7171,
+        "Lookalike": 0.2825
+      }
+    },
+    {
+      "id": "part3_Lookalike_00147",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6234,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.001,
+        "No-Oil": 0.6234,
+        "Lookalike": 0.3756
+      }
+    },
+    {
+      "id": "part3_Lookalike_00148",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8951,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0002,
+        "No-Oil": 0.8951,
+        "Lookalike": 0.1047
+      }
+    },
+    {
+      "id": "part3_Lookalike_00149",
+      "true_label": "Lookalike",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8049,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0102,
+        "No-Oil": 0.8049,
+        "Lookalike": 0.1849
+      }
+    },
+    {
+      "id": "part3_No-Oil_00000",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4185,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3532,
+        "No-Oil": 0.2283,
+        "Lookalike": 0.4185
+      }
+    },
+    {
+      "id": "part3_No-Oil_00001",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5691,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4249,
+        "No-Oil": 0.5691,
+        "Lookalike": 0.006
+      }
+    },
+    {
+      "id": "part3_No-Oil_00002",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3533,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2976,
+        "No-Oil": 0.3533,
+        "Lookalike": 0.3491
+      }
+    },
+    {
+      "id": "part3_No-Oil_00003",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3992,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3116,
+        "No-Oil": 0.3992,
+        "Lookalike": 0.2892
+      }
+    },
+    {
+      "id": "part3_No-Oil_00004",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7882,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0208,
+        "No-Oil": 0.7882,
+        "Lookalike": 0.191
+      }
+    },
+    {
+      "id": "part3_No-Oil_00005",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7611,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0938,
+        "No-Oil": 0.7611,
+        "Lookalike": 0.1451
+      }
+    },
+    {
+      "id": "part3_No-Oil_00006",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6207,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1898,
+        "No-Oil": 0.6207,
+        "Lookalike": 0.1895
+      }
+    },
+    {
+      "id": "part3_No-Oil_00007",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7367,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1658,
+        "No-Oil": 0.7367,
+        "Lookalike": 0.0975
+      }
+    },
+    {
+      "id": "part3_No-Oil_00008",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6246,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2158,
+        "No-Oil": 0.6246,
+        "Lookalike": 0.1597
+      }
+    },
+    {
+      "id": "part3_No-Oil_00009",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4041,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2439,
+        "No-Oil": 0.4041,
+        "Lookalike": 0.352
+      }
+    },
+    {
+      "id": "part3_No-Oil_00010",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6516,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0505,
+        "No-Oil": 0.6516,
+        "Lookalike": 0.2979
+      }
+    },
+    {
+      "id": "part3_No-Oil_00011",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8761,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0175,
+        "No-Oil": 0.8761,
+        "Lookalike": 0.1064
+      }
+    },
+    {
+      "id": "part3_No-Oil_00012",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9643,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0162,
+        "No-Oil": 0.9643,
+        "Lookalike": 0.0195
+      }
+    },
+    {
+      "id": "part3_No-Oil_00013",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.3548,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2925,
+        "No-Oil": 0.3527,
+        "Lookalike": 0.3548
+      }
+    },
+    {
+      "id": "part3_No-Oil_00014",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5007,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.496,
+        "No-Oil": 0.5007,
+        "Lookalike": 0.0033
+      }
+    },
+    {
+      "id": "part3_No-Oil_00015",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5644,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4319,
+        "No-Oil": 0.5644,
+        "Lookalike": 0.0038
+      }
+    },
+    {
+      "id": "part3_No-Oil_00016",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6663,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3267,
+        "No-Oil": 0.6663,
+        "Lookalike": 0.007
+      }
+    },
+    {
+      "id": "part3_No-Oil_00017",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8265,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0236,
+        "No-Oil": 0.8265,
+        "Lookalike": 0.1499
+      }
+    },
+    {
+      "id": "part3_No-Oil_00018",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8409,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0421,
+        "No-Oil": 0.8409,
+        "Lookalike": 0.117
+      }
+    },
+    {
+      "id": "part3_No-Oil_00019",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.604,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1489,
+        "No-Oil": 0.604,
+        "Lookalike": 0.2471
+      }
+    },
+    {
+      "id": "part3_No-Oil_00020",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5274,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2091,
+        "No-Oil": 0.2635,
+        "Lookalike": 0.5274
+      }
+    },
+    {
+      "id": "part3_No-Oil_00021",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6916,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2988,
+        "No-Oil": 0.6916,
+        "Lookalike": 0.0096
+      }
+    },
+    {
+      "id": "part3_No-Oil_00022",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6857,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3039,
+        "No-Oil": 0.6857,
+        "Lookalike": 0.0104
+      }
+    },
+    {
+      "id": "part3_No-Oil_00023",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7168,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2762,
+        "No-Oil": 0.7168,
+        "Lookalike": 0.0071
+      }
+    },
+    {
+      "id": "part3_No-Oil_00024",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7998,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.194,
+        "No-Oil": 0.7998,
+        "Lookalike": 0.0062
+      }
+    },
+    {
+      "id": "part3_No-Oil_00025",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6043,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3893,
+        "No-Oil": 0.6043,
+        "Lookalike": 0.0065
+      }
+    },
+    {
+      "id": "part3_No-Oil_00026",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7341,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2529,
+        "No-Oil": 0.7341,
+        "Lookalike": 0.013
+      }
+    },
+    {
+      "id": "part3_No-Oil_00027",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7953,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1846,
+        "No-Oil": 0.7953,
+        "Lookalike": 0.0202
+      }
+    },
+    {
+      "id": "part3_No-Oil_00028",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3593,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.316,
+        "No-Oil": 0.3593,
+        "Lookalike": 0.3247
+      }
+    },
+    {
+      "id": "part3_No-Oil_00029",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5974,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1556,
+        "No-Oil": 0.5974,
+        "Lookalike": 0.247
+      }
+    },
+    {
+      "id": "part3_No-Oil_00030",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5491,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4446,
+        "No-Oil": 0.5491,
+        "Lookalike": 0.0063
+      }
+    },
+    {
+      "id": "part3_No-Oil_00031",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3692,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3036,
+        "No-Oil": 0.3692,
+        "Lookalike": 0.3272
+      }
+    },
+    {
+      "id": "part3_No-Oil_00032",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5469,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4404,
+        "No-Oil": 0.5469,
+        "Lookalike": 0.0127
+      }
+    },
+    {
+      "id": "part3_No-Oil_00033",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5564,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5564,
+        "No-Oil": 0.4366,
+        "Lookalike": 0.007
+      }
+    },
+    {
+      "id": "part3_No-Oil_00034",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5125,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4768,
+        "No-Oil": 0.5125,
+        "Lookalike": 0.0107
+      }
+    },
+    {
+      "id": "part3_No-Oil_00035",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4982,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4982,
+        "No-Oil": 0.496,
+        "Lookalike": 0.0057
+      }
+    },
+    {
+      "id": "part3_No-Oil_00036",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5282,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4634,
+        "No-Oil": 0.5282,
+        "Lookalike": 0.0084
+      }
+    },
+    {
+      "id": "part3_No-Oil_00037",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5885,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3966,
+        "No-Oil": 0.5885,
+        "Lookalike": 0.015
+      }
+    },
+    {
+      "id": "part3_No-Oil_00038",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6435,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3415,
+        "No-Oil": 0.6435,
+        "Lookalike": 0.015
+      }
+    },
+    {
+      "id": "part3_No-Oil_00039",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.3578,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.353,
+        "No-Oil": 0.2892,
+        "Lookalike": 0.3578
+      }
+    },
+    {
+      "id": "part3_No-Oil_00040",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7142,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2736,
+        "No-Oil": 0.7142,
+        "Lookalike": 0.0122
+      }
+    },
+    {
+      "id": "part3_No-Oil_00041",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.608,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3768,
+        "No-Oil": 0.608,
+        "Lookalike": 0.0152
+      }
+    },
+    {
+      "id": "part3_No-Oil_00042",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5563,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4339,
+        "No-Oil": 0.5563,
+        "Lookalike": 0.0098
+      }
+    },
+    {
+      "id": "part3_No-Oil_00043",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6188,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.6188,
+        "No-Oil": 0.377,
+        "Lookalike": 0.0042
+      }
+    },
+    {
+      "id": "part3_No-Oil_00044",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6051,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.6051,
+        "No-Oil": 0.3896,
+        "Lookalike": 0.0053
+      }
+    },
+    {
+      "id": "part3_No-Oil_00045",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7204,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2535,
+        "No-Oil": 0.7204,
+        "Lookalike": 0.0262
+      }
+    },
+    {
+      "id": "part3_No-Oil_00046",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4173,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2627,
+        "No-Oil": 0.4173,
+        "Lookalike": 0.32
+      }
+    },
+    {
+      "id": "part3_No-Oil_00047",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5395,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4576,
+        "No-Oil": 0.5395,
+        "Lookalike": 0.0028
+      }
+    },
+    {
+      "id": "part3_No-Oil_00048",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3923,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2895,
+        "No-Oil": 0.3923,
+        "Lookalike": 0.3183
+      }
+    },
+    {
+      "id": "part3_No-Oil_00049",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.578,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1764,
+        "No-Oil": 0.578,
+        "Lookalike": 0.2455
+      }
+    },
+    {
+      "id": "part3_No-Oil_00050",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7663,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0342,
+        "No-Oil": 0.7663,
+        "Lookalike": 0.1996
+      }
+    },
+    {
+      "id": "part3_No-Oil_00051",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.471,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2576,
+        "No-Oil": 0.471,
+        "Lookalike": 0.2715
+      }
+    },
+    {
+      "id": "part3_No-Oil_00052",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.404,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3125,
+        "No-Oil": 0.404,
+        "Lookalike": 0.2835
+      }
+    },
+    {
+      "id": "part3_No-Oil_00053",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5833,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5833,
+        "No-Oil": 0.4137,
+        "Lookalike": 0.003
+      }
+    },
+    {
+      "id": "part3_No-Oil_00054",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.637,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0748,
+        "No-Oil": 0.637,
+        "Lookalike": 0.2882
+      }
+    },
+    {
+      "id": "part3_No-Oil_00055",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5068,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4897,
+        "No-Oil": 0.5068,
+        "Lookalike": 0.0035
+      }
+    },
+    {
+      "id": "part3_No-Oil_00056",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4004,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2388,
+        "No-Oil": 0.4004,
+        "Lookalike": 0.3608
+      }
+    },
+    {
+      "id": "part3_No-Oil_00057",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6917,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.123,
+        "No-Oil": 0.6917,
+        "Lookalike": 0.1853
+      }
+    },
+    {
+      "id": "part3_No-Oil_00058",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7216,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0988,
+        "No-Oil": 0.7216,
+        "Lookalike": 0.1796
+      }
+    },
+    {
+      "id": "part3_No-Oil_00059",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9395,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0424,
+        "No-Oil": 0.9395,
+        "Lookalike": 0.0181
+      }
+    },
+    {
+      "id": "part3_No-Oil_00060",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9014,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.037,
+        "No-Oil": 0.9014,
+        "Lookalike": 0.0616
+      }
+    },
+    {
+      "id": "part3_No-Oil_00061",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4061,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3395,
+        "No-Oil": 0.4061,
+        "Lookalike": 0.2545
+      }
+    },
+    {
+      "id": "part3_No-Oil_00062",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9525,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0298,
+        "No-Oil": 0.9525,
+        "Lookalike": 0.0177
+      }
+    },
+    {
+      "id": "part3_No-Oil_00063",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3653,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2771,
+        "No-Oil": 0.3653,
+        "Lookalike": 0.3577
+      }
+    },
+    {
+      "id": "part3_No-Oil_00064",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3777,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.248,
+        "No-Oil": 0.3777,
+        "Lookalike": 0.3743
+      }
+    },
+    {
+      "id": "part3_No-Oil_00065",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5009,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5009,
+        "No-Oil": 0.4969,
+        "Lookalike": 0.0022
+      }
+    },
+    {
+      "id": "part3_No-Oil_00066",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6908,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.6908,
+        "No-Oil": 0.3079,
+        "Lookalike": 0.0014
+      }
+    },
+    {
+      "id": "part3_No-Oil_00067",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6394,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3292,
+        "No-Oil": 0.6394,
+        "Lookalike": 0.0315
+      }
+    },
+    {
+      "id": "part3_No-Oil_00068",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6283,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3278,
+        "No-Oil": 0.6283,
+        "Lookalike": 0.0439
+      }
+    },
+    {
+      "id": "part3_No-Oil_00069",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6888,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2626,
+        "No-Oil": 0.6888,
+        "Lookalike": 0.0486
+      }
+    },
+    {
+      "id": "part3_No-Oil_00070",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5594,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5594,
+        "No-Oil": 0.4375,
+        "Lookalike": 0.0031
+      }
+    },
+    {
+      "id": "part3_No-Oil_00071",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7072,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0492,
+        "No-Oil": 0.7072,
+        "Lookalike": 0.2436
+      }
+    },
+    {
+      "id": "part3_No-Oil_00072",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5825,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5825,
+        "No-Oil": 0.4135,
+        "Lookalike": 0.004
+      }
+    },
+    {
+      "id": "part3_No-Oil_00073",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7676,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0504,
+        "No-Oil": 0.7676,
+        "Lookalike": 0.182
+      }
+    },
+    {
+      "id": "part3_No-Oil_00074",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5581,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4344,
+        "No-Oil": 0.5581,
+        "Lookalike": 0.0075
+      }
+    },
+    {
+      "id": "part3_No-Oil_00075",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6687,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3235,
+        "No-Oil": 0.6687,
+        "Lookalike": 0.0078
+      }
+    },
+    {
+      "id": "part3_No-Oil_00076",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.3833,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3833,
+        "No-Oil": 0.3471,
+        "Lookalike": 0.2696
+      }
+    },
+    {
+      "id": "part3_No-Oil_00077",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5955,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3948,
+        "No-Oil": 0.5955,
+        "Lookalike": 0.0097
+      }
+    },
+    {
+      "id": "part3_No-Oil_00078",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5585,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4327,
+        "No-Oil": 0.5585,
+        "Lookalike": 0.0088
+      }
+    },
+    {
+      "id": "part3_No-Oil_00079",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5318,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4623,
+        "No-Oil": 0.5318,
+        "Lookalike": 0.0059
+      }
+    },
+    {
+      "id": "part3_No-Oil_00080",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5602,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4352,
+        "No-Oil": 0.5602,
+        "Lookalike": 0.0045
+      }
+    },
+    {
+      "id": "part3_No-Oil_00081",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4576,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1704,
+        "No-Oil": 0.4576,
+        "Lookalike": 0.372
+      }
+    },
+    {
+      "id": "part3_No-Oil_00082",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3918,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3169,
+        "No-Oil": 0.3918,
+        "Lookalike": 0.2913
+      }
+    },
+    {
+      "id": "part3_No-Oil_00083",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.428,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1744,
+        "No-Oil": 0.428,
+        "Lookalike": 0.3976
+      }
+    },
+    {
+      "id": "part3_No-Oil_00084",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8117,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0203,
+        "No-Oil": 0.8117,
+        "Lookalike": 0.1679
+      }
+    },
+    {
+      "id": "part3_No-Oil_00085",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5753,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5753,
+        "No-Oil": 0.4179,
+        "Lookalike": 0.0068
+      }
+    },
+    {
+      "id": "part3_No-Oil_00086",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6746,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0224,
+        "No-Oil": 0.6746,
+        "Lookalike": 0.303
+      }
+    },
+    {
+      "id": "part3_No-Oil_00087",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7611,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0938,
+        "No-Oil": 0.7611,
+        "Lookalike": 0.1451
+      }
+    },
+    {
+      "id": "part3_No-Oil_00088",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.574,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4066,
+        "No-Oil": 0.574,
+        "Lookalike": 0.0193
+      }
+    },
+    {
+      "id": "part3_No-Oil_00089",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5875,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3986,
+        "No-Oil": 0.5875,
+        "Lookalike": 0.0139
+      }
+    },
+    {
+      "id": "part3_No-Oil_00090",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5081,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5081,
+        "No-Oil": 0.4844,
+        "Lookalike": 0.0075
+      }
+    },
+    {
+      "id": "part3_No-Oil_00091",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9177,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0227,
+        "No-Oil": 0.9177,
+        "Lookalike": 0.0596
+      }
+    },
+    {
+      "id": "part3_No-Oil_00092",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5146,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0671,
+        "No-Oil": 0.4183,
+        "Lookalike": 0.5146
+      }
+    },
+    {
+      "id": "part3_No-Oil_00093",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8788,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0634,
+        "No-Oil": 0.8788,
+        "Lookalike": 0.0578
+      }
+    },
+    {
+      "id": "part3_No-Oil_00094",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9228,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0189,
+        "No-Oil": 0.9228,
+        "Lookalike": 0.0583
+      }
+    },
+    {
+      "id": "part3_No-Oil_00095",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5717,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.1664,
+        "No-Oil": 0.5717,
+        "Lookalike": 0.2618
+      }
+    },
+    {
+      "id": "part3_No-Oil_00096",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6797,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0966,
+        "No-Oil": 0.6797,
+        "Lookalike": 0.2237
+      }
+    },
+    {
+      "id": "part3_No-Oil_00097",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3916,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2254,
+        "No-Oil": 0.3916,
+        "Lookalike": 0.3831
+      }
+    },
+    {
+      "id": "part3_No-Oil_00098",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7985,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0307,
+        "No-Oil": 0.7985,
+        "Lookalike": 0.1708
+      }
+    },
+    {
+      "id": "part3_No-Oil_00099",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7611,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0938,
+        "No-Oil": 0.7611,
+        "Lookalike": 0.1451
+      }
+    },
+    {
+      "id": "part3_No-Oil_00100",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8748,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0127,
+        "No-Oil": 0.8748,
+        "Lookalike": 0.1125
+      }
+    },
+    {
+      "id": "part3_No-Oil_00101",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9478,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0265,
+        "No-Oil": 0.9478,
+        "Lookalike": 0.0257
+      }
+    },
+    {
+      "id": "part3_No-Oil_00102",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8821,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0473,
+        "No-Oil": 0.8821,
+        "Lookalike": 0.0707
+      }
+    },
+    {
+      "id": "part3_No-Oil_00103",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6603,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0266,
+        "No-Oil": 0.6603,
+        "Lookalike": 0.3131
+      }
+    },
+    {
+      "id": "part3_No-Oil_00104",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8733,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0279,
+        "No-Oil": 0.8733,
+        "Lookalike": 0.0988
+      }
+    },
+    {
+      "id": "part3_No-Oil_00105",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8394,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0239,
+        "No-Oil": 0.8394,
+        "Lookalike": 0.1367
+      }
+    },
+    {
+      "id": "part3_No-Oil_00106",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8201,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0411,
+        "No-Oil": 0.8201,
+        "Lookalike": 0.1388
+      }
+    },
+    {
+      "id": "part3_No-Oil_00107",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7426,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.095,
+        "No-Oil": 0.7426,
+        "Lookalike": 0.1624
+      }
+    },
+    {
+      "id": "part3_No-Oil_00108",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.664,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.664,
+        "No-Oil": 0.3336,
+        "Lookalike": 0.0024
+      }
+    },
+    {
+      "id": "part3_No-Oil_00109",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8143,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0435,
+        "No-Oil": 0.8143,
+        "Lookalike": 0.1422
+      }
+    },
+    {
+      "id": "part3_No-Oil_00110",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6349,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3573,
+        "No-Oil": 0.6349,
+        "Lookalike": 0.0078
+      }
+    },
+    {
+      "id": "part3_No-Oil_00111",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5004,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5004,
+        "No-Oil": 0.4953,
+        "Lookalike": 0.0043
+      }
+    },
+    {
+      "id": "part3_No-Oil_00112",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.343,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3327,
+        "No-Oil": 0.3243,
+        "Lookalike": 0.343
+      }
+    },
+    {
+      "id": "part3_No-Oil_00113",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5135,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5135,
+        "No-Oil": 0.4834,
+        "Lookalike": 0.0031
+      }
+    },
+    {
+      "id": "part3_No-Oil_00114",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5539,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5539,
+        "No-Oil": 0.4444,
+        "Lookalike": 0.0017
+      }
+    },
+    {
+      "id": "part3_No-Oil_00115",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5066,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4894,
+        "No-Oil": 0.5066,
+        "Lookalike": 0.004
+      }
+    },
+    {
+      "id": "part3_No-Oil_00116",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5752,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.422,
+        "No-Oil": 0.5752,
+        "Lookalike": 0.0028
+      }
+    },
+    {
+      "id": "part3_No-Oil_00117",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8642,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0277,
+        "No-Oil": 0.8642,
+        "Lookalike": 0.1081
+      }
+    },
+    {
+      "id": "part3_No-Oil_00118",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5476,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4487,
+        "No-Oil": 0.5476,
+        "Lookalike": 0.0037
+      }
+    },
+    {
+      "id": "part3_No-Oil_00119",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5936,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4019,
+        "No-Oil": 0.5936,
+        "Lookalike": 0.0045
+      }
+    },
+    {
+      "id": "part3_No-Oil_00120",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6046,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3521,
+        "No-Oil": 0.6046,
+        "Lookalike": 0.0433
+      }
+    },
+    {
+      "id": "part3_No-Oil_00121",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.3555,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3555,
+        "No-Oil": 0.315,
+        "Lookalike": 0.3295
+      }
+    },
+    {
+      "id": "part3_No-Oil_00122",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5443,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4275,
+        "No-Oil": 0.5443,
+        "Lookalike": 0.0281
+      }
+    },
+    {
+      "id": "part3_No-Oil_00123",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6626,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.6626,
+        "No-Oil": 0.3358,
+        "Lookalike": 0.0016
+      }
+    },
+    {
+      "id": "part3_No-Oil_00124",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.542,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4551,
+        "No-Oil": 0.542,
+        "Lookalike": 0.003
+      }
+    },
+    {
+      "id": "part3_No-Oil_00125",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6322,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3625,
+        "No-Oil": 0.6322,
+        "Lookalike": 0.0053
+      }
+    },
+    {
+      "id": "part3_No-Oil_00126",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5859,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5859,
+        "No-Oil": 0.41,
+        "Lookalike": 0.0041
+      }
+    },
+    {
+      "id": "part3_No-Oil_00127",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6167,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0942,
+        "No-Oil": 0.6167,
+        "Lookalike": 0.2891
+      }
+    },
+    {
+      "id": "part3_No-Oil_00128",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8333,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.031,
+        "No-Oil": 0.8333,
+        "Lookalike": 0.1358
+      }
+    },
+    {
+      "id": "part3_No-Oil_00129",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8209,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0304,
+        "No-Oil": 0.8209,
+        "Lookalike": 0.1487
+      }
+    },
+    {
+      "id": "part3_No-Oil_00130",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8439,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0247,
+        "No-Oil": 0.8439,
+        "Lookalike": 0.1314
+      }
+    },
+    {
+      "id": "part3_No-Oil_00131",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5682,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.5682,
+        "No-Oil": 0.4292,
+        "Lookalike": 0.0026
+      }
+    },
+    {
+      "id": "part3_No-Oil_00132",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6442,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3476,
+        "No-Oil": 0.6442,
+        "Lookalike": 0.0082
+      }
+    },
+    {
+      "id": "part3_No-Oil_00133",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6509,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.6509,
+        "No-Oil": 0.3466,
+        "Lookalike": 0.0024
+      }
+    },
+    {
+      "id": "part3_No-Oil_00134",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6159,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.3708,
+        "No-Oil": 0.6159,
+        "Lookalike": 0.0133
+      }
+    },
+    {
+      "id": "part3_No-Oil_00135",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5112,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4828,
+        "No-Oil": 0.5112,
+        "Lookalike": 0.0061
+      }
+    },
+    {
+      "id": "part3_No-Oil_00136",
+      "true_label": "No-Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.3719,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3719,
+        "No-Oil": 0.3482,
+        "Lookalike": 0.2799
+      }
+    },
+    {
+      "id": "part3_No-Oil_00137",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4284,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1504,
+        "No-Oil": 0.4212,
+        "Lookalike": 0.4284
+      }
+    },
+    {
+      "id": "part3_No-Oil_00138",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3913,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2641,
+        "No-Oil": 0.3913,
+        "Lookalike": 0.3446
+      }
+    },
+    {
+      "id": "part3_No-Oil_00139",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.3801,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2833,
+        "No-Oil": 0.3801,
+        "Lookalike": 0.3366
+      }
+    },
+    {
+      "id": "part3_No-Oil_00140",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7814,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0264,
+        "No-Oil": 0.7814,
+        "Lookalike": 0.1922
+      }
+    },
+    {
+      "id": "part3_No-Oil_00141",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.671,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0348,
+        "No-Oil": 0.671,
+        "Lookalike": 0.2941
+      }
+    },
+    {
+      "id": "part3_No-Oil_00142",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7325,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0705,
+        "No-Oil": 0.7325,
+        "Lookalike": 0.1969
+      }
+    },
+    {
+      "id": "part3_No-Oil_00143",
+      "true_label": "No-Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5259,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3161,
+        "No-Oil": 0.158,
+        "Lookalike": 0.5259
+      }
+    },
+    {
+      "id": "part3_No-Oil_00144",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5109,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4824,
+        "No-Oil": 0.5109,
+        "Lookalike": 0.0067
+      }
+    },
+    {
+      "id": "part3_No-Oil_00145",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.9146,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0808,
+        "No-Oil": 0.9146,
+        "Lookalike": 0.0046
+      }
+    },
+    {
+      "id": "part3_No-Oil_00146",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.921,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.017,
+        "No-Oil": 0.921,
+        "Lookalike": 0.0619
+      }
+    },
+    {
+      "id": "part3_No-Oil_00147",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8895,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0187,
+        "No-Oil": 0.8895,
+        "Lookalike": 0.0918
+      }
+    },
+    {
+      "id": "part3_No-Oil_00148",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8441,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.0217,
+        "No-Oil": 0.8441,
+        "Lookalike": 0.1342
+      }
+    },
+    {
+      "id": "part3_No-Oil_00149",
+      "true_label": "No-Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7478,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.2397,
+        "No-Oil": 0.7478,
+        "Lookalike": 0.0125
+      }
+    },
+    {
+      "id": "part3_Oil_00000",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5775,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0025,
+        "No-Oil": 0.5775,
+        "Lookalike": 0.42
+      }
+    },
+    {
+      "id": "part3_Oil_00001",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.502,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0869,
+        "No-Oil": 0.502,
+        "Lookalike": 0.4111
+      }
+    },
+    {
+      "id": "part3_Oil_00002",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5287,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3332,
+        "No-Oil": 0.1381,
+        "Lookalike": 0.5287
+      }
+    },
+    {
+      "id": "part3_Oil_00003",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5305,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1145,
+        "No-Oil": 0.355,
+        "Lookalike": 0.5305
+      }
+    },
+    {
+      "id": "part3_Oil_00004",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6459,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0033,
+        "No-Oil": 0.6459,
+        "Lookalike": 0.3508
+      }
+    },
+    {
+      "id": "part3_Oil_00005",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7171,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0018,
+        "No-Oil": 0.7171,
+        "Lookalike": 0.2811
+      }
+    },
+    {
+      "id": "part3_Oil_00006",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5403,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0028,
+        "No-Oil": 0.5403,
+        "Lookalike": 0.4569
+      }
+    },
+    {
+      "id": "part3_Oil_00007",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5318,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2087,
+        "No-Oil": 0.2595,
+        "Lookalike": 0.5318
+      }
+    },
+    {
+      "id": "part3_Oil_00008",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5876,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.047,
+        "No-Oil": 0.3654,
+        "Lookalike": 0.5876
+      }
+    },
+    {
+      "id": "part3_Oil_00009",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5847,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3731,
+        "No-Oil": 0.0422,
+        "Lookalike": 0.5847
+      }
+    },
+    {
+      "id": "part3_Oil_00010",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4991,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4033,
+        "No-Oil": 0.0976,
+        "Lookalike": 0.4991
+      }
+    },
+    {
+      "id": "part3_Oil_00011",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4977,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4977,
+        "No-Oil": 0.1044,
+        "Lookalike": 0.3979
+      }
+    },
+    {
+      "id": "part3_Oil_00012",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7332,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0198,
+        "No-Oil": 0.7332,
+        "Lookalike": 0.247
+      }
+    },
+    {
+      "id": "part3_Oil_00013",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7582,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0212,
+        "No-Oil": 0.7582,
+        "Lookalike": 0.2206
+      }
+    },
+    {
+      "id": "part3_Oil_00014",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8085,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0025,
+        "No-Oil": 0.8085,
+        "Lookalike": 0.189
+      }
+    },
+    {
+      "id": "part3_Oil_00015",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7601,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0111,
+        "No-Oil": 0.7601,
+        "Lookalike": 0.2288
+      }
+    },
+    {
+      "id": "part3_Oil_00016",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5094,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5094,
+        "No-Oil": 0.2271,
+        "Lookalike": 0.2635
+      }
+    },
+    {
+      "id": "part3_Oil_00017",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5842,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5842,
+        "No-Oil": 0.0758,
+        "Lookalike": 0.34
+      }
+    },
+    {
+      "id": "part3_Oil_00018",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4036,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3737,
+        "No-Oil": 0.4036,
+        "Lookalike": 0.2227
+      }
+    },
+    {
+      "id": "part3_Oil_00019",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5294,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3816,
+        "No-Oil": 0.0889,
+        "Lookalike": 0.5294
+      }
+    },
+    {
+      "id": "part3_Oil_00020",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4524,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4524,
+        "No-Oil": 0.381,
+        "Lookalike": 0.1667
+      }
+    },
+    {
+      "id": "part3_Oil_00021",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4847,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4847,
+        "No-Oil": 0.2948,
+        "Lookalike": 0.2205
+      }
+    },
+    {
+      "id": "part3_Oil_00022",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5347,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0122,
+        "No-Oil": 0.5347,
+        "Lookalike": 0.4531
+      }
+    },
+    {
+      "id": "part3_Oil_00023",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.473,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.473,
+        "No-Oil": 0.1155,
+        "Lookalike": 0.4115
+      }
+    },
+    {
+      "id": "part3_Oil_00024",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6683,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6683,
+        "No-Oil": 0.1171,
+        "Lookalike": 0.2146
+      }
+    },
+    {
+      "id": "part3_Oil_00025",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5781,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0855,
+        "No-Oil": 0.3364,
+        "Lookalike": 0.5781
+      }
+    },
+    {
+      "id": "part3_Oil_00026",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5435,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5435,
+        "No-Oil": 0.1703,
+        "Lookalike": 0.2862
+      }
+    },
+    {
+      "id": "part3_Oil_00027",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5178,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5178,
+        "No-Oil": 0.0613,
+        "Lookalike": 0.4208
+      }
+    },
+    {
+      "id": "part3_Oil_00028",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.356,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3365,
+        "No-Oil": 0.3075,
+        "Lookalike": 0.356
+      }
+    },
+    {
+      "id": "part3_Oil_00029",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5676,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2927,
+        "No-Oil": 0.1397,
+        "Lookalike": 0.5676
+      }
+    },
+    {
+      "id": "part3_Oil_00030",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5922,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.375,
+        "No-Oil": 0.0328,
+        "Lookalike": 0.5922
+      }
+    },
+    {
+      "id": "part3_Oil_00031",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4722,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4722,
+        "No-Oil": 0.2678,
+        "Lookalike": 0.26
+      }
+    },
+    {
+      "id": "part3_Oil_00032",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4803,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1688,
+        "No-Oil": 0.3509,
+        "Lookalike": 0.4803
+      }
+    },
+    {
+      "id": "part3_Oil_00033",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8515,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1021,
+        "No-Oil": 0.0464,
+        "Lookalike": 0.8515
+      }
+    },
+    {
+      "id": "part3_Oil_00034",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5885,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1103,
+        "No-Oil": 0.5885,
+        "Lookalike": 0.3012
+      }
+    },
+    {
+      "id": "part3_Oil_00035",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5677,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3515,
+        "No-Oil": 0.0808,
+        "Lookalike": 0.5677
+      }
+    },
+    {
+      "id": "part3_Oil_00036",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5771,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3511,
+        "No-Oil": 0.0718,
+        "Lookalike": 0.5771
+      }
+    },
+    {
+      "id": "part3_Oil_00037",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4849,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3145,
+        "No-Oil": 0.2006,
+        "Lookalike": 0.4849
+      }
+    },
+    {
+      "id": "part3_Oil_00038",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5369,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2894,
+        "No-Oil": 0.1737,
+        "Lookalike": 0.5369
+      }
+    },
+    {
+      "id": "part3_Oil_00039",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4618,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4618,
+        "No-Oil": 0.3263,
+        "Lookalike": 0.212
+      }
+    },
+    {
+      "id": "part3_Oil_00040",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4916,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0389,
+        "No-Oil": 0.4916,
+        "Lookalike": 0.4694
+      }
+    },
+    {
+      "id": "part3_Oil_00041",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4358,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2323,
+        "No-Oil": 0.3319,
+        "Lookalike": 0.4358
+      }
+    },
+    {
+      "id": "part3_Oil_00042",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8059,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0985,
+        "No-Oil": 0.0956,
+        "Lookalike": 0.8059
+      }
+    },
+    {
+      "id": "part3_Oil_00043",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5125,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3791,
+        "No-Oil": 0.1084,
+        "Lookalike": 0.5125
+      }
+    },
+    {
+      "id": "part3_Oil_00044",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7921,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0711,
+        "No-Oil": 0.7921,
+        "Lookalike": 0.1368
+      }
+    },
+    {
+      "id": "part3_Oil_00045",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5872,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5872,
+        "No-Oil": 0.3995,
+        "Lookalike": 0.0134
+      }
+    },
+    {
+      "id": "part3_Oil_00046",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5392,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0553,
+        "No-Oil": 0.5392,
+        "Lookalike": 0.4055
+      }
+    },
+    {
+      "id": "part3_Oil_00047",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4639,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2567,
+        "No-Oil": 0.4639,
+        "Lookalike": 0.2794
+      }
+    },
+    {
+      "id": "part3_Oil_00048",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4935,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4935,
+        "No-Oil": 0.4416,
+        "Lookalike": 0.065
+      }
+    },
+    {
+      "id": "part3_Oil_00049",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5078,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4557,
+        "No-Oil": 0.5078,
+        "Lookalike": 0.0364
+      }
+    },
+    {
+      "id": "part3_Oil_00050",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4963,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4963,
+        "No-Oil": 0.115,
+        "Lookalike": 0.3888
+      }
+    },
+    {
+      "id": "part3_Oil_00051",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8843,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0621,
+        "No-Oil": 0.0536,
+        "Lookalike": 0.8843
+      }
+    },
+    {
+      "id": "part3_Oil_00052",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6177,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6177,
+        "No-Oil": 0.125,
+        "Lookalike": 0.2573
+      }
+    },
+    {
+      "id": "part3_Oil_00053",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4677,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3825,
+        "No-Oil": 0.1498,
+        "Lookalike": 0.4677
+      }
+    },
+    {
+      "id": "part3_Oil_00054",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5352,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2862,
+        "No-Oil": 0.1786,
+        "Lookalike": 0.5352
+      }
+    },
+    {
+      "id": "part3_Oil_00055",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6132,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6132,
+        "No-Oil": 0.2047,
+        "Lookalike": 0.1821
+      }
+    },
+    {
+      "id": "part3_Oil_00056",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.369,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.369,
+        "No-Oil": 0.2921,
+        "Lookalike": 0.3389
+      }
+    },
+    {
+      "id": "part3_Oil_00057",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4977,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3114,
+        "No-Oil": 0.1909,
+        "Lookalike": 0.4977
+      }
+    },
+    {
+      "id": "part3_Oil_00058",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.4198,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.4198,
+        "No-Oil": 0.1681,
+        "Lookalike": 0.4122
+      }
+    },
+    {
+      "id": "part3_Oil_00059",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.509,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0024,
+        "No-Oil": 0.4887,
+        "Lookalike": 0.509
+      }
+    },
+    {
+      "id": "part3_Oil_00060",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5898,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5898,
+        "No-Oil": 0.4076,
+        "Lookalike": 0.0026
+      }
+    },
+    {
+      "id": "part3_Oil_00061",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6785,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0116,
+        "No-Oil": 0.3099,
+        "Lookalike": 0.6785
+      }
+    },
+    {
+      "id": "part3_Oil_00062",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.7365,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.7365,
+        "No-Oil": 0.2614,
+        "Lookalike": 0.0021
+      }
+    },
+    {
+      "id": "part3_Oil_00063",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.9282,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.9282,
+        "No-Oil": 0.0684,
+        "Lookalike": 0.0034
+      }
+    },
+    {
+      "id": "part3_Oil_00064",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7076,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2821,
+        "No-Oil": 0.0103,
+        "Lookalike": 0.7076
+      }
+    },
+    {
+      "id": "part3_Oil_00065",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.3832,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2642,
+        "No-Oil": 0.3526,
+        "Lookalike": 0.3832
+      }
+    },
+    {
+      "id": "part3_Oil_00066",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4482,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2492,
+        "No-Oil": 0.3026,
+        "Lookalike": 0.4482
+      }
+    },
+    {
+      "id": "part3_Oil_00067",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8555,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0,
+        "No-Oil": 0.8555,
+        "Lookalike": 0.1445
+      }
+    },
+    {
+      "id": "part3_Oil_00068",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.518,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0118,
+        "No-Oil": 0.518,
+        "Lookalike": 0.4702
+      }
+    },
+    {
+      "id": "part3_Oil_00069",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.524,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.524,
+        "No-Oil": 0.0863,
+        "Lookalike": 0.3897
+      }
+    },
+    {
+      "id": "part3_Oil_00070",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4931,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3722,
+        "No-Oil": 0.4931,
+        "Lookalike": 0.1347
+      }
+    },
+    {
+      "id": "part3_Oil_00071",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.676,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2522,
+        "No-Oil": 0.0718,
+        "Lookalike": 0.676
+      }
+    },
+    {
+      "id": "part3_Oil_00072",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5404,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0618,
+        "No-Oil": 0.3977,
+        "Lookalike": 0.5404
+      }
+    },
+    {
+      "id": "part3_Oil_00073",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4811,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2511,
+        "No-Oil": 0.2679,
+        "Lookalike": 0.4811
+      }
+    },
+    {
+      "id": "part3_Oil_00074",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8373,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1291,
+        "No-Oil": 0.0337,
+        "Lookalike": 0.8373
+      }
+    },
+    {
+      "id": "part3_Oil_00075",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5262,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1502,
+        "No-Oil": 0.5262,
+        "Lookalike": 0.3236
+      }
+    },
+    {
+      "id": "part3_Oil_00076",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5462,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5462,
+        "No-Oil": 0.2415,
+        "Lookalike": 0.2123
+      }
+    },
+    {
+      "id": "part3_Oil_00077",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7322,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0867,
+        "No-Oil": 0.1811,
+        "Lookalike": 0.7322
+      }
+    },
+    {
+      "id": "part3_Oil_00078",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4238,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4081,
+        "No-Oil": 0.1681,
+        "Lookalike": 0.4238
+      }
+    },
+    {
+      "id": "part3_Oil_00079",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4481,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4429,
+        "No-Oil": 0.109,
+        "Lookalike": 0.4481
+      }
+    },
+    {
+      "id": "part3_Oil_00080",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5023,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0845,
+        "No-Oil": 0.4133,
+        "Lookalike": 0.5023
+      }
+    },
+    {
+      "id": "part3_Oil_00081",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4873,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1144,
+        "No-Oil": 0.3983,
+        "Lookalike": 0.4873
+      }
+    },
+    {
+      "id": "part3_Oil_00082",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.8746,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.8746,
+        "No-Oil": 0.0167,
+        "Lookalike": 0.1087
+      }
+    },
+    {
+      "id": "part3_Oil_00083",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6765,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0407,
+        "No-Oil": 0.6765,
+        "Lookalike": 0.2829
+      }
+    },
+    {
+      "id": "part3_Oil_00084",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.7072,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.7072,
+        "No-Oil": 0.0109,
+        "Lookalike": 0.2818
+      }
+    },
+    {
+      "id": "part3_Oil_00085",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4411,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.191,
+        "No-Oil": 0.3679,
+        "Lookalike": 0.4411
+      }
+    },
+    {
+      "id": "part3_Oil_00086",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5196,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5196,
+        "No-Oil": 0.1429,
+        "Lookalike": 0.3375
+      }
+    },
+    {
+      "id": "part3_Oil_00087",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5409,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0895,
+        "No-Oil": 0.3696,
+        "Lookalike": 0.5409
+      }
+    },
+    {
+      "id": "part3_Oil_00088",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5849,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1657,
+        "No-Oil": 0.5849,
+        "Lookalike": 0.2494
+      }
+    },
+    {
+      "id": "part3_Oil_00089",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6392,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6392,
+        "No-Oil": 0.0767,
+        "Lookalike": 0.2841
+      }
+    },
+    {
+      "id": "part3_Oil_00090",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6844,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6844,
+        "No-Oil": 0.2829,
+        "Lookalike": 0.0328
+      }
+    },
+    {
+      "id": "part3_Oil_00091",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7987,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1451,
+        "No-Oil": 0.7987,
+        "Lookalike": 0.0562
+      }
+    },
+    {
+      "id": "part3_Oil_00092",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5269,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5269,
+        "No-Oil": 0.034,
+        "Lookalike": 0.4391
+      }
+    },
+    {
+      "id": "part3_Oil_00093",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5991,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1985,
+        "No-Oil": 0.2024,
+        "Lookalike": 0.5991
+      }
+    },
+    {
+      "id": "part3_Oil_00094",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5971,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2728,
+        "No-Oil": 0.5971,
+        "Lookalike": 0.1301
+      }
+    },
+    {
+      "id": "part3_Oil_00095",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5841,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5841,
+        "No-Oil": 0.2884,
+        "Lookalike": 0.1275
+      }
+    },
+    {
+      "id": "part3_Oil_00096",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5322,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0417,
+        "No-Oil": 0.4261,
+        "Lookalike": 0.5322
+      }
+    },
+    {
+      "id": "part3_Oil_00097",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4646,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2561,
+        "No-Oil": 0.2793,
+        "Lookalike": 0.4646
+      }
+    },
+    {
+      "id": "part3_Oil_00098",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6764,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6764,
+        "No-Oil": 0.3086,
+        "Lookalike": 0.015
+      }
+    },
+    {
+      "id": "part3_Oil_00099",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5048,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5048,
+        "No-Oil": 0.3022,
+        "Lookalike": 0.193
+      }
+    },
+    {
+      "id": "part3_Oil_00100",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4533,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.229,
+        "No-Oil": 0.3177,
+        "Lookalike": 0.4533
+      }
+    },
+    {
+      "id": "part3_Oil_00101",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.506,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.506,
+        "No-Oil": 0.1578,
+        "Lookalike": 0.3361
+      }
+    },
+    {
+      "id": "part3_Oil_00102",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6648,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6648,
+        "No-Oil": 0.3199,
+        "Lookalike": 0.0153
+      }
+    },
+    {
+      "id": "part3_Oil_00103",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8089,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1823,
+        "No-Oil": 0.0088,
+        "Lookalike": 0.8089
+      }
+    },
+    {
+      "id": "part3_Oil_00104",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5005,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0073,
+        "No-Oil": 0.4922,
+        "Lookalike": 0.5005
+      }
+    },
+    {
+      "id": "part3_Oil_00105",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.7265,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.7265,
+        "No-Oil": 0.2648,
+        "Lookalike": 0.0087
+      }
+    },
+    {
+      "id": "part3_Oil_00106",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6083,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6083,
+        "No-Oil": 0.3586,
+        "Lookalike": 0.0331
+      }
+    },
+    {
+      "id": "part3_Oil_00107",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4314,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3517,
+        "No-Oil": 0.4314,
+        "Lookalike": 0.217
+      }
+    },
+    {
+      "id": "part3_Oil_00108",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8413,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0417,
+        "No-Oil": 0.1171,
+        "Lookalike": 0.8413
+      }
+    },
+    {
+      "id": "part3_Oil_00109",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.852,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.852,
+        "No-Oil": 0.1327,
+        "Lookalike": 0.0153
+      }
+    },
+    {
+      "id": "part3_Oil_00110",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5524,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3307,
+        "No-Oil": 0.1169,
+        "Lookalike": 0.5524
+      }
+    },
+    {
+      "id": "part3_Oil_00111",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7324,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0822,
+        "No-Oil": 0.1854,
+        "Lookalike": 0.7324
+      }
+    },
+    {
+      "id": "part3_Oil_00112",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.433,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.433,
+        "No-Oil": 0.3481,
+        "Lookalike": 0.2189
+      }
+    },
+    {
+      "id": "part3_Oil_00113",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6423,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6423,
+        "No-Oil": 0.35,
+        "Lookalike": 0.0077
+      }
+    },
+    {
+      "id": "part3_Oil_00114",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6374,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2417,
+        "No-Oil": 0.6374,
+        "Lookalike": 0.1209
+      }
+    },
+    {
+      "id": "part3_Oil_00115",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4791,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2437,
+        "No-Oil": 0.2773,
+        "Lookalike": 0.4791
+      }
+    },
+    {
+      "id": "part3_Oil_00116",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6508,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3094,
+        "No-Oil": 0.6508,
+        "Lookalike": 0.0398
+      }
+    },
+    {
+      "id": "part3_Oil_00117",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6325,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.026,
+        "No-Oil": 0.6325,
+        "Lookalike": 0.3415
+      }
+    },
+    {
+      "id": "part3_Oil_00118",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.626,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.626,
+        "No-Oil": 0.3703,
+        "Lookalike": 0.0037
+      }
+    },
+    {
+      "id": "part3_Oil_00119",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5476,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5476,
+        "No-Oil": 0.4149,
+        "Lookalike": 0.0375
+      }
+    },
+    {
+      "id": "part3_Oil_00120",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5717,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5717,
+        "No-Oil": 0.1257,
+        "Lookalike": 0.3026
+      }
+    },
+    {
+      "id": "part3_Oil_00121",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.6235,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1186,
+        "No-Oil": 0.2579,
+        "Lookalike": 0.6235
+      }
+    },
+    {
+      "id": "part3_Oil_00122",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8015,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.04,
+        "No-Oil": 0.1585,
+        "Lookalike": 0.8015
+      }
+    },
+    {
+      "id": "part3_Oil_00123",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6374,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6374,
+        "No-Oil": 0.1048,
+        "Lookalike": 0.2578
+      }
+    },
+    {
+      "id": "part3_Oil_00124",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4091,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.343,
+        "No-Oil": 0.2479,
+        "Lookalike": 0.4091
+      }
+    },
+    {
+      "id": "part3_Oil_00125",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5665,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1421,
+        "No-Oil": 0.2914,
+        "Lookalike": 0.5665
+      }
+    },
+    {
+      "id": "part3_Oil_00126",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.8729,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0521,
+        "No-Oil": 0.8729,
+        "Lookalike": 0.075
+      }
+    },
+    {
+      "id": "part3_Oil_00127",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.8298,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0903,
+        "No-Oil": 0.0799,
+        "Lookalike": 0.8298
+      }
+    },
+    {
+      "id": "part3_Oil_00128",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.7422,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2409,
+        "No-Oil": 0.7422,
+        "Lookalike": 0.0169
+      }
+    },
+    {
+      "id": "part3_Oil_00129",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5429,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.2888,
+        "No-Oil": 0.1682,
+        "Lookalike": 0.5429
+      }
+    },
+    {
+      "id": "part3_Oil_00130",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6486,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0782,
+        "No-Oil": 0.6486,
+        "Lookalike": 0.2732
+      }
+    },
+    {
+      "id": "part3_Oil_00131",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.562,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.562,
+        "No-Oil": 0.4227,
+        "Lookalike": 0.0153
+      }
+    },
+    {
+      "id": "part3_Oil_00132",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.7606,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.7606,
+        "No-Oil": 0.0092,
+        "Lookalike": 0.2302
+      }
+    },
+    {
+      "id": "part3_Oil_00133",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7679,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1894,
+        "No-Oil": 0.0427,
+        "Lookalike": 0.7679
+      }
+    },
+    {
+      "id": "part3_Oil_00134",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.7733,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1998,
+        "No-Oil": 0.0269,
+        "Lookalike": 0.7733
+      }
+    },
+    {
+      "id": "part3_Oil_00135",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.8754,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.8754,
+        "No-Oil": 0.0036,
+        "Lookalike": 0.121
+      }
+    },
+    {
+      "id": "part3_Oil_00136",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.4654,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4617,
+        "No-Oil": 0.0729,
+        "Lookalike": 0.4654
+      }
+    },
+    {
+      "id": "part3_Oil_00137",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6271,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3512,
+        "No-Oil": 0.6271,
+        "Lookalike": 0.0218
+      }
+    },
+    {
+      "id": "part3_Oil_00138",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.73,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0132,
+        "No-Oil": 0.73,
+        "Lookalike": 0.2568
+      }
+    },
+    {
+      "id": "part3_Oil_00139",
+      "true_label": "Oil",
+      "predicted_label": "Lookalike",
+      "confidence": 0.5976,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.1675,
+        "No-Oil": 0.2348,
+        "Lookalike": 0.5976
+      }
+    },
+    {
+      "id": "part3_Oil_00140",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5865,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5865,
+        "No-Oil": 0.4031,
+        "Lookalike": 0.0104
+      }
+    },
+    {
+      "id": "part3_Oil_00141",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.7823,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.7823,
+        "No-Oil": 0.2147,
+        "Lookalike": 0.003
+      }
+    },
+    {
+      "id": "part3_Oil_00142",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.5409,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.5409,
+        "No-Oil": 0.0064,
+        "Lookalike": 0.4527
+      }
+    },
+    {
+      "id": "part3_Oil_00143",
+      "true_label": "Oil",
+      "predicted_label": "Oil",
+      "confidence": 0.6004,
+      "correct": true,
+      "probabilities": {
+        "Oil": 0.6004,
+        "No-Oil": 0.3794,
+        "Lookalike": 0.0203
+      }
+    },
+    {
+      "id": "part3_Oil_00144",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6301,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0365,
+        "No-Oil": 0.6301,
+        "Lookalike": 0.3334
+      }
+    },
+    {
+      "id": "part3_Oil_00145",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5182,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.47,
+        "No-Oil": 0.5182,
+        "Lookalike": 0.0118
+      }
+    },
+    {
+      "id": "part3_Oil_00146",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.4659,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.3276,
+        "No-Oil": 0.4659,
+        "Lookalike": 0.2065
+      }
+    },
+    {
+      "id": "part3_Oil_00147",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.6038,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.051,
+        "No-Oil": 0.6038,
+        "Lookalike": 0.3452
+      }
+    },
+    {
+      "id": "part3_Oil_00148",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5973,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.0736,
+        "No-Oil": 0.5973,
+        "Lookalike": 0.3291
+      }
+    },
+    {
+      "id": "part3_Oil_00149",
+      "true_label": "Oil",
+      "predicted_label": "No-Oil",
+      "confidence": 0.5297,
+      "correct": false,
+      "probabilities": {
+        "Oil": 0.4565,
+        "No-Oil": 0.5297,
+        "Lookalike": 0.0138
+      }
+    }
+  ],
+  "dataset_dois": {
+    "part1": "10.5281/zenodo.8346860",
+    "part2": "10.5281/zenodo.8253899",
+    "part3": "10.5281/zenodo.13761290"
+  },
+  "dataset_citation": "Trujillo-Acatitla, R., Tuxpan-Vargas, J., Ovando-Vazquez, C., & Monterrubio-Martinez, E. (2024). Sentinel-1 SAR Oil spill image dataset for train, validate, and test deep learning models. Parts I-III. Zenodo. https://doi.org/10.5281/zenodo.8346860",
+  "limitations": [
+    "This is the dataset's own published test split (Part III), never mixed into train/val (see app/ml/dataset.py build_manifests 'LEAKAGE PREVENTION').",
+    "Softmax confidence is the model's own raw output, not a calibrated statistical probability - no calibration (e.g. temperature scaling, Platt scaling) is implemented anywhere in this codebase. Treat 'confidence' as a relative ranking signal only.",
+    "This evaluation reports the classifier's OWN predicted label vs ground truth - it does not re-derive or validate ML_FALLBACK_CONFIDENCE_THRESHOLD (app/ml/detector.py), which governs a separate, orthogonal decision (whether to trust ANY ML result enough to skip the classical-detector fallback). See MODEL_CARD.md / README_ML_STATUS.md.",
+    "A Lookalike/No-Oil scene correctly classified as such can still carry a non-empty segmenter mask (the two sub-models are architecturally independent) - this evaluation covers ONLY the classifier's own scene-level label, not the segmenter's mask quality (see app/ml/evaluate_real.py for that) or the orchestrator's Lookalike-safety gating (app/investigation/orchestrator.py, guarded by tests/test_lookalike_safety.py).",
+    "Re-evaluate after any further training - these numbers describe this exact checkpoint file (see checkpoint_sha256) at this exact epoch only."
+  ]
+}

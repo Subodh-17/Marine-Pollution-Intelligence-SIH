@@ -227,6 +227,80 @@ describe('MlTrainingTab', () => {
     expect(screen.queryByText('Real Zenodo-trained model not available yet.')).not.toBeInTheDocument()
   })
 
+  it('renders multi-component history with model switcher and accuracy/loss controls', async () => {
+    const MULTI_COMPONENT_HISTORY = {
+      available: true,
+      provenance: 'ML_REAL_ZENODO_TRAINED',
+      model_component: 'classifier',
+      active_component: 'classifier',
+      source_file: 'classifier_v2_training_history.json',
+      metric_name: 'accuracy',
+      epochs: [
+        { epoch: 1, train_loss: 0.84, val_loss: 0.52, train_metric: 0.64, val_metric: 0.78, train_accuracy: 0.64, val_accuracy: 0.78 },
+        { epoch: 32, train_loss: 0.24, val_loss: 0.21, train_metric: 0.91, val_metric: 0.9249, train_accuracy: 0.91, val_accuracy: 0.9249 },
+        { epoch: 40, train_loss: 0.22, val_loss: 0.24, train_metric: 0.92, val_metric: 0.9223, train_accuracy: 0.92, val_accuracy: 0.9223 },
+      ],
+      best_epoch: 32,
+      total_epochs: 40,
+      reported_test_accuracy: 0.7933,
+      components: {
+        classifier: {
+          available: true,
+          model_component: 'classifier',
+          model_name: 'SceneClassifierV2',
+          source_file: 'classifier_v2_training_history.json',
+          metric_name: 'accuracy',
+          epochs: [
+            { epoch: 1, train_loss: 0.84, val_loss: 0.52, train_metric: 0.64, val_metric: 0.78, train_accuracy: 0.64, val_accuracy: 0.78 },
+            { epoch: 32, train_loss: 0.24, val_loss: 0.21, train_metric: 0.91, val_metric: 0.9249, train_accuracy: 0.91, val_accuracy: 0.9249 },
+            { epoch: 40, train_loss: 0.22, val_loss: 0.24, train_metric: 0.92, val_metric: 0.9223, train_accuracy: 0.92, val_accuracy: 0.9223 },
+          ],
+          best_epoch: 32,
+          total_epochs: 40,
+          reported_test_accuracy: 0.7933,
+        },
+        segmenter: {
+          available: true,
+          model_component: 'segmenter',
+          model_name: 'SpillUNet',
+          source_file: 'spill_unet_real_training_history.json',
+          metric_name: 'iou',
+          epochs: [
+            { epoch: 1, train_loss: 0.49, val_loss: 0.37, train_metric: 0.35, val_metric: 0.43, train_iou: 0.35, val_iou: 0.43 },
+            { epoch: 18, train_loss: 0.32, val_loss: 0.32, train_metric: 0.49, val_metric: 0.6294, train_iou: 0.49, val_iou: 0.6294 },
+            { epoch: 20, train_loss: 0.32, val_loss: 0.32, train_metric: 0.51, val_metric: 0.5651, train_iou: 0.51, val_iou: 0.5651 },
+          ],
+          best_epoch: 18,
+          total_epochs: 20,
+        },
+      },
+    }
+
+    getMlStatus.mockResolvedValue(REAL_STATUS)
+    getMlTrainingHistory.mockResolvedValue(MULTI_COMPONENT_HISTORY)
+    getMlMetrics.mockResolvedValue(REAL_METRICS)
+    render(<MlTrainingTab />)
+
+    // Check classifier controls and 40 epochs
+    expect(await screen.findByText('SceneClassifierV2 (40 Epochs)')).toBeInTheDocument()
+    expect(screen.getByText('SpillUNet (20 Epochs)')).toBeInTheDocument()
+    expect(screen.getByText('40 of 40 epochs')).toBeInTheDocument()
+    expect(screen.getByText('Epoch 32')).toBeInTheDocument()
+    expect(screen.getByText('79.33%')).toBeInTheDocument()
+
+    // Switch to segmenter
+    fireEvent.click(screen.getByText('SpillUNet (20 Epochs)'))
+    expect(screen.getByText('20 of 20 epochs')).toBeInTheDocument()
+    expect(screen.getByText('Epoch 18')).toBeInTheDocument()
+    expect(screen.getByText('62.94%')).toBeInTheDocument()
+
+    // Switch view modes
+    fireEvent.click(screen.getByRole('button', { name: 'Loss' }))
+    expect(screen.getByRole('button', { name: 'Loss' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'IoU' }))
+    expect(screen.getByRole('button', { name: 'IoU' })).toBeInTheDocument()
+  })
+
   it('shows "not trained" when no checkpoint is available at all', async () => {
     getMlStatus.mockResolvedValue(NOT_TRAINED_STATUS)
     getMlTrainingHistory.mockResolvedValue({

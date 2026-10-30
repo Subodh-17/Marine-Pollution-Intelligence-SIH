@@ -195,3 +195,99 @@
   color: var(--text-secondary);
   margin-top: 2px;
 }
+
+/* ---- Training history controls and stats ---- */
+.ml-history-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.ml-history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+}
+
+.ml-control-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-inset);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-hairline);
+}
+
+.ml-control-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-right: 4px;
+  padding-left: 6px;
+}
+
+.ml-pill-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.ml-pill-btn:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+}
+
+.ml-pill-btn--active {
+  background: var(--bg-panel-raised, #1e293b);
+  color: var(--signal-cyan);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ml-history-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.ml-history-banner {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-left: 3px solid var(--signal-cyan);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: var(--sp-3);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.ml-history-banner strong {
+  color: var(--text-primary);
+}
+
+.ml-history-banner-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--signal-cyan) 15%, transparent);
+  color: var(--signal-cyan);
+  margin-right: 6px;
+}

@@ -536,6 +536,31 @@ export default function RoutePlannerTab({ investigation }) {
             <div className="route-comparison-card">
               <h3 className="section-title">Voyage Trade-Off & Safety Comparison</h3>
 
+              {routePlan.recommended_route_type === 'baseline_safe' && (
+                <div className="route-recommendation-banner route-recommendation-banner--safe">
+                  <span>🛡️</span>
+                  <div>
+                    <strong>Direct Baseline Recommended:</strong> The direct sea path is already safe and clears all active spill hazard zones by {routePlan.comparison?.safety_buffer_maintained_nm ?? routePlan.baseline_route.closest_spill_distance_nm ?? 0} NM. No detour required.
+                  </div>
+                </div>
+              )}
+              {routePlan.recommended_route_type === 'spill_avoiding' && (
+                <div className="route-recommendation-banner route-recommendation-banner--detour">
+                  <span>⚠️</span>
+                  <div>
+                    <strong>Spill-Avoiding Detour Recommended:</strong> Direct baseline penetrates active spill hazard. Navigational detour generated maintaining {routePlan.comparison?.safety_buffer_maintained_nm || spillBufferNm} NM safety buffer.
+                  </div>
+                </div>
+              )}
+              {routePlan.recommended_route_type === 'baseline' && !routePlan.spill_avoiding_route && (
+                <div className="route-recommendation-banner route-recommendation-banner--neutral">
+                  <span>🧭</span>
+                  <div>
+                    <strong>Standard Direct Navigation:</strong> Baseline sea path calculated without active spill avoidance constraints.
+                  </div>
+                </div>
+              )}
+
               <div className="comparison-table-wrapper">
                 <table className="comparison-table">
                   <thead>

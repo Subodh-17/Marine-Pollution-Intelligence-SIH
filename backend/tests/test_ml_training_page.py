@@ -56,6 +56,24 @@ class TestResponseShapes:
             assert key in body
         assert isinstance(body["epochs"], list)
 
+    def test_training_history_endpoint_supports_components(self):
+        r = client.get("/api/ml/training-history")
+        assert r.status_code == 200
+        body = r.json()
+        assert "components" in body
+        assert "active_component" in body
+        assert "available_components" in body
+
+        # Query classifier component explicitly
+        r_clf = client.get("/api/ml/training-history?component=classifier")
+        assert r_clf.status_code == 200
+        body_clf = r_clf.json()
+        assert body_clf["model_component"] == "classifier"
+        if body_clf["available"] and body_clf.get("total_epochs") == 40:
+            assert body_clf["best_epoch"] == 32
+            assert "train_accuracy" in body_clf["epochs"][0]
+            assert "val_accuracy" in body_clf["epochs"][0]
+
     def test_metrics_endpoint_shape(self):
         r = client.get("/api/ml/metrics")
         assert r.status_code == 200

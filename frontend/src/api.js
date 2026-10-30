@@ -145,7 +145,7 @@ export const api = {
 
   getMlStatus: () => client.get('/ml/status').then(r => r.data),
 
-  getMlTrainingHistory: () => client.get('/ml/training-history').then(r => r.data),
+  getMlTrainingHistory: (component) => client.get('/ml/training-history', { params: component ? { component } : {} }).then(r => r.data),
 
   getMlMetrics: () => client.get('/ml/metrics').then(r => r.data),
 

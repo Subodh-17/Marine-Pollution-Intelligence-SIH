@@ -254,23 +254,13 @@ def plan_maritime_route(
         or baseline_summary.closest_spill_distance_nm >= spill_buffer_nm
     ):
         vessel_resp = VesselProfileResponse(**vessel.to_dict())
-        # Avoidance route is identical to baseline since baseline is safe
-        avoid_summary = _build_route_summary(
-            route_coords=baseline_coords,
-            route_type="spill_avoiding",
-            vessel=vessel,
-            speed_knots=speed,
-            current_fuel_mt=current_fuel_mt,
-            buffered_spills=buffered_polygons,
-            raw_spills=raw_polygons,
-            bunker_price=bunker_price_usd_per_mt,
-        )
+        # Baseline is already safe — return it directly as recommended; no detour needed
         return RoutePlanResponse(
             origin=origin,
             destination=destination,
-            recommended_route_type="spill_avoiding",
+            recommended_route_type="baseline_safe",
             baseline_route=baseline_summary,
-            spill_avoiding_route=avoid_summary,
+            spill_avoiding_route=None,
             comparison=RouteDeltaComparison(
                 extra_distance_nm=0.0,
                 extra_distance_pct=0.0,
@@ -280,7 +270,7 @@ def plan_maritime_route(
                 extra_fuel_consumed_pct=0.0,
                 extra_cost_usd=0.0,
                 extra_co2_mt=0.0,
-                safety_buffer_maintained_nm=round(avoid_summary.closest_spill_distance_nm or spill_buffer_nm, 2),
+                safety_buffer_maintained_nm=round(baseline_summary.closest_spill_distance_nm or spill_buffer_nm, 2),
             ),
             spill_zones=list(active_spills),
             vessel=vessel_resp,

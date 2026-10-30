@@ -26,9 +26,12 @@ labels the result accordingly.
 """
 from __future__ import annotations
 
+import logging
 from typing import Callable, List, Tuple
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def compute_tile_bounds(h: int, w: int, tile_size: int, overlap: int) -> List[Tuple[int, int, int, int]]:
@@ -241,12 +244,15 @@ def stitch_multiscale_segmentation(
     stacked_coarse = np.stack([coarse_vv, coarse_vh], axis=0)
 
     # 4. Run segmenter on coarse representation
-    if fits_direct or (coarse_h <= tile_size and coarse_w <= tile_size):
-        prob_coarse = run_fn(stacked_coarse)
-    else:
-        prob_coarse = stitch_tiled_segmentation(run_fn, stacked_coarse, tile_size, overlap)
-
-    prob_coarse = np.nan_to_num(np.clip(prob_coarse, 0.0, 1.0), nan=0.0).astype(np.float32)
+    try:
+        if fits_direct or (coarse_h <= tile_size and coarse_w <= tile_size):
+            prob_coarse = run_fn(stacked_coarse)
+        else:
+            prob_coarse = stitch_tiled_segmentation(run_fn, stacked_coarse, tile_size, overlap)
+        prob_coarse = np.nan_to_num(np.clip(prob_coarse, 0.0, 1.0), nan=0.0).astype(np.float32)
+    except Exception as exc:
+        logger.warning('Multiscale coarse pass failed, falling back to base segmentation: %s', exc)
+        return prob_base, False
 
     # 5. Apply fusion strategy
     if fusion_strategy in ("boundary_preserved", "size_gated_closure"):

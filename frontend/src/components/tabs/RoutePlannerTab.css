@@ -439,3 +439,33 @@
   color: var(--text-secondary);
   line-height: 1.45;
 }
+
+/* Route Recommendation Banners */
+.route-recommendation-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.route-recommendation-banner--safe {
+  background: rgba(63, 216, 196, 0.12);
+  border: 1px solid rgba(63, 216, 196, 0.35);
+  color: var(--signal-cyan);
+}
+
+.route-recommendation-banner--detour {
+  background: rgba(255, 184, 77, 0.12);
+  border: 1px solid rgba(255, 184, 77, 0.35);
+  color: #ffb84d;
+}
+
+.route-recommendation-banner--neutral {
+  background: rgba(123, 138, 151, 0.12);
+  border: 1px solid rgba(123, 138, 151, 0.35);
+  color: var(--text-secondary);
+}
