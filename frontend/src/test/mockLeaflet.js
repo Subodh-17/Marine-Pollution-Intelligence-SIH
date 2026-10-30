@@ -34,11 +34,13 @@ vi.mock('react-leaflet', () => {
     Marker: Stub,
     Popup: Stub,
     useMap: () => ({ fitBounds: vi.fn() }),
+    useMapEvents: () => ({}),
   }
 })
 
 vi.mock('leaflet', () => ({
   default: {
     divIcon: vi.fn(() => ({})),
+    latLngBounds: vi.fn(() => ({})),
   },
 }))

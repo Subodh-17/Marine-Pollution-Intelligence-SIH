@@ -1,0 +1,356 @@
+/* ============================================================
+   FUEL INDICATION METER — Vessel Propulsion & Fuel Intelligence
+   ============================================================ */
+
+.fuel-meter-container {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.fuel-meter-container--sufficient {
+  border-left: 4px solid var(--signal-cyan);
+}
+
+.fuel-meter-container--warning {
+  border-left: 4px solid var(--signal-amber);
+}
+
+.fuel-meter-container--critical {
+  border-left: 4px solid var(--signal-coral);
+}
+
+.fuel-meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.fuel-meter-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fuel-meter-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--signal-cyan);
+}
+
+.fuel-meter-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.fuel-meter-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fuel-unit-toggle {
+  display: inline-flex;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.unit-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.unit-btn.active {
+  background: var(--bg-panel-raised);
+  color: var(--signal-cyan);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Callout Banner */
+.fuel-status-banner {
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fuel-status-banner--sufficient {
+  background: rgba(63, 216, 196, 0.1);
+  border: 1px solid rgba(63, 216, 196, 0.3);
+}
+
+.fuel-status-banner--sufficient .fuel-status-banner__badge {
+  color: var(--signal-cyan);
+}
+
+.fuel-status-banner--warning {
+  background: rgba(255, 184, 77, 0.12);
+  border: 1px solid rgba(255, 184, 77, 0.35);
+}
+
+.fuel-status-banner--warning .fuel-status-banner__badge {
+  color: var(--signal-amber);
+}
+
+.fuel-status-banner--critical {
+  background: rgba(255, 107, 92, 0.14);
+  border: 1px solid rgba(255, 107, 92, 0.4);
+}
+
+.fuel-status-banner--critical .fuel-status-banner__badge {
+  color: var(--signal-coral);
+}
+
+.fuel-status-banner__badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fuel-status-banner__badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.fuel-status-banner__text {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Gauge Level Bar */
+.fuel-gauge-card {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.fuel-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.fuel-gauge-track {
+  position: relative;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
+  overflow: visible;
+  margin-bottom: 12px;
+}
+
+.fuel-gauge-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.4s ease;
+}
+
+.fuel-gauge-fill--sufficient {
+  background: linear-gradient(90deg, #1f6e63, var(--signal-cyan));
+  box-shadow: 0 0 10px rgba(63, 216, 196, 0.4);
+}
+
+.fuel-gauge-fill--warning {
+  background: linear-gradient(90deg, #8a5d24, var(--signal-amber));
+  box-shadow: 0 0 10px rgba(255, 184, 77, 0.4);
+}
+
+.fuel-gauge-fill--critical {
+  background: linear-gradient(90deg, #7a3129, var(--signal-coral));
+  box-shadow: 0 0 10px rgba(255, 107, 92, 0.4);
+}
+
+.fuel-gauge-reserve-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--signal-amber);
+  z-index: 2;
+}
+
+.reserve-tag {
+  position: absolute;
+  top: -18px;
+  left: -24px;
+  font-size: 9px;
+  color: var(--signal-amber);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fuel-gauge-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legend-color--consumed {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.legend-color--reserve {
+  background: var(--signal-amber);
+}
+
+.legend-color--sufficient {
+  background: var(--signal-cyan);
+}
+
+.legend-color--warning {
+  background: var(--signal-amber);
+}
+
+.legend-color--critical {
+  background: var(--signal-coral);
+}
+
+/* Grid of Readouts */
+.fuel-readouts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 800px) {
+  .fuel-readouts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.readout-card {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.readout-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.readout-val {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.readout-val small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.readout-note {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Avoidance Delta Chips */
+.avoidance-delta-panel {
+  background: rgba(63, 216, 196, 0.05);
+  border: 1px dashed rgba(63, 216, 196, 0.25);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.delta-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--signal-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.delta-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.delta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.delta-chip {
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.delta-chip--safe {
+  border-color: rgba(63, 216, 196, 0.4);
+  color: var(--signal-cyan);
+}
+
+.fuel-meter-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  background: var(--bg-panel);
+  border: 1px dashed var(--border-hairline);
+  border-radius: 8px;
+}

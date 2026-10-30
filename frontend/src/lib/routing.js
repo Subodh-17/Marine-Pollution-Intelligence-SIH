@@ -5,9 +5,10 @@
 export function getInitialTabFromLocation(pathname = (typeof window !== 'undefined' ? window.location?.pathname : '')) {
   try {
     const raw = (pathname || '').replace(/^\/+/, '').split('/')[0].toLowerCase()
-    const validTabs = ['dashboard', 'satellite', 'ais', 'ranking', 'timeline', 'report', 'mltraining']
+    const validTabs = ['dashboard', 'satellite', 'ais', 'ranking', 'timeline', 'report', 'mltraining', 'routeplanner']
     if (raw === 'ml-training') return 'mltraining'
     if (raw === 'overview') return 'dashboard'
+    if (raw === 'routing' || raw === 'routes' || raw === 'navigation' || raw === 'route-planner') return 'routeplanner'
     if (validTabs.includes(raw)) return raw
   } catch {
     /* fallback */

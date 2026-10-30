@@ -176,6 +176,18 @@ export const api = {
   getSpillPolygonGeojson: (id) => client.get(`/export/${id}/spill_polygon.geojson`).then(r => r.data),
 
   getVesselTracksGeojson: (id) => client.get(`/export/${id}/vessel_tracks.geojson`).then(r => r.data),
+
+  // Spill-Aware Maritime Route Optimization & Fuel Intelligence
+  getRoutePorts: () => client.get('/routes/ports').then(r => r.data),
+
+  getVesselProfiles: () => client.get('/vessels/profiles').then(r => r.data),
+
+  getRouteSpills: ({ investigationId } = {}) =>
+    client.get('/routes/spills', { params: investigationId ? { investigation_id: investigationId } : undefined }).then(r => r.data),
+
+  planRoute: (payload) => client.post('/routes/plan', payload).then(r => r.data),
+
+  compareRoutes: (payload) => client.post('/routes/compare', payload).then(r => r.data),
 }
 
 export default api

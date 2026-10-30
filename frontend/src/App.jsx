@@ -16,6 +16,7 @@ import RankingTab from './components/tabs/RankingTab'
 import TimelineTab from './components/tabs/TimelineTab'
 import ReportTab from './components/tabs/ReportTab'
 import MlTrainingTab from './components/tabs/MlTrainingTab'
+import RoutePlannerTab from './components/tabs/RoutePlannerTab'
 import { getInitialTabFromLocation } from './lib/routing'
 import api from './api'
 
@@ -391,19 +392,20 @@ export default function App() {
             from a clean slate rather than re-showing a stale error. */}
         <ErrorBoundary resetKey={`${activeTab}:${investigation?.id ?? 'none'}`}>
           {!running && activeTab === 'mltraining' && <MlTrainingTab />}
+          {!running && activeTab === 'routeplanner' && <RoutePlannerTab investigation={investigation} />}
 
           {/* While a stored investigation id from a previous page load is
               being re-fetched, show neither the empty state (which would
               flash misleadingly before the restore resolves) nor the full
               step-by-step progress checklist (which implies a pipeline is
               actively running, not just being re-fetched). */}
-          {!running && restoring && activeTab !== 'mltraining' && !investigation && (
+          {!running && restoring && activeTab !== 'mltraining' && activeTab !== 'routeplanner' && !investigation && (
             <div className="empty-state">
               <span className="empty-state__eyebrow">Restoring your last investigation…</span>
             </div>
           )}
 
-          {!running && !restoring && activeTab !== 'mltraining' && !investigation && (
+          {!running && !restoring && activeTab !== 'mltraining' && activeTab !== 'routeplanner' && !investigation && (
             <div className="empty-state">
               <span className="empty-state__eyebrow">No active investigation</span>
               <h1>Detect the slick.<br />Trace the origin.<br />Rank the vessels.</h1>
@@ -421,7 +423,7 @@ export default function App() {
             </div>
           )}
 
-          {!running && activeTab !== 'mltraining' && investigation && (
+          {!running && activeTab !== 'mltraining' && activeTab !== 'routeplanner' && investigation && (
             <>
               {activeTab === 'dashboard' && (
                 <DashboardTab

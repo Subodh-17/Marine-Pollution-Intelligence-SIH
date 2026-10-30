@@ -22,6 +22,9 @@ const ICONS = {
   mltraining: (
     <svg viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="8" height="8" rx="1.2" stroke="currentColor" strokeWidth="1.6"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M18 6l-2 2M6 18l2-2M18 18l-2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
   ),
+  routeplanner: (
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6"/><polygon points="12,6 14.8,11.8 12,18 9.2,11.8" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="var(--bg-void)"/></svg>
+  ),
 }
 
 const ITEMS = [
@@ -31,15 +34,12 @@ const ITEMS = [
   { id: 'ranking', label: 'Ranking' },
   { id: 'timeline', label: 'Timeline' },
   { id: 'report', label: 'Report' },
+  { id: 'routeplanner', label: 'Route Planner' },
   { id: 'mltraining', label: 'ML TRAINING' },
 ]
 
-// Dashboard and ML Training are the two sections that don't depend on an
-// active investigation: Dashboard is the app's own empty-state entry point,
-// and ML Training reports the state of the model itself (checkpoints,
-// training history, evaluation), which exists independently of whether any
-// investigation has been run yet.
-const ALWAYS_ENABLED_IDS = new Set(['dashboard', 'mltraining'])
+// Dashboard, ML Training, and Route Planner don't require a prior SAR investigation run:
+const ALWAYS_ENABLED_IDS = new Set(['dashboard', 'mltraining', 'routeplanner'])
 
 export default function Sidebar({ active, onSelect, enabled }) {
   return (

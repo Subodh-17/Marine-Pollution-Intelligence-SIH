@@ -30,7 +30,8 @@ An intuitive, dark/light nautical console interface ties the entire investigatio
 3. **Fail-Closed Attribution Safety Gating:** Centralized policy safeguards that automatically abstain from vessel attribution when dark spots are classified as natural lookalikes or when masks are empty, preventing false vessel accusations.
 4. **Hydrodynamic Drift Hindcasting & Forecasting:** Physics-based advection modeling incorporating ocean surface currents and wind leeway vectors to trace the slick back to its release origin.
 5. **Explainable AIS Vessel Correlation:** Multi-criteria trajectory scoring that ranks candidate vessels based on distance to hindcast origin, speed consistency, heading anomaly, and data completeness.
-6. **Production-Grade Design System:** Complete light, dark, and system themes targeting WCAG 2.2 AA contrast standards, responsive layouts, and tabular numerals.
+6. **Spill-Aware Maritime Route Optimization & Fuel Intelligence:** Tactical shortest-path maritime navigation avoiding detected oil slick polygons with configurable environmental safety buffers (NM), Admiralty cubic power-speed propulsion physics, Specific Fuel Oil Consumption (SFOC) modeling, interactive Fuel Indication Gauges, and SOLAS Chapter V advisory compliance.
+7. **Production-Grade Design System:** Complete light, dark, and system themes targeting WCAG 2.2 AA contrast standards, responsive layouts, and tabular numerals.
 
 ---
 
@@ -51,12 +52,14 @@ marine-pollution-intelligence/
 │   ├── investigation/    Central orchestrator wiring pipeline stages and enforcing safety gating
 │   ├── persistence/      SQLite investigation store, background thread-pool job runner, and schema
 │   ├── reports/          Automated Markdown and PDF executive investigation report generation
+│   ├── routing/          Spill-aware shortest-path maritime navigation, geodesic geometry,
+│   │                     hydrodynamic SFOC fuel physics engine, and preset port waypoints
 │   └── main.py           FastAPI REST application, dependency injection, and endpoint routing
 │
 ├── frontend/src/
 │   ├── components/       Header, Sidebar, InteractiveMap, ClassificationScorecard, KpiCards,
-│   │                     VesselDetailDrawer, UploadSatelliteModal, UploadAisModal, DataSourceIndicator
-│   ├── components/tabs/  Dashboard, Satellite, AIS, Ranking, Timeline, Report, ML Training
+│   │                     VesselDetailDrawer, FuelIndicationMeter, UploadSatelliteModal, UploadAisModal
+│   ├── components/tabs/  Dashboard, Satellite, AIS, Ranking, Timeline, Report, ML Training, Route Planner
 │   ├── styles/           Design tokens (tokens.css), shell layout, and responsive components
 │   └── api.js            Axios API client with background job polling and error handling
 ```

@@ -1348,6 +1348,15 @@ def get_vessel_ranking(investigation_id: str, current_user: str = Depends(get_cu
     return [c.to_dict() for c in inv.candidates]
 
 
+@app.get("/api/vessels/profiles")
+@app.get("/api/routes/vessels")
+def get_vessel_profiles():
+    """List available vessel categories with their hydrodynamic & fuel specifications."""
+    from app.routing.vessel_specs import list_vessel_profiles
+    from app.routing.models import VesselProfileResponse
+    return [VesselProfileResponse(**p.to_dict()) for p in list_vessel_profiles()]
+
+
 @app.get("/api/vessels/{mmsi}")
 def get_vessel(mmsi: str, investigation_id: str, current_user: str = Depends(get_current_user)):
     inv = _require(investigation_id, current_user)
@@ -1552,3 +1561,94 @@ def _require(investigation_id: str, current_user: str = "anonymous"):
         raise HTTPException(404, "Investigation not found")
     check_ownership(getattr(inv, "owner", None), current_user)
     return inv
+
+
+# -----------------------------------------------------------------------------
+# Spill-Aware Maritime Route Optimization & Fuel Intelligence Endpoints
+# -----------------------------------------------------------------------------
+from app.routing.models import (
+    RoutePlanRequest,
+    RoutePlanResponse,
+    SpillAvoidanceZone,
+    VesselProfileResponse,
+)
+from app.routing.vessel_specs import list_vessel_profiles
+from app.routing.ports import list_ports
+from app.routing.spill_provider import resolve_active_spill_zones
+from app.routing.avoidance_engine import plan_maritime_route
+
+
+@app.get("/api/routes/ports")
+def get_route_ports():
+    """List preset major maritime ports and strategic routing waypoints."""
+    return [p.to_dict() for p in list_ports()]
+
+
+@app.get("/api/routes/spills", response_model=list[SpillAvoidanceZone])
+def get_active_spills(investigation_id: str | None = None):
+    """Retrieve active oil slick polygons available for navigational hazard avoidance."""
+    return resolve_active_spill_zones(investigation_id=investigation_id)
+
+
+@app.post("/api/routes/plan", response_model=RoutePlanResponse)
+def plan_route(req: RoutePlanRequest):
+    """
+    Plan a maritime voyage between origin and destination:
+    - Calculates baseline shortest navigable route.
+    - Evaluates oil slick collision hazards against active spills with safety buffer.
+    - Generates optimal avoidance detour around slick polygons if hazard detected.
+    - Calculates hydrodynamic propulsion power, SFOC fuel consumption, bunker costs, and CO2.
+    """
+    spill_zones = []
+    if req.custom_spill_polygons:
+        for idx, poly in enumerate(req.custom_spill_polygons):
+            if len(poly) >= 3:
+                spill_zones.append(
+                    SpillAvoidanceZone(
+                        id=f"custom_spill_{idx+1}",
+                        name=f"Custom Slick Zone {idx+1}",
+                        polygon_latlon=poly,
+                        buffer_nm=req.spill_buffer_nm,
+                        active=True,
+                    )
+                )
+    else:
+        # Resolve active spills from orchestrator / persistence / demo
+        resolved = resolve_active_spill_zones()
+        if req.active_spill_ids:
+            allowed_ids = set(req.active_spill_ids)
+            spill_zones = [sz for sz in resolved if sz.id in allowed_ids]
+        else:
+            spill_zones = resolved
+
+        # Update buffer on resolved zones
+        for sz in spill_zones:
+            sz.buffer_nm = req.spill_buffer_nm
+
+    return plan_maritime_route(
+        origin=req.origin,
+        destination=req.destination,
+        vessel_type=req.vessel_type,
+        custom_speed_knots=req.custom_speed_knots,
+        current_fuel_mt=req.current_fuel_mt,
+        spill_buffer_nm=req.spill_buffer_nm,
+        avoid_spills=req.avoid_spills,
+        spill_zones=spill_zones,
+        bunker_price_usd_per_mt=req.bunker_price_usd_per_mt,
+    )
+
+
+@app.post("/api/routes/compare")
+def compare_routes(req: RoutePlanRequest):
+    """Convenience endpoint returning the route comparison metrics between baseline and avoidance paths."""
+    res = plan_route(req)
+    return {
+        "origin": res.origin.model_dump() if hasattr(res.origin, "model_dump") else res.origin.dict(),
+        "destination": res.destination.model_dump() if hasattr(res.destination, "model_dump") else res.destination.dict(),
+        "recommended_route_type": res.recommended_route_type,
+        "comparison": (res.comparison.model_dump() if hasattr(res.comparison, "model_dump") else res.comparison.dict()) if res.comparison else None,
+        "baseline_summary": res.baseline_route.model_dump() if hasattr(res.baseline_route, "model_dump") else res.baseline_route.dict(),
+        "spill_avoiding_summary": (res.spill_avoiding_route.model_dump() if hasattr(res.spill_avoiding_route, "model_dump") else res.spill_avoiding_route.dict()) if res.spill_avoiding_route else None,
+        "disclaimer": res.disclaimer,
+    }
+
