@@ -1,18 +1,16 @@
 """
 Navigable maritime graph network for the Arabian Sea, Indian Ocean, and coastal corridors.
-Constructed with networkx, avoiding land masses and supporting dynamic spill-avoidance edge filtering.
+Implemented in pure Python using Dijkstra / A* priority queue algorithm with zero external C-dependencies.
 """
 from __future__ import annotations
 
+import heapq
 import math
-from typing import Dict, List, Tuple, Sequence, Set
-import networkx as nx
+from typing import Dict, List, Tuple, Sequence, Set, Any, Iterator
 
 from app.routing.geometry import (
     haversine_distance_nm,
     segment_intersects_polygon,
-    point_in_polygon,
-    min_route_distance_to_polygon_nm,
 )
 
 # Standard Navigable Corridors and Deep-Water Waypoints
@@ -155,9 +153,114 @@ MARITIME_EDGES: List[Tuple[str, str]] = [
 ]
 
 
-def build_base_maritime_graph() -> nx.Graph:
+class NodeView(dict):
+    """Provides networkx-compatible node dict access and g.nodes(data=True) calls."""
+
+    def __call__(self, data: bool = False) -> List[Any]:
+        if data:
+            return list(self.items())
+        return list(self.keys())
+
+
+class EdgeView(list):
+    """Provides networkx-compatible edge list access and g.edges() calls."""
+
+    def __call__(self) -> EdgeView:
+        return self
+
+
+class MaritimeGraph:
+    """
+    Pure-Python graph data structure with Dijkstra shortest path.
+    Requires no external C-extensions or networkx installation.
+    """
+
+    def __init__(self):
+        self._nodes: Dict[str, Dict[str, Any]] = {}
+        self.adj: Dict[str, Dict[str, float]] = {}
+
+    @property
+    def nodes(self) -> NodeView:
+        return NodeView(self._nodes)
+
+    def add_node(self, node_id: str, lat: float, lon: float, label: str = "") -> None:
+        self._nodes[node_id] = {"lat": lat, "lon": lon, "label": label}
+        if node_id not in self.adj:
+            self.adj[node_id] = {}
+
+    def add_edge(self, u: str, v: str, weight: float, distance_nm: float | None = None) -> None:
+        dist = weight if distance_nm is None else distance_nm
+        if u not in self.adj:
+            self.adj[u] = {}
+        if v not in self.adj:
+            self.adj[v] = {}
+        self.adj[u][v] = dist
+        self.adj[v][u] = dist
+
+    def remove_edge(self, u: str, v: str) -> None:
+        if u in self.adj:
+            self.adj[u].pop(v, None)
+        if v in self.adj:
+            self.adj[v].pop(u, None)
+
+    @property
+    def edges(self) -> EdgeView:
+        seen: Set[Tuple[str, str]] = set()
+        edge_list: List[Tuple[str, str]] = []
+        for u, neighbors in self.adj.items():
+            for v in neighbors:
+                if (v, u) not in seen:
+                    seen.add((u, v))
+                    edge_list.append((u, v))
+        return EdgeView(edge_list)
+
+    def copy(self) -> MaritimeGraph:
+        new_g = MaritimeGraph()
+        new_g._nodes = {k: dict(v) for k, v in self._nodes.items()}
+        new_g.adj = {u: dict(neighbors) for u, neighbors in self.adj.items()}
+        return new_g
+
+    def shortest_path(self, source: str, target: str) -> List[str]:
+        if source not in self._nodes or target not in self._nodes:
+            raise KeyError(f"Source ({source}) or target ({target}) not in graph")
+
+        dist: Dict[str, float] = {source: 0.0}
+        prev: Dict[str, str | None] = {}
+        visited: Set[str] = set()
+        pq: List[Tuple[float, str]] = [(0.0, source)]
+
+        while pq:
+            d, u = heapq.heappop(pq)
+            if u == target:
+                break
+            if u in visited:
+                continue
+            visited.add(u)
+
+            for v, weight in self.adj.get(u, {}).items():
+                if v in visited:
+                    continue
+                new_d = d + weight
+                if new_d < dist.get(v, float("inf")):
+                    dist[v] = new_d
+                    prev[v] = u
+                    heapq.heappush(pq, (new_d, v))
+
+        if target not in prev and source != target:
+            raise ValueError(f"No path between {source} and {target}")
+
+        path: List[str] = []
+        curr: str | None = target
+        while curr:
+            path.append(curr)
+            curr = prev.get(curr)
+        path.reverse()
+        return path
+
+
+def build_base_maritime_graph() -> MaritimeGraph:
     """Builds the baseline navigable maritime graph with edge weights in Nautical Miles."""
-    g = nx.Graph()
+    g = MaritimeGraph()
     for node_id, (lat, lon, label) in MARITIME_WAYPOINTS.items():
         g.add_node(node_id, lat=lat, lon=lon, label=label)
 
@@ -172,14 +275,14 @@ def build_base_maritime_graph() -> nx.Graph:
 
 
 def find_nearest_navigable_node(
-    lat: float, lon: float, graph: nx.Graph | None = None
+    lat: float, lon: float, graph: MaritimeGraph | None = None
 ) -> Tuple[str, float]:
     """Finds closest node in the maritime graph to coordinates (lat, lon)."""
     g = graph or build_base_maritime_graph()
     best_node = None
     min_dist = float("inf")
 
-    for node_id, data in g.nodes(data=True):
+    for node_id, data in g.nodes.items():
         dist = haversine_distance_nm(lat, lon, data["lat"], data["lon"])
         if dist < min_dist:
             min_dist = dist
@@ -189,14 +292,14 @@ def find_nearest_navigable_node(
 
 
 def connect_custom_point(
-    graph: nx.Graph,
+    graph: MaritimeGraph,
     point_id: str,
     lat: float,
     lon: float,
     label: str = "Custom Waypoint",
     k_nearest: int = 4,
     spill_polygons: Sequence[Sequence[Sequence[float]]] | None = None,
-) -> nx.Graph:
+) -> MaritimeGraph:
     """
     Connects a custom point (e.g. user-selected port or coordinates) to the k nearest
     navigable nodes, ensuring connecting segments do not penetrate spill zones.
@@ -206,7 +309,7 @@ def connect_custom_point(
 
     # Sort nodes by proximity
     nodes_by_dist = []
-    for node_id, data in graph.nodes(data=True):
+    for node_id, data in graph.nodes.items():
         if node_id == point_id:
             continue
         dist = haversine_distance_nm(lat, lon, data["lat"], data["lon"])

@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import math
 from typing import List, Dict, Tuple, Sequence, Optional
-import networkx as nx
 
 from app.routing.geometry import (
     haversine_distance_nm,
@@ -181,8 +180,8 @@ def plan_maritime_route(
     )
 
     try:
-        path_nodes = nx.shortest_path(g_base, source=origin_id, target=dest_id, weight="weight")
-    except (nx.NetworkXNoPath, nx.NodeNotFound):
+        path_nodes = g_base.shortest_path(source=origin_id, target=dest_id)
+    except (KeyError, ValueError):
         # Fallback to direct interpolated coordinates
         raw_interp = interpolate_great_circle(origin.lat, origin.lon, destination.lat, destination.lon, num_points=12)
         path_nodes = []
@@ -335,9 +334,9 @@ def plan_maritime_route(
     # Calculate shortest path on avoidance graph
     avoid_path_nodes = None
     try:
-        avoid_path_nodes = nx.shortest_path(g_avoid, source=origin_id, target=dest_id, weight="weight")
+        avoid_path_nodes = g_avoid.shortest_path(source=origin_id, target=dest_id)
         avoid_coords = [[g_avoid.nodes[n]["lat"], g_avoid.nodes[n]["lon"]] for n in avoid_path_nodes]
-    except (nx.NetworkXNoPath, nx.NodeNotFound):
+    except (KeyError, ValueError):
         # Fallback: create safe waypoint detour directly around the centroid of the primary spill
         if active_spills:
             spill = active_spills[0]
