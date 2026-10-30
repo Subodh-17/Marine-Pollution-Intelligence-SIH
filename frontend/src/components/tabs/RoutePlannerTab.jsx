@@ -179,6 +179,7 @@ export default function RoutePlannerTab({ investigation }) {
       current_fuel_mt: currentFuel ? parseFloat(currentFuel) : null,
       spill_buffer_nm: parseFloat(spillBufferNm),
       avoid_spills: avoidSpills,
+      investigation_id: investigation?.id || null,
     }
 
     api.planRoute(payload)
@@ -191,7 +192,7 @@ export default function RoutePlannerTab({ investigation }) {
         setError(err.response?.data?.detail || 'Failed to calculate optimal route.')
         setLoading(false)
       })
-  }, [originCoord, originName, destCoord, destName, vesselType, customSpeed, currentFuel, spillBufferNm, avoidSpills])
+  }, [originCoord, originName, destCoord, destName, vesselType, customSpeed, currentFuel, spillBufferNm, avoidSpills, investigation?.id])
 
   // Trigger initial calculation on mount once defaults are set
   const initialCalculated = useRef(false)
