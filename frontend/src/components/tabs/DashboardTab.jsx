@@ -31,11 +31,17 @@ export default function DashboardTab({
     return () => { cancelled = true }
   }, [investigation?.id])
 
+  const attrStatus = investigation?.satellite?.attribution_status
+  const oilStatus = investigation?.satellite?.scene_classification?.oil_status
+  const isOil = attrStatus === 'CONFIRMED_OIL_ATTRIBUTION' || attrStatus === 'ATTRIBUTION_PERMITTED' || oilStatus === 'LIKELY_OIL'
+  const isLookalike = attrStatus === 'ABSTAINED_LOOKALIKE' || oilStatus === 'LOOKALIKE'
+  const isNoOil = attrStatus === 'ABSTAINED_EMPTY_MASK' || attrStatus === 'ABSTAINED_NO_OIL' || oilStatus === 'NO_OIL'
+
   const incidents = commandData?.incidents || {
     total_investigations: investigation ? 1 : 0,
-    confirmed_oil: investigation?.satellite?.attribution_status === 'CONFIRMED_OIL_ATTRIBUTION' ? 1 : 0,
-    lookalike_count: investigation?.satellite?.attribution_status === 'ABSTAINED_LOOKALIKE' ? 1 : 0,
-    no_oil_count: investigation?.satellite?.attribution_status === 'ABSTAINED_NO_OIL' ? 1 : 0,
+    confirmed_oil: isOil ? 1 : 0,
+    lookalike_count: isLookalike ? 1 : 0,
+    no_oil_count: isNoOil ? 1 : 0,
     review_required: 0,
   }
 

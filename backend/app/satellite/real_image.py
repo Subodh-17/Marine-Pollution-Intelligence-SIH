@@ -84,6 +84,7 @@ class RealSceneLoadResult:
     geolocation_source: str = "assumed_center_coordinates"  # "embedded_geotiff_metadata" | "assumed_center_coordinates"
     geotiff_metadata: dict | None = None  # raw GeoTiffMetadata.to_dict(), when a GeoTIFF was inspected at all
     is_flat_scene: bool = False  # True if input is 8-bit image with negligible dynamic range (<20 DN), characteristic of clean open ocean
+    raw_dynamic_range: float | None = None  # raw P99 - P01 dynamic range (DN) before normalization
 
 
 def _normalize_band(band: np.ndarray) -> np.ndarray:
@@ -143,6 +144,7 @@ def load_real_scene(
     max_target_dim = 1024
     scale = 1.0
     is_flat_scene = False
+    raw_dynamic_range: float | None = None
 
     if ext in (".tif", ".tiff", ".geotiff"):
         if not TIFFFILE_AVAILABLE:
@@ -263,7 +265,8 @@ def load_real_scene(
         # Check raw 8-bit dynamic range before percentile stretching
         if arr.size > 0 and float(arr.min()) >= 0.0 and float(arr.max()) <= 255.0:
             p01, p99 = np.percentile(arr, [1, 99])
-            if float(p99 - p01) < 20.0:
+            raw_dynamic_range = float(p99 - p01)
+            if raw_dynamic_range < 20.0:
                 is_flat_scene = True
 
     else:
@@ -326,4 +329,5 @@ def load_real_scene(
         geolocation_source=geolocation_source,
         geotiff_metadata=geotiff_meta_dict,
         is_flat_scene=is_flat_scene,
+        raw_dynamic_range=raw_dynamic_range,
     )

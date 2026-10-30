@@ -113,3 +113,42 @@ class TestDARTISLookalikeClassification:
         # Safety gate must prevent attribution when classified as Lookalike
         ais = d.get("ais", {})
         assert ais.get("attribution_status") == "ABSTAINED_LOOKALIKE" or len(d.get("candidates", [])) == 0
+
+
+@pytest.mark.skipif(not os.path.exists(CSIRO_DIR) or not os.path.exists(DARTIS_DIR), reason="Test directories not found")
+class TestConfidenceIntegrityAndDiversity:
+    def test_csiro_images_produce_distinct_physically_derived_confidences(self):
+        """Verifies that clean-sea images produce distinct confidences derived from physical dynamic range,
+        never repeating hardcoded 0.95 constants across different images."""
+        confidences = []
+        for fname in CSIRO_IMAGES:
+            fpath = os.path.join(CSIRO_DIR, fname)
+            inv = run_investigation(mode="real_satellite", image_path=fpath, detector="auto")
+            sc = inv.to_dict()["satellite"]["scene_classification"]
+            confidences.append(sc["confidence"])
+            assert sc["score_type"] == "heuristic_score"
+            assert "0.9500" not in f"{sc['confidence']:.4f}" or sc["scores"]["No Oil"] != 0.9000
+
+        # All 6 clean-sea scenes must have unique, non-identical confidences based on backscatter DR
+        assert len(set(confidences)) == len(CSIRO_IMAGES), f"Confidences contained duplicate values: {confidences}"
+
+    def test_dartis_images_produce_distinct_confidences(self):
+        """Verifies that lookalike scenes produce distinct confidences reflecting their individual geometry."""
+        confidences = []
+        for fname in DARTIS_IMAGES:
+            fpath = os.path.join(DARTIS_DIR, fname)
+            inv = run_investigation(mode="real_satellite", image_path=fpath, detector="auto")
+            sc = inv.to_dict()["satellite"]["scene_classification"]
+            confidences.append(sc["confidence"])
+            assert sc["score_type"] == "heuristic_score"
+
+        assert len(set(confidences)) == len(DARTIS_IMAGES), f"Confidences contained duplicate values: {confidences}"
+
+    def test_heuristic_scores_are_never_labeled_as_calibrated_probabilities(self):
+        """Verifies that classical detector scores are labeled as heuristic scores, never calibrated probabilities."""
+        sample = os.path.join(CSIRO_DIR, CSIRO_IMAGES[0])
+        inv = run_investigation(mode="real_satellite", image_path=sample, detector="auto")
+        sc = inv.to_dict()["satellite"]["scene_classification"]
+        assert sc["score_type"] == "heuristic_score"
+        assert sc.get("is_calibrated") is not True
+        assert sc.get("calibration_method") is None

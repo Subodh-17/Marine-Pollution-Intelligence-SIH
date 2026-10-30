@@ -35,4 +35,7 @@ frontend/dist/
 # at a directory inside the repo instead of outside it).
 data/zenodo_sar/
 
+# Local ML experiment artifacts and data caches (preserved locally, excluded from git)
+backend/data/ml_checkpoints/experiments/
+
 *.zip

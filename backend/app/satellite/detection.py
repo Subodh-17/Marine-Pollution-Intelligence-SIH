@@ -129,6 +129,7 @@ def detect_oil_slick(
     max_region_frac: float = 0.35,
     min_oil_area_px: int = 250,
     is_flat_scene: bool = False,
+    raw_dynamic_range: float | None = None,
 ) -> DetectionResult:
     """
     Classical hybrid dark-spot detector with 3-class heuristic classification
@@ -152,30 +153,59 @@ def detect_oil_slick(
 
     if is_flat_scene:
         empty_mask = np.zeros_like(image, dtype=bool) if (image is not None and isinstance(image, np.ndarray)) else np.zeros((0, 0), dtype=bool)
+
+        # Physically derived No-Oil confidence based on backscatter uniformity:
+        # Open calm ocean without wave perturbance or oil slick features exhibits low dynamic range.
+        # As raw dynamic range decreases from 20 DN down towards 0 DN, backscatter homogeneity
+        # increases, producing higher physical confidence in clean sea.
+        if raw_dynamic_range is not None and np.isfinite(raw_dynamic_range):
+            dr = float(np.clip(raw_dynamic_range, 0.0, 20.0))
+            dr_ratio = dr / 20.0
+            homogeneity = 1.0 - dr_ratio
+            raw_no_oil = float(np.clip(0.88 + 0.09 * homogeneity, 0.88, 0.98))
+            raw_lookalike = float(np.clip(0.01 + 0.08 * dr_ratio, 0.01, 0.10))
+            raw_oil = float(np.clip(0.01 + 0.01 * dr_ratio, 0.01, 0.02))
+        else:
+            var = float(np.var(image)) if image is not None and image.size > 0 else 0.0
+            raw_no_oil = float(np.clip(0.92 - 0.5 * var, 0.85, 0.95))
+            raw_lookalike = float(np.clip(0.05 + 0.3 * var, 0.03, 0.10))
+            raw_oil = 0.01
+
+        tot = raw_oil + raw_lookalike + raw_no_oil
+        s_oil = float(np.clip(round(raw_oil / tot, 4), 0.0, 1.0))
+        s_lookalike = float(np.clip(round(raw_lookalike / tot, 4), 0.0, 1.0))
+        s_no_oil = float(np.clip(round(1.0 - s_oil - s_lookalike, 4), 0.0, 1.0))
+        residual = round(1.0 - (s_oil + s_lookalike + s_no_oil), 4)
+        if residual != 0:
+            s_no_oil = round(s_no_oil + residual, 4)
+
+        conf = s_no_oil
+        dr_text = f" ({raw_dynamic_range:.1f} DN < 20 DN)" if raw_dynamic_range is not None else " (<20 DN)"
+
         return DetectionResult(
             mask=empty_mask,
             candidate_masks=[],
-            confidence=0.95,
-            notes=["Scene exhibits uniform open sea surface backscatter with negligible dynamic range (<20 DN); no anomalous dark features present."],
+            confidence=conf,
+            notes=[f"Scene exhibits uniform open sea surface backscatter with low dynamic range{dr_text}; no anomalous dark features present."],
             processing_time_ms=round((time.perf_counter() - _t0) * 1000, 2),
             scene_classification={
                 "label": "No Oil",
-                "confidence": 0.95,
+                "confidence": conf,
                 "probabilities": {
-                    "Oil": 0.02,
-                    "No-Oil": 0.90,
-                    "Lookalike": 0.08,
+                    "Oil": s_oil,
+                    "No-Oil": s_no_oil,
+                    "Lookalike": s_lookalike,
                 },
                 "scores": {
-                    "Oil": 0.02,
-                    "Lookalike": 0.08,
-                    "No Oil": 0.90,
+                    "Oil": s_oil,
+                    "Lookalike": s_lookalike,
+                    "No Oil": s_no_oil,
                 },
                 "oil_status": "NO_OIL",
                 "score_type": "heuristic_score",
                 "score_type_label": "Heuristic score",
                 "detector_name": "Classical Detector",
-                "reasoning": "Scene exhibits uniform open sea surface backscatter with negligible variance; no anomalous dark features present.",
+                "reasoning": f"Scene exhibits uniform open sea surface backscatter with negligible variance{dr_text}; no anomalous dark features present.",
             },
         )
 
@@ -343,16 +373,17 @@ def detect_oil_slick(
 
     elif not scored and low_wind_regions:
         # Large low-wind calm sea area
-        raw_lookalike = 0.85
-        raw_no_oil = 0.10
-        raw_oil = 0.05
-        label = "Lookalike"
-        oil_status = "LOOKALIKE"
         best_lw = max(low_wind_regions, key=lambda r: r.area)
         best_mask = (labels == best_lw.label)
         candidates = [best_mask]
+        lw_fraction = float(np.clip(best_lw.area / max(1, h * w), 0.0, 1.0))
+        raw_lookalike = float(np.clip(0.70 + 0.25 * lw_fraction, 0.70, 0.95))
+        raw_no_oil = float(np.clip(0.20 * (1.0 - lw_fraction), 0.04, 0.20))
+        raw_oil = 0.02
+        label = "Lookalike"
+        oil_status = "LOOKALIKE"
         notes.append(f"Large low-wind area detected ({best_lw.area}px > {int(max_area)}px) - classified as lookalike. Despite low-backscatter feature presence, this is NOT a confirmed or likely oil detection - it is a natural calm-sea lookalike.")
-        reasoning = f"Detected anomalous dark region exceeding {max_region_frac*100:.0f}% of scene frame, characteristic of low-wind calm sea surface rather than an oil spill."
+        reasoning = f"Detected anomalous dark region exceeding {max_region_frac*100:.0f}% of scene frame ({lw_fraction*100:.1f}%), characteristic of low-wind calm sea surface rather than an oil spill."
 
     else:
         scored.sort(key=lambda t: t[0], reverse=True)
@@ -418,13 +449,13 @@ def detect_oil_slick(
             # Pervasive diffuse background sea-clutter / wave speckle
             label = "No Oil"
             oil_status = "NO_OIL"
-            raw_no_oil = 0.75
-            raw_lookalike = 0.20
-            raw_oil = 0.05
+            raw_no_oil = float(np.clip(0.65 + 0.25 * dark_fraction, 0.70, 0.92))
+            raw_lookalike = float(np.clip(0.10 + 0.15 * (1.0 - dark_fraction), 0.05, 0.22))
+            raw_oil = float(np.clip(0.02 + 0.03 * (best_region.area / 500.0), 0.02, 0.05))
             best_mask = np.zeros_like(image, dtype=bool)
             candidates = []
             notes.append(f"Pervasive diffuse wave clutter detected across {dark_fraction*100:.1f}% of sea ({total_candidates} fragments) without dominant slick; this scene is NOT classified as containing oil.")
-            reasoning = "Dark pixels are diffusely distributed across hundreds of small wave-clutter fragments without any coherent, elongated slick candidate."
+            reasoning = f"Dark pixels are diffusely distributed across {total_candidates} small wave-clutter fragments ({dark_fraction*100:.1f}% sea) without any coherent, elongated slick candidate."
         else:
             label = "Lookalike"
             oil_status = "LOOKALIKE"

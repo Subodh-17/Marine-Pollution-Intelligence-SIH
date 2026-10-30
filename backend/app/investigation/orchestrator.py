@@ -326,6 +326,7 @@ def run_investigation(
     #                                      never presented as if the ML model
     #                                      had produced it.
     is_flat_scene = getattr(scene, "is_flat_scene", False) if mode == "real_satellite" else False
+    raw_dynamic_range = getattr(scene, "raw_dynamic_range", None) if mode == "real_satellite" else None
     fallback_used = False
     fallback_reason = None
 
@@ -341,7 +342,7 @@ def run_investigation(
                         detector_provenance = ml_det.provenance
                         ml_model_info = ml_det.model_provenance_info
                     else:
-                        det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+                        det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
                         det.method = "classical_dark_spot_ml_fallback"
                         detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
                         fallback_used = True
@@ -350,7 +351,7 @@ def run_investigation(
                             det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
                         ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
                 except Exception as e:
-                    det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+                    det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
                     det.method = "classical_dark_spot_ml_fallback"
                     detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
                     fallback_used = True
@@ -359,7 +360,7 @@ def run_investigation(
                         det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
                     ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
             else:
-                det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+                det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
                 det.method = "classical_dark_spot_ml_fallback"
                 detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
                 fallback_used = True
@@ -368,7 +369,7 @@ def run_investigation(
                     det.scene_classification["detector_name"] = "Classical Detector (ML Fallback)"
                 ml_notes.append(f"{getattr(engine, 'provenance', 'ML_UNAVAILABLE')}: Auto mode fell back to Classical SAR detector ({fallback_reason}).")
         else:
-            det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+            det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
             detector_provenance = "CLASSICAL_DARK_SPOT"
             ml_notes.append(
                 "Auto mode selected Classical SAR Detector: the image is single-band (1 channel). "
@@ -382,7 +383,7 @@ def run_investigation(
                         "ML detector requires a dual-polarization (VV+VH) SAR image (2 channels: VV, VH). "
                         "The uploaded image is single-band. Select 'Auto' or 'Classical' detector mode."
                     )
-                det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+                det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
                 det.method = "classical_dark_spot_ml_fallback"
                 detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
                 fallback_used = True
@@ -453,7 +454,7 @@ def run_investigation(
                 if eval_fallback_reason is not None:
                     if not allow_fallback:
                         raise RuntimeError(f"ML detection failed: {eval_fallback_reason}")
-                    det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+                    det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
                     det.method = "classical_dark_spot_ml_fallback"
                     detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
                     fallback_used = True
@@ -497,7 +498,7 @@ def run_investigation(
         else:
             if not allow_fallback:
                 raise ValueError("ML detector requires a dual-polarization (VV+VH) SAR image. The synthetic demo scene is single-band. Select 'Auto' or 'Classical' detector mode.")
-            det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+            det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
             det.method = "classical_dark_spot_ml_fallback"
             detector_provenance = "CLASSICAL_DARK_SPOT_ML_FALLBACK"
             fallback_used = True
@@ -509,7 +510,7 @@ def run_investigation(
                 "(VV+VH). Classical SAR Detection / Fallback was run instead."
             )
     else:
-        det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene)
+        det = detect_oil_slick(norm, sea_mask, is_flat_scene=is_flat_scene, raw_dynamic_range=raw_dynamic_range)
         detector_provenance = "CLASSICAL_DARK_SPOT"
     log("Oil slick detected" if det.mask.sum() > 0 else "No oil slick detected")
     _log.info(
