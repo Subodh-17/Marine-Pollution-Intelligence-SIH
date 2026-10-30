@@ -83,6 +83,7 @@ class RealSceneLoadResult:
     original_shape: tuple
     geolocation_source: str = "assumed_center_coordinates"  # "embedded_geotiff_metadata" | "assumed_center_coordinates"
     geotiff_metadata: dict | None = None  # raw GeoTiffMetadata.to_dict(), when a GeoTIFF was inspected at all
+    is_flat_scene: bool = False  # True if input is 8-bit image with negligible dynamic range (<20 DN), characteristic of clean open ocean
 
 
 def _normalize_band(band: np.ndarray) -> np.ndarray:
@@ -141,6 +142,7 @@ def load_real_scene(
     arr = None
     max_target_dim = 1024
     scale = 1.0
+    is_flat_scene = False
 
     if ext in (".tif", ".tiff", ".geotiff"):
         if not TIFFFILE_AVAILABLE:
@@ -258,6 +260,12 @@ def load_real_scene(
             raise UnsupportedImageFormat("Uploaded image file is empty or unreadable.")
         arr = np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
 
+        # Check raw 8-bit dynamic range before percentile stretching
+        if arr.size > 0 and float(arr.min()) >= 0.0 and float(arr.max()) <= 255.0:
+            p01, p99 = np.percentile(arr, [1, 99])
+            if float(p99 - p01) < 20.0:
+                is_flat_scene = True
+
     else:
         raise UnsupportedImageFormat(f"Unsupported file extension '{ext}'. Supported: .tif, .tiff, .geotiff, .png, .jpg, .jpeg, .webp")
 
@@ -317,4 +325,5 @@ def load_real_scene(
         original_shape=original_shape,
         geolocation_source=geolocation_source,
         geotiff_metadata=geotiff_meta_dict,
+        is_flat_scene=is_flat_scene,
     )

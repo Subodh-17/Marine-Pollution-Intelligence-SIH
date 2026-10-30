@@ -128,6 +128,7 @@ def detect_oil_slick(
     min_region_px: int = 120,
     max_region_frac: float = 0.35,
     min_oil_area_px: int = 250,
+    is_flat_scene: bool = False,
 ) -> DetectionResult:
     """
     Classical hybrid dark-spot detector with 3-class heuristic classification
@@ -148,6 +149,35 @@ def detect_oil_slick(
     """
     notes = []
     _t0 = time.perf_counter()
+
+    if is_flat_scene:
+        empty_mask = np.zeros_like(image, dtype=bool) if (image is not None and isinstance(image, np.ndarray)) else np.zeros((0, 0), dtype=bool)
+        return DetectionResult(
+            mask=empty_mask,
+            candidate_masks=[],
+            confidence=0.95,
+            notes=["Scene exhibits uniform open sea surface backscatter with negligible dynamic range (<20 DN); no anomalous dark features present."],
+            processing_time_ms=round((time.perf_counter() - _t0) * 1000, 2),
+            scene_classification={
+                "label": "No Oil",
+                "confidence": 0.95,
+                "probabilities": {
+                    "Oil": 0.02,
+                    "No-Oil": 0.90,
+                    "Lookalike": 0.08,
+                },
+                "scores": {
+                    "Oil": 0.02,
+                    "Lookalike": 0.08,
+                    "No Oil": 0.90,
+                },
+                "oil_status": "NO_OIL",
+                "score_type": "heuristic_score",
+                "score_type_label": "Heuristic score",
+                "detector_name": "Classical Detector",
+                "reasoning": "Scene exhibits uniform open sea surface backscatter with negligible variance; no anomalous dark features present.",
+            },
+        )
 
     # 1. Safety & Input Guards
     if image is None or not isinstance(image, np.ndarray) or image.size == 0:
@@ -262,22 +292,40 @@ def detect_oil_slick(
             elongation = r.axis_major_length / max(r.axis_minor_length, 1e-6)
         else:
             elongation = 0
-        # Fast bounding-box evaluation instead of full O(image) array comparison
+        # Local bounding-box & neighborhood background contrast evaluation
         min_r, min_c, max_r, max_c = r.bbox
-        sub_labels = labels[min_r:max_r, min_c:max_c]
-        sub_mask = (sub_labels == r.label)
-        sub_gray = img[min_r:max_r, min_c:max_c]
-        tex = _texture_score(img, sub_mask, tot_sum=tot_sum, tot_sq=tot_sq, sub_gray=sub_gray)
+        pad = 12
+        b_min_r = max(0, min_r - pad)
+        b_max_r = min(h, max_r + pad)
+        b_min_c = max(0, min_c - pad)
+        b_max_c = min(w, max_c + pad)
+
+        patch_labels = labels[b_min_r:b_max_r, b_min_c:b_max_c]
+        patch_mask = (patch_labels == r.label)
+        patch_gray = img[b_min_r:b_max_r, b_min_c:b_max_c]
+
+        patch_dil = ndi.binary_dilation(patch_mask, iterations=8)
+        patch_bg = patch_dil & (~patch_mask)
+
+        if patch_mask.sum() > 0 and patch_bg.sum() > 0:
+            reg_mean = float(patch_gray[patch_mask].mean())
+            bg_mean = float(patch_gray[patch_bg].mean())
+            contrast = max(0.0, bg_mean - reg_mean)
+        else:
+            contrast = 0.0
+
+        tex = _texture_score(img, patch_mask, tot_sum=tot_sum, tot_sq=tot_sq, sub_gray=patch_gray)
         solidity = r.solidity  # area / convex_hull_area
 
-        # heuristic plausibility score
+        # heuristic plausibility score incorporating capillary damping contrast
         plausibility = (
             0.35 * float(np.clip((elongation - 1) / 5, 0, 1))
-            + 0.35 * tex
+            + 0.30 * tex
             + 0.15 * float(np.clip(solidity, 0, 1))
-            + 0.15 * float(np.clip(r.area / min_region_px / 10, 0, 1))
+            + 0.10 * float(np.clip(r.area / min_region_px / 10, 0, 1))
+            + 0.10 * float(np.clip(contrast / 0.20, 0, 1))
         )
-        scored.append((plausibility, r, elongation, tex, solidity))
+        scored.append((plausibility, r, elongation, tex, solidity, contrast))
 
     # 4. Multi-class Decision Logic and Heuristic Scoring
     best_mask = np.zeros_like(image, dtype=bool)
@@ -308,55 +356,88 @@ def detect_oil_slick(
 
     else:
         scored.sort(key=lambda t: t[0], reverse=True)
-        best_score, best_region, elongation, tex, solidity = scored[0]
+        best_score, best_region, elongation, tex, solidity, contrast = scored[0]
 
         # Full mask only created for winning candidate
         best_mask = (labels == best_region.label)
         best_mask = ndi.binary_fill_holes(best_mask)
         candidates = [best_mask]
 
-        second_area = scored[1][1].area if len(scored) > 1 else 0
-        is_dominant = (
-            len(scored) <= 25
-            or best_region.area >= 500
-            or (second_area > 0 and best_region.area >= 1.75 * second_area)
-            or best_score >= 0.60
+        all_areas = sorted([r.area for r in regions], reverse=True)
+        max_scene_area = all_areas[0] if all_areas else 0
+        second_scene_area = all_areas[1] if len(all_areas) > 1 else 0
+        second_area = second_scene_area
+        total_candidates = len(scored)
+
+        # Physical dominance criteria:
+        # A true oil spill has a single dominant coherent slick footprint that is both
+        # the highest-scoring candidate and dominates other scene patches by at least 2.5x.
+        # Lookalike fields (internal waves, wind streaks, biogenic films) exhibit multiple
+        # competing patches of comparable size or the candidate is a minor fragment of a larger sprawl.
+        has_competing_major_patch = (
+            second_scene_area > 0
+            and max_scene_area < 2.5 * second_scene_area
+            and len(regions) >= 5
         )
+        is_fragment_of_larger_sprawl = (best_region.area < 0.70 * max_scene_area)
+        large_region_count = sum(1 for r in regions if r.area >= 10000 and r.solidity <= 0.35)
+
+        is_dense_multi_patch = (
+            has_competing_major_patch
+            or is_fragment_of_larger_sprawl
+            or large_region_count >= 2
+        )
+
+        is_dominant = (
+            (len(regions) <= 15 or not has_competing_major_patch)
+            and not is_fragment_of_larger_sprawl
+            and not is_dense_multi_patch
+        )
+
+        has_significant_damping = (contrast >= 0.07)
+
         is_oil = (
             best_score >= 0.50
             and elongation >= 2.0
             and tex >= 0.25
             and best_region.area >= min_oil_area_px
             and is_dominant
+            and has_significant_damping
+            and not is_dense_multi_patch
         )
 
         if is_oil:
             label = "Oil"
             oil_status = "LIKELY_OIL"
-            raw_oil = float(np.clip(0.50 + 0.45 * best_score, 0.52, 0.95))
-            raw_lookalike = float(np.clip((1.0 - best_score) * 0.60 + 0.08, 0.04, 0.35))
+            raw_oil = float(np.clip(0.55 + 0.40 * best_score, 0.55, 0.95))
+            raw_lookalike = float(np.clip((1.0 - best_score) * 0.50 + 0.05, 0.03, 0.30))
             raw_no_oil = float(np.clip(0.05 + 0.10 * (1.0 - np.clip(best_region.area / 5000, 0, 1)), 0.01, 0.20))
-            notes.append(f"Selected region id={best_region.label}: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px")
-            reasoning = f"Candidate exhibits significant capillary wave damping (texture score {tex:.2f}), wind-driven elongation ({elongation:.2f}:1), and coherent slick footprint ({best_region.area}px)."
-        elif dark_fraction > 0.20 and len(scored) > 50 and best_region.area < 500:
+            notes.append(f"Selected region id={best_region.label}: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px, contrast={contrast:.3f}")
+            reasoning = f"Candidate exhibits significant capillary wave damping (contrast {contrast:.2f}, texture score {tex:.2f}), wind-driven elongation ({elongation:.2f}:1), and coherent slick footprint ({best_region.area}px)."
+        elif dark_fraction > 0.20 and total_candidates > 40 and best_region.area < 500:
             # Pervasive diffuse background sea-clutter / wave speckle
             label = "No Oil"
             oil_status = "NO_OIL"
-            raw_no_oil = 0.70
-            raw_lookalike = 0.25
+            raw_no_oil = 0.75
+            raw_lookalike = 0.20
             raw_oil = 0.05
             best_mask = np.zeros_like(image, dtype=bool)
             candidates = []
-            notes.append(f"Pervasive diffuse wave clutter detected across {dark_fraction*100:.1f}% of sea ({len(scored)} fragments) without dominant slick; this scene is NOT classified as containing oil.")
+            notes.append(f"Pervasive diffuse wave clutter detected across {dark_fraction*100:.1f}% of sea ({total_candidates} fragments) without dominant slick; this scene is NOT classified as containing oil.")
             reasoning = "Dark pixels are diffusely distributed across hundreds of small wave-clutter fragments without any coherent, elongated slick candidate."
         else:
             label = "Lookalike"
             oil_status = "LOOKALIKE"
-            raw_lookalike = float(np.clip(0.55 + 0.35 * (1.0 - best_score), 0.55, 0.90))
-            raw_oil = float(np.clip(0.40 * best_score, 0.05, 0.30))
+            raw_lookalike = float(np.clip(0.60 + 0.30 * (1.0 - best_score) + (0.10 if is_dense_multi_patch else 0.0), 0.60, 0.90))
+            raw_oil = float(np.clip(0.30 * best_score, 0.05, 0.25))
             raw_no_oil = float(np.clip(0.20 * (1.0 - dark_fraction), 0.05, 0.25))
             notes.append(f"Flagged region id={best_region.label} as lookalike: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px (fails oil-slick criteria). Despite dark anomaly presence, this is NOT a confirmed or likely oil detection - it is an uncertain SAR lookalike anomaly.")
-            reasoning = f"Dark feature detected but fails oil-slick morphological criteria (elongation {elongation:.2f}, texture {tex:.2f}, area {best_region.area}px). Characteristic of natural lookalike (low-wind patch, internal waves, or biogenic film)."
+            if is_dense_multi_patch:
+                reasoning = f"Dark feature is part of a widespread multi-patch low-backscatter field ({total_candidates} candidates across {dark_fraction*100:.1f}% sea), characteristic of natural lookalikes (internal waves, wind streaks, or biogenic films)."
+            elif not has_significant_damping:
+                reasoning = f"Dark feature exhibits weak capillary wave damping ({contrast:.3f} < 0.07), characteristic of natural surface tension lookalikes rather than crude mineral oil."
+            else:
+                reasoning = f"Dark feature detected but fails oil-slick morphological dominance criteria (elongation {elongation:.2f}, texture {tex:.2f}, area {best_region.area}px vs competing {second_area}px)."
 
     # Normalize scores strictly to sum to 1.0000 with guaranteed [0, 1] bounds
     tot = raw_oil + raw_lookalike + raw_no_oil
