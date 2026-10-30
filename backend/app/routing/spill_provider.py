@@ -45,13 +45,13 @@ def resolve_active_spill_zones(investigation_id: str | None = None) -> List[Spil
     zones: List[SpillAvoidanceZone] = []
     seen_ids = set()
 
-    # If specific investigation requested
+    # If specific investigation requested, return strictly its geometry (never substitute demo data)
     if investigation_id:
         inv = get_investigation(investigation_id)
         if inv:
             inv_dict = inv.to_dict() if hasattr(inv, "to_dict") else inv
             geo = (inv_dict.get("satellite") or {}).get("geometry")
-            if geo and geo.get("polygon_latlon"):
+            if geo and geo.get("polygon_latlon") and len(geo["polygon_latlon"]) >= 3:
                 zones.append(
                     SpillAvoidanceZone(
                         id=f"inv_{investigation_id}",
@@ -64,7 +64,7 @@ def resolve_active_spill_zones(investigation_id: str | None = None) -> List[Spil
                         active=True,
                     )
                 )
-                seen_ids.add(investigation_id)
+        return zones
 
     # Check in-memory store
     try:

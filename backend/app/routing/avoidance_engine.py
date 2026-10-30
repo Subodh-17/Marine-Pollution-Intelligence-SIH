@@ -136,6 +136,28 @@ def _build_route_summary(
     )
 
 
+def _is_valid_polygon(poly: Sequence[Sequence[float]] | None) -> bool:
+    """Verifies that a polygon has at least 3 valid finite numeric WGS 84 vertices."""
+    if not poly or len(poly) < 3:
+        return False
+    for pt in poly:
+        if not pt or len(pt) < 2:
+            return False
+        lat, lon = pt[0], pt[1]
+        if lat is None or lon is None:
+            return False
+        try:
+            f_lat = float(lat)
+            f_lon = float(lon)
+            if math.isnan(f_lat) or math.isnan(f_lon) or math.isinf(f_lat) or math.isinf(f_lon):
+                return False
+            if abs(f_lat) > 90.0 or abs(f_lon) > 180.0:
+                return False
+        except (ValueError, TypeError):
+            return False
+    return True
+
+
 def plan_maritime_route(
     origin: GeoPoint,
     destination: GeoPoint,
@@ -158,8 +180,8 @@ def plan_maritime_route(
     vessel = get_vessel_profile(vessel_type)
     speed = custom_speed_knots if custom_speed_knots and custom_speed_knots > 0 else vessel.service_speed_knots
 
-    # Extract active spill polygons
-    active_spills = [sz for sz in (spill_zones or []) if sz.active and len(sz.polygon_latlon) >= 3]
+    # Extract active spill polygons with strict geometry validation
+    active_spills = [sz for sz in (spill_zones or []) if sz.active and _is_valid_polygon(sz.polygon_latlon)]
     raw_polygons = [sz.polygon_latlon for sz in active_spills]
     buffered_polygons = [
         expand_polygon_buffer(sz.polygon_latlon, buffer_nm=max(0.1, spill_buffer_nm))

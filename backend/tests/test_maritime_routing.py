@@ -470,3 +470,120 @@ def test_real_spill_to_route_end_to_end_integration():
     # 5. Mandatory SOLAS / IMO advisory notice is present
     assert "SOLAS Chapter V, Regulation 34" in result.disclaimer
 
+
+def test_resolve_active_spill_zones_never_substitutes_demo_data_when_specific_inv_requested(monkeypatch):
+    from app.routing.spill_provider import resolve_active_spill_zones
+    from app.investigation import orchestrator
+
+    # Case 1: Explicit non-existent investigation requested -> must return []
+    res_ghost = resolve_active_spill_zones(investigation_id="non_existent_ghost_investigation")
+    assert res_ghost == [], "Must never substitute demo or unrelated data when specific investigation is requested"
+
+    # Case 2: Investigation exists but has no oil spill detected -> must return []
+    class MockCleanInv:
+        def to_dict(self):
+            return {
+                "id": "clean_inv_123",
+                "satellite": {
+                    "oil_spill_detected": False,
+                    "geometry": None,
+                }
+            }
+
+    monkeypatch.setattr(orchestrator, "_STORE", {"clean_inv_123": MockCleanInv()})
+    res_clean = resolve_active_spill_zones(investigation_id="clean_inv_123")
+    assert res_clean == [], "Clean investigation with no oil must return 0 spill zones"
+
+
+def test_plan_maritime_route_filters_invalid_and_corrupt_polygons():
+    from app.routing.avoidance_engine import plan_maritime_route
+    from app.routing.models import GeoPoint, SpillAvoidanceZone
+
+    origin = GeoPoint(lat=18.940, lon=72.840)
+    dest = GeoPoint(lat=15.415, lon=73.790)
+
+    # Corrupt polygons: NaN coordinates, out-of-bounds latitude, fewer than 3 vertices
+    corrupt_zones = [
+        SpillAvoidanceZone(
+            id="nan_zone",
+            name="Corrupt NaN Zone",
+            polygon_latlon=[[float("nan"), 72.0], [18.0, 72.0], [18.0, 73.0]],
+            active=True,
+        ),
+        SpillAvoidanceZone(
+            id="oob_zone",
+            name="Out of Bounds Lat Zone",
+            polygon_latlon=[[95.0, 72.0], [18.0, 72.0], [18.0, 73.0]],
+            active=True,
+        ),
+        SpillAvoidanceZone(
+            id="two_pt_zone",
+            name="Insufficient Points Zone",
+            polygon_latlon=[[18.0, 72.0], [19.0, 72.0]],
+            active=True,
+        ),
+    ]
+
+    result = plan_maritime_route(
+        origin=origin,
+        destination=dest,
+        vessel_type="Tanker",
+        avoid_spills=True,
+        spill_zones=corrupt_zones,
+    )
+    # Must compute baseline cleanly and ignore corrupt polygons without crashing
+    assert result.baseline_route.distance_nm > 0
+    assert result.recommended_route_type == "baseline"
+    assert result.spill_avoiding_route is None  # Corrupt polygons filtered out -> no spills to avoid
+    assert result.spill_zones == []
+
+
+def test_multiple_simultaneous_spill_zones_avoidance():
+    from app.routing.avoidance_engine import plan_maritime_route
+    from app.routing.models import GeoPoint, SpillAvoidanceZone
+
+    # Two separate slicks along the corridor
+    zone_a = SpillAvoidanceZone(
+        id="slick_a",
+        name="Slick A",
+        polygon_latlon=[
+            [19.00, 71.15],
+            [19.10, 71.15],
+            [19.10, 71.25],
+            [19.00, 71.25],
+            [19.00, 71.15],
+        ],
+        buffer_nm=1.5,
+        active=True,
+    )
+    zone_b = SpillAvoidanceZone(
+        id="slick_b",
+        name="Slick B",
+        polygon_latlon=[
+            [18.85, 72.05],
+            [18.95, 72.05],
+            [18.95, 72.15],
+            [18.85, 72.15],
+            [18.85, 72.05],
+        ],
+        buffer_nm=1.5,
+        active=True,
+    )
+
+    origin = GeoPoint(lat=18.940, lon=72.840, name="Mumbai Port")
+    dest = GeoPoint(lat=19.050, lon=70.400, name="Arabian Sea West")
+
+    result = plan_maritime_route(
+        origin=origin,
+        destination=dest,
+        vessel_type="Tanker",
+        spill_buffer_nm=1.5,
+        avoid_spills=True,
+        spill_zones=[zone_a, zone_b],
+    )
+
+    assert result.baseline_route.distance_nm > 0
+    assert result.spill_avoiding_route is not None
+    assert result.spill_avoiding_route.intersects_spill is False
+
+
