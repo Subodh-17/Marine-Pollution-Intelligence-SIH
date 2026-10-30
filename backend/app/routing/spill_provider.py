@@ -92,6 +92,37 @@ def resolve_active_spill_zones(investigation_id: str | None = None) -> List[Spil
     except Exception:
         pass
 
+    # Check persisted database investigations if more zones are needed (Section 6 & Phase 4 persistence requirement)
+    if len(zones) < 5:
+        try:
+            persisted_list = _db.list_investigations(limit=10)
+            for item in persisted_list:
+                inv_id = item.get("id")
+                if not inv_id or inv_id in seen_ids:
+                    continue
+                inv_data = _db.load_investigation(inv_id)
+                if not inv_data:
+                    continue
+                geo = (inv_data.get("satellite") or {}).get("geometry")
+                if geo and geo.get("polygon_latlon") and len(geo["polygon_latlon"]) >= 3:
+                    zones.append(
+                        SpillAvoidanceZone(
+                            id=f"inv_{inv_id}",
+                            name=f"Persisted Slick: Inv {inv_id[:8]}",
+                            polygon_latlon=geo["polygon_latlon"],
+                            buffer_nm=2.0,
+                            centroid_lat=geo.get("centroid_lat"),
+                            centroid_lon=geo.get("centroid_lon"),
+                            area_km2=geo.get("area_km2"),
+                            active=True,
+                        )
+                    )
+                    seen_ids.add(inv_id)
+                    if len(zones) >= 5:
+                        break
+        except Exception:
+            pass
+
     # Fallback to default demo spill zone so routing always has immediate slick data
     if not zones:
         zones.append(get_default_spill_zone())

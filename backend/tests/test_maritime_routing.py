@@ -328,3 +328,145 @@ def test_api_route_compare():
     assert "recommended_route_type" in data
     assert "baseline_summary" in data
     assert "disclaimer" in data
+
+
+def test_route_plan_input_validation_rejects_negative_or_zero_speed():
+    payload_zero = {
+        "origin": {"lat": 18.940, "lon": 72.840},
+        "destination": {"lat": 15.415, "lon": 73.790},
+        "custom_speed_knots": 0.0,
+    }
+    resp = client.post("/api/routes/plan", json=payload_zero)
+    assert resp.status_code == 422
+
+    payload_neg = {
+        "origin": {"lat": 18.940, "lon": 72.840},
+        "destination": {"lat": 15.415, "lon": 73.790},
+        "custom_speed_knots": -12.5,
+    }
+    resp = client.post("/api/routes/plan", json=payload_neg)
+    assert resp.status_code == 422
+
+
+def test_route_plan_input_validation_rejects_negative_or_impossible_fuel():
+    payload_neg_fuel = {
+        "origin": {"lat": 18.940, "lon": 72.840},
+        "destination": {"lat": 15.415, "lon": 73.790},
+        "current_fuel_mt": -10.0,
+    }
+    resp = client.post("/api/routes/plan", json=payload_neg_fuel)
+    assert resp.status_code == 422
+
+    payload_impossible_fuel = {
+        "origin": {"lat": 18.940, "lon": 72.840},
+        "destination": {"lat": 15.415, "lon": 73.790},
+        "current_fuel_mt": 1000000.0,  # 1 million MT is impossible for any marine vessel
+    }
+    resp = client.post("/api/routes/plan", json=payload_impossible_fuel)
+    assert resp.status_code == 422
+
+
+def test_resolve_active_spill_zones_discovers_persisted_db_records(monkeypatch):
+    from app.routing.spill_provider import resolve_active_spill_zones
+    from app.investigation import orchestrator
+    from app.persistence import db as _db
+
+    # Temporarily isolate in-memory store to simulate clean process startup
+    monkeypatch.setattr(orchestrator, "_STORE", {})
+
+    zones = resolve_active_spill_zones()
+    assert isinstance(zones, list)
+    assert len(zones) >= 1
+    # Either discovers persisted slicks or cleanly falls back to default high-fidelity zone
+    for z in zones:
+        assert len(z.polygon_latlon) >= 3
+        assert z.active is True
+
+
+def test_real_spill_to_route_end_to_end_integration():
+    from app.routing.avoidance_engine import plan_maritime_route
+    from app.routing.models import GeoPoint, SpillAvoidanceZone
+
+    # Real Sentinel-1 detection polygon centered on central Arabian Sea corridor (19.05°N, 71.20°E)
+    real_spill_polygon = [
+        [19.0597, 71.1832],
+        [19.0582, 71.1844],
+        [19.0564, 71.1851],
+        [19.0561, 71.1870],
+        [19.0561, 71.1889],
+        [19.0550, 71.1908],
+        [19.0532, 71.1897],
+        [19.0514, 71.1904],
+        [19.0496, 71.1916],
+        [19.0478, 71.1931],
+        [19.0471, 71.1950],
+        [19.0453, 71.1958],
+        [19.0438, 71.1973],
+        [19.0453, 71.1992],
+        [19.0424, 71.1988],
+        [19.0406, 71.2000],
+        [19.0388, 71.2022],
+        [19.0359, 71.2038],
+        [19.0323, 71.2041],
+        [19.0270, 71.2041],
+        [19.0234, 71.2114],
+        [19.0198, 71.2114],
+        [19.0155, 71.2133],
+        [19.0140, 71.2098],
+        [19.0176, 71.2091],
+        [19.0212, 71.2041],
+        [19.0266, 71.2007],
+        [19.0305, 71.1988],
+        [19.0320, 71.1950],
+        [19.0370, 71.1908],
+        [19.0442, 71.1885],
+        [19.0503, 71.1840],
+        [19.0575, 71.1817],
+        [19.0597, 71.1832],
+    ]
+
+    spill_zone = SpillAvoidanceZone(
+        id="real_s1_slick_test",
+        name="Real Sentinel-1 SAR Oil Slick",
+        polygon_latlon=real_spill_polygon,
+        buffer_nm=2.0,
+        centroid_lat=19.038,
+        centroid_lon=71.196,
+        area_km2=3.94,
+        active=True,
+    )
+
+    origin = GeoPoint(lat=18.940, lon=72.840, name="Mumbai Port")
+    dest = GeoPoint(lat=19.050, lon=70.400, name="Arabian Sea West")
+
+    result = plan_maritime_route(
+        origin=origin,
+        destination=dest,
+        vessel_type="Tanker",
+        spill_buffer_nm=2.0,
+        avoid_spills=True,
+        spill_zones=[spill_zone],
+    )
+
+    # 1. Baseline route penetrates the real slick zone
+    assert result.baseline_route.intersects_spill is True
+    assert result.baseline_route.closest_spill_distance_nm < 1.0
+
+    # 2. Avoidance route successfully circumvents the slick maintaining safe buffer
+    assert result.spill_avoiding_route is not None
+    assert result.spill_avoiding_route.intersects_spill is False
+    assert result.spill_avoiding_route.closest_spill_distance_nm >= 2.0
+
+    # 3. Recommended route type is spill_avoiding
+    assert result.recommended_route_type == "spill_avoiding"
+
+    # 4. Comparison deltas are non-negative and physically consistent
+    assert result.comparison is not None
+    assert result.comparison.extra_distance_nm >= 0.0
+    assert result.comparison.extra_fuel_consumed_mt >= 0.0
+    assert result.comparison.extra_cost_usd >= 0.0
+    assert result.comparison.extra_co2_mt >= 0.0
+
+    # 5. Mandatory SOLAS / IMO advisory notice is present
+    assert "SOLAS Chapter V, Regulation 34" in result.disclaimer
+

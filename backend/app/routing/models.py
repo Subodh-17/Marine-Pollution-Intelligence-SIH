@@ -98,13 +98,13 @@ class RoutePlanRequest(BaseModel):
     origin: GeoPoint
     destination: GeoPoint
     vessel_type: str = "Tanker"
-    custom_speed_knots: Optional[float] = None
-    current_fuel_mt: Optional[float] = None
+    custom_speed_knots: Optional[float] = Field(None, gt=0.0, le=45.0, description="Optional custom operational speed in knots (must be positive)")
+    current_fuel_mt: Optional[float] = Field(None, ge=0.0, le=50000.0, description="Initial fuel onboard in Metric Tonnes")
     spill_buffer_nm: float = Field(2.0, ge=0.1, le=20.0, description="Safety buffer in Nautical Miles")
     avoid_spills: bool = True
     active_spill_ids: Optional[List[str]] = None
     custom_spill_polygons: Optional[List[List[List[float]]]] = None
-    bunker_price_usd_per_mt: float = 650.0
+    bunker_price_usd_per_mt: float = Field(650.0, ge=10.0, le=5000.0, description="Bunker fuel cost in USD per MT")
 
 
 class RoutePlanResponse(BaseModel):
