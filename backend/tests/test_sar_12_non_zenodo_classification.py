@@ -152,3 +152,53 @@ class TestConfidenceIntegrityAndDiversity:
         assert sc["score_type"] == "heuristic_score"
         assert sc.get("is_calibrated") is not True
         assert sc.get("calibration_method") is None
+
+
+class TestOilSpillClassificationIntegrity:
+    def test_sample_oil_scene_is_classified_as_oil(self):
+        sample_path = os.path.join(os.path.dirname(__file__), "..", "data", "sample_sar", "demo_oil_scene_01.tif")
+        if not os.path.exists(sample_path):
+            pytest.skip("Sample oil scene not found")
+        inv = run_investigation(mode="real_satellite", image_path=sample_path, detector="classical")
+        d = inv.to_dict()
+        sc = d["satellite"]["scene_classification"]
+        assert sc["oil_status"] == "LIKELY_OIL"
+        assert sc["label"] == "Oil"
+        assert sc["confidence"] >= 0.70
+        assert sc["scores"]["Oil"] > sc["scores"]["Lookalike"]
+        assert sc["scores"]["Oil"] > sc["scores"]["No Oil"]
+
+    def test_single_band_oil_slick_classified_as_oil(self):
+        """Verifies that an elongated, high-damping oil slick in single-band format
+        is reliably classified as LIKELY_OIL (not misclassified as LOOKALIKE)."""
+        import numpy as np
+        h, w = 300, 300
+        img = np.full((h, w), 0.7, dtype=np.float32)
+        y, x = np.ogrid[:h, :w]
+        # Elongated ellipse (oil slick): length 160, width 30
+        mask = (((x - w // 2) / 80) ** 2 + ((y - h // 2) / 15) ** 2) <= 1.0
+        img[mask] = 0.2
+        det = detect_oil_slick(img, None)
+        sc = det.scene_classification
+        assert det.success is True
+        assert sc["oil_status"] == "LIKELY_OIL"
+        assert sc["label"] == "Oil"
+        assert sc["confidence"] >= 0.75
+        assert det.mask.sum() > 0
+
+    def test_clean_sea_with_wave_clutter_classified_as_no_oil(self):
+        """Verifies that clean sea with background texture / speckle (>20 DN dynamic range)
+        is classified as NO_OIL, never incorrectly defaulting to LOOKALIKE."""
+        import numpy as np
+        h, w = 256, 256
+        # Background sea with moderate variance but no coherent macroscopic slick
+        np.random.seed(42)
+        clutter = np.random.normal(loc=0.5, scale=0.04, size=(h, w)).astype(np.float32)
+        clutter = np.clip(clutter, 0.0, 1.0)
+        sea_mask = np.ones((h, w), dtype=bool)
+        det = detect_oil_slick(clutter, sea_mask, is_flat_scene=False)
+        sc = det.scene_classification
+        assert sc["oil_status"] == "NO_OIL"
+        assert sc["label"] == "No Oil"
+        assert det.mask.sum() == 0
+        assert sc["confidence"] >= 0.85

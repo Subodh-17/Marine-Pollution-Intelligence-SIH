@@ -400,75 +400,95 @@ def detect_oil_slick(
         second_area = second_scene_area
         total_candidates = len(scored)
 
-        # Physical dominance criteria:
-        # A true oil spill has a single dominant coherent slick footprint that is both
-        # the highest-scoring candidate and dominates other scene patches by at least 2.5x.
-        # Lookalike fields (internal waves, wind streaks, biogenic films) exhibit multiple
-        # competing patches of comparable size or the candidate is a minor fragment of a larger sprawl.
+        # Physical dominance & lookalike criteria:
+        # A true oil spill has a coherent slick footprint that exhibits high capillary wave damping,
+        # smooth internal texture, and wind/current-driven elongation.
+        # Natural lookalike fields (such as oceanic internal wave trains or biogenic films) exhibit
+        # multiple competing parallel bands or fragments of comparable size.
+        large_patches = sum(1 for r in regions if r.area >= 400)
         has_competing_major_patch = (
             second_scene_area > 0
             and max_scene_area < 2.5 * second_scene_area
             and len(regions) >= 5
+            and (large_patches >= 4 or best_region.area < 1000)
         )
-        is_fragment_of_larger_sprawl = (best_region.area < 0.70 * max_scene_area)
-        large_region_count = sum(1 for r in regions if r.area >= 10000 and r.solidity <= 0.35)
-
-        is_dense_multi_patch = (
-            has_competing_major_patch
-            or is_fragment_of_larger_sprawl
-            or large_region_count >= 2
+        is_fragment_of_larger_sprawl = (
+            best_region.area < 0.60 * max_scene_area and (large_patches >= 3 or max_scene_area >= 1500)
         )
+        is_dense_multi_patch = has_competing_major_patch or is_fragment_of_larger_sprawl
 
-        is_dominant = (
-            (len(regions) <= 15 or not has_competing_major_patch)
-            and not is_fragment_of_larger_sprawl
-            and not is_dense_multi_patch
-        )
-
-        has_significant_damping = (contrast >= 0.07)
+        has_significant_damping = (contrast >= 0.045)
+        has_smooth_texture = (tex >= 0.22)
+        has_oil_shape = (elongation >= 1.45) or (best_region.area >= 500 and elongation >= 1.20)
+        has_sufficient_area = (best_region.area >= min_oil_area_px)
+        has_oil_plausibility = (best_score >= 0.38) or (contrast >= 0.08 and best_region.area >= 400 and best_score >= 0.32)
 
         is_oil = (
-            best_score >= 0.50
-            and elongation >= 2.0
-            and tex >= 0.25
-            and best_region.area >= min_oil_area_px
-            and is_dominant
+            has_oil_plausibility
+            and has_oil_shape
+            and has_smooth_texture
+            and has_sufficient_area
             and has_significant_damping
             and not is_dense_multi_patch
+        )
+
+        # Clean sea backscatter checks (reject sub-slick noise, negligible damping, faint background, diffuse clutter):
+        is_sub_slick_noise = (max_scene_area < min_oil_area_px and contrast < 0.08)
+        has_negligible_damping = (contrast < 0.040 and max_scene_area < 500)
+        is_unremarkable_background = (best_score < 0.32 and max_scene_area < 500)
+        is_diffuse_sea_clutter = (
+            (dark_fraction > 0.02 and total_candidates > 25 and max_scene_area < 500 and contrast < 0.065)
+            or (dark_fraction > 0.20 and total_candidates > 40 and best_region.area < 500)
+        )
+
+        is_clean_sea = not is_oil and (
+            is_sub_slick_noise
+            or has_negligible_damping
+            or is_unremarkable_background
+            or is_diffuse_sea_clutter
         )
 
         if is_oil:
             label = "Oil"
             oil_status = "LIKELY_OIL"
             raw_oil = float(np.clip(0.55 + 0.40 * best_score, 0.55, 0.95))
-            raw_lookalike = float(np.clip((1.0 - best_score) * 0.50 + 0.05, 0.03, 0.30))
-            raw_no_oil = float(np.clip(0.05 + 0.10 * (1.0 - np.clip(best_region.area / 5000, 0, 1)), 0.01, 0.20))
+            raw_lookalike = float(np.clip((1.0 - best_score) * 0.40 + 0.05, 0.03, 0.30))
+            raw_no_oil = float(np.clip(0.05 + 0.10 * (1.0 - np.clip(best_region.area / 5000, 0, 1)), 0.01, 0.15))
             notes.append(f"Selected region id={best_region.label}: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px, contrast={contrast:.3f}")
             reasoning = f"Candidate exhibits significant capillary wave damping (contrast {contrast:.2f}, texture score {tex:.2f}), wind-driven elongation ({elongation:.2f}:1), and coherent slick footprint ({best_region.area}px)."
-        elif dark_fraction > 0.20 and total_candidates > 40 and best_region.area < 500:
-            # Pervasive diffuse background sea-clutter / wave speckle
+        elif is_clean_sea:
             label = "No Oil"
             oil_status = "NO_OIL"
-            raw_no_oil = float(np.clip(0.65 + 0.25 * dark_fraction, 0.70, 0.92))
-            raw_lookalike = float(np.clip(0.10 + 0.15 * (1.0 - dark_fraction), 0.05, 0.22))
-            raw_oil = float(np.clip(0.02 + 0.03 * (best_region.area / 500.0), 0.02, 0.05))
+            raw_no_oil = float(np.clip(0.70 + 0.22 * (1.0 - np.clip(contrast / 0.08, 0, 1)), 0.70, 0.94))
+            raw_lookalike = float(np.clip(0.08 + 0.15 * np.clip(contrast / 0.08, 0, 1), 0.05, 0.24))
+            raw_oil = float(np.clip(0.02 + 0.03 * (best_score / 0.50), 0.01, 0.05))
             best_mask = np.zeros_like(image, dtype=bool)
             candidates = []
-            notes.append(f"Pervasive diffuse wave clutter detected across {dark_fraction*100:.1f}% of sea ({total_candidates} fragments) without dominant slick; this scene is NOT classified as containing oil.")
-            reasoning = f"Dark pixels are diffusely distributed across {total_candidates} small wave-clutter fragments ({dark_fraction*100:.1f}% sea) without any coherent, elongated slick candidate."
-        else:
+            notes.append(f"Clean sea surface backscatter detected: candidate features are sub-slick speckle noise (area {best_region.area}px < {min_oil_area_px}px or contrast {contrast:.3f} < 0.080); this scene is NOT classified as containing oil.")
+            reasoning = f"Detected features correspond to natural sea surface backscatter and minor wave texture (area {best_region.area}px, contrast {contrast:.3f}, score {best_score:.2f}) without coherent slick damping anomaly."
+        elif (best_region.area >= min_oil_area_px or max_scene_area >= min_oil_area_px) and contrast >= 0.040:
             label = "Lookalike"
             oil_status = "LOOKALIKE"
             raw_lookalike = float(np.clip(0.60 + 0.30 * (1.0 - best_score) + (0.10 if is_dense_multi_patch else 0.0), 0.60, 0.90))
-            raw_oil = float(np.clip(0.30 * best_score, 0.05, 0.25))
+            raw_oil = float(np.clip(0.25 * best_score, 0.04, 0.22))
             raw_no_oil = float(np.clip(0.20 * (1.0 - dark_fraction), 0.05, 0.25))
             notes.append(f"Flagged region id={best_region.label} as lookalike: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px (fails oil-slick criteria). Despite dark anomaly presence, this is NOT a confirmed or likely oil detection - it is an uncertain SAR lookalike anomaly.")
             if is_dense_multi_patch:
                 reasoning = f"Dark feature is part of a widespread multi-patch low-backscatter field ({total_candidates} candidates across {dark_fraction*100:.1f}% sea), characteristic of natural lookalikes (internal waves, wind streaks, or biogenic films)."
+            elif elongation < 1.40 and best_score < 0.42:
+                reasoning = f"Dark feature detected but lacks characteristic wind/current elongation (elongation {elongation:.2f}:1), consistent with natural calm-sea lookalike."
             elif not has_significant_damping:
-                reasoning = f"Dark feature exhibits weak capillary wave damping ({contrast:.3f} < 0.07), characteristic of natural surface tension lookalikes rather than crude mineral oil."
+                reasoning = f"Dark feature exhibits weak capillary wave damping ({contrast:.3f} < 0.045), characteristic of natural surface tension lookalikes rather than crude mineral oil."
             else:
-                reasoning = f"Dark feature detected but fails oil-slick morphological dominance criteria (elongation {elongation:.2f}, texture {tex:.2f}, area {best_region.area}px vs competing {second_area}px)."
+                reasoning = f"Dark feature detected (area {best_region.area}px, contrast {contrast:.2f}) but fails oil-slick morphological dominance criteria (elongation {elongation:.2f}, texture {tex:.2f})."
+        else:
+            label = "Uncertain"
+            oil_status = "UNCERTAIN"
+            raw_lookalike = 0.45
+            raw_no_oil = 0.45
+            raw_oil = 0.10
+            notes.append("Dark anomaly exhibits ambiguous SAR characteristics; classified as uncertain.")
+            reasoning = "Dark anomaly exhibits ambiguous SAR characteristics between sea clutter and natural lookalike."
 
     # Normalize scores strictly to sum to 1.0000 with guaranteed [0, 1] bounds
     tot = raw_oil + raw_lookalike + raw_no_oil
