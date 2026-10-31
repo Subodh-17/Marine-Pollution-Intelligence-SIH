@@ -399,29 +399,68 @@ def detect_oil_slick(
         second_scene_area = all_areas[1] if len(all_areas) > 1 else 0
         second_area = second_scene_area
         total_candidates = len(scored)
+        large_patches = sum(1 for r in regions if r.area >= 400)
+
+        # Inspect largest region in the scene for macro-slick damping and morphology
+        max_r = max(regions, key=lambda r: r.area) if regions else None
+        max_r_contrast = contrast
+        max_r_tex = tex
+        max_r_elongation = elongation
+        if max_r and max_r.label != best_region.label:
+            m_min_r, m_min_c, m_max_r, m_max_c = max_r.bbox
+            mb_min_r = max(0, m_min_r - 12)
+            mb_max_r = min(h, m_max_r + 12)
+            mb_min_c = max(0, m_min_c - 12)
+            mb_max_c = min(w, m_max_c + 12)
+            m_labels = labels[mb_min_r:mb_max_r, mb_min_c:mb_max_c]
+            m_mask = (m_labels == max_r.label)
+            m_gray = img[mb_min_r:mb_max_r, mb_min_c:mb_max_c]
+            m_dil = ndi.binary_dilation(m_mask, iterations=8)
+            m_bg = m_dil & (~m_mask)
+            if m_mask.sum() > 0 and m_bg.sum() > 0:
+                max_r_contrast = max(0.0, float(m_gray[m_bg].mean()) - float(m_gray[m_mask].mean()))
+            max_r_tex = _texture_score(img, m_mask, tot_sum=tot_sum, tot_sq=tot_sq, sub_gray=m_gray)
+            max_r_elongation = max_r.axis_major_length / max(max_r.axis_minor_length, 1e-6) if max_r.axis_minor_length > 0 else 0
 
         # Physical dominance & lookalike criteria:
         # A true oil spill has a coherent slick footprint that exhibits high capillary wave damping,
         # smooth internal texture, and wind/current-driven elongation.
         # Natural lookalike fields (such as oceanic internal wave trains or biogenic films) exhibit
-        # multiple competing parallel bands or fragments of comparable size.
-        large_patches = sum(1 for r in regions if r.area >= 400)
+        # multiple competing parallel bands or fragments of comparable size without linear streamline dominance.
         has_competing_major_patch = (
             second_scene_area > 0
             and max_scene_area < 2.5 * second_scene_area
             and len(regions) >= 5
             and (large_patches >= 4 or best_region.area < 1000)
         )
-        is_fragment_of_larger_sprawl = (
-            best_region.area < 0.60 * max_scene_area and (large_patches >= 3 or max_scene_area >= 1500)
+        is_genuine_oil_morphology = (
+            (max_r_elongation >= 6.0 and max_scene_area >= 5000)
+            or (contrast >= 0.40 and elongation >= 5.0)
+            or (max_scene_area >= 10000 and max_r_contrast >= 0.25 and (max_r_tex >= 0.60 or elongation >= 10.0))
+            or (max_scene_area >= 50000)
         )
-        is_dense_multi_patch = has_competing_major_patch or is_fragment_of_larger_sprawl
+        is_wave_train = has_competing_major_patch and not is_genuine_oil_morphology
 
-        has_significant_damping = (contrast >= 0.045)
-        has_smooth_texture = (tex >= 0.22)
-        has_oil_shape = (elongation >= 1.45) or (best_region.area >= 500 and elongation >= 1.20)
-        has_sufficient_area = (best_region.area >= min_oil_area_px)
-        has_oil_plausibility = (best_score >= 0.38) or (contrast >= 0.08 and best_region.area >= 400 and best_score >= 0.32)
+        # Calm sprawl lookalike (large sprawling patch but low contrast or no elongation):
+        is_calm_sprawl = (
+            best_region.area < 0.50 * max_scene_area
+            and max_scene_area >= 1500
+            and max_r_contrast < 0.12
+            and elongation < 2.0
+            and max_r_elongation < 3.0
+        )
+
+        # Rough interior texture lookalike:
+        is_rough_interior = (tex < 0.22 and max_r_tex < 0.22)
+
+        is_lookalike_anomaly = is_wave_train or is_calm_sprawl or is_rough_interior
+
+        # Physical Oil Spill Criteria:
+        has_significant_damping = (contrast >= 0.045 or max_r_contrast >= 0.08)
+        has_smooth_texture = (tex >= 0.22 or max_r_tex >= 0.22)
+        has_oil_shape = (elongation >= 1.45) or (best_region.area >= 500 and elongation >= 1.20) or (contrast >= 0.10 and max_scene_area >= 1000 and elongation >= 1.15)
+        has_sufficient_area = (best_region.area >= min_oil_area_px or max_scene_area >= min_oil_area_px)
+        has_oil_plausibility = (best_score >= 0.38) or (contrast >= 0.08 and best_region.area >= 400 and best_score >= 0.32) or (max_scene_area >= 3000 and max_r_contrast >= 0.08 and best_score >= 0.35)
 
         is_oil = (
             has_oil_plausibility
@@ -429,7 +468,7 @@ def detect_oil_slick(
             and has_smooth_texture
             and has_sufficient_area
             and has_significant_damping
-            and not is_dense_multi_patch
+            and not is_lookalike_anomaly
         )
 
         # Clean sea backscatter checks (reject sub-slick noise, negligible damping, faint background, diffuse clutter):
@@ -469,12 +508,14 @@ def detect_oil_slick(
         elif (best_region.area >= min_oil_area_px or max_scene_area >= min_oil_area_px) and contrast >= 0.040:
             label = "Lookalike"
             oil_status = "LOOKALIKE"
-            raw_lookalike = float(np.clip(0.60 + 0.30 * (1.0 - best_score) + (0.10 if is_dense_multi_patch else 0.0), 0.60, 0.90))
+            raw_lookalike = float(np.clip(0.60 + 0.30 * (1.0 - best_score) + (0.10 if is_lookalike_anomaly else 0.0), 0.60, 0.90))
             raw_oil = float(np.clip(0.25 * best_score, 0.04, 0.22))
             raw_no_oil = float(np.clip(0.20 * (1.0 - dark_fraction), 0.05, 0.25))
             notes.append(f"Flagged region id={best_region.label} as lookalike: elongation={elongation:.2f}, texture_score={tex:.2f}, plausibility={best_score:.2f}, area={best_region.area}px (fails oil-slick criteria). Despite dark anomaly presence, this is NOT a confirmed or likely oil detection - it is an uncertain SAR lookalike anomaly.")
-            if is_dense_multi_patch:
-                reasoning = f"Dark feature is part of a widespread multi-patch low-backscatter field ({total_candidates} candidates across {dark_fraction*100:.1f}% sea), characteristic of natural lookalikes (internal waves, wind streaks, or biogenic films)."
+            if is_wave_train:
+                reasoning = f"Dark feature is part of a widespread oceanic internal wave train ({len(regions)} crests across {dark_fraction*100:.1f}% sea), characteristic of natural periodic lookalikes."
+            elif is_calm_sprawl:
+                reasoning = f"Dark feature is part of an amorphous calm sea / low-wind sprawl (area {max_scene_area}px, contrast {max_r_contrast:.3f}), lacking the capillary damping and elongation of crude mineral oil."
             elif elongation < 1.40 and best_score < 0.42:
                 reasoning = f"Dark feature detected but lacks characteristic wind/current elongation (elongation {elongation:.2f}:1), consistent with natural calm-sea lookalike."
             elif not has_significant_damping:
